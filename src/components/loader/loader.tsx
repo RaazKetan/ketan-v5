@@ -4,56 +4,85 @@ import gsap from 'gsap';
 export const Loader: React.FC<{ onFinish: () => void }> = ({ onFinish }) => {
   const loaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const [count, setCount] = useState(0);  
+  const [count, setCount] = useState(0);
+  const [isTracking, setIsTracking] = useState(false);
+  // Mouse-following animation
+  useEffect(() => {
+    const followCursor = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
 
-  useEffect(()=>{
-    const followCursor = (e:MouseEvent)=>{
-        gsap.to(textRef.current, {
-            x: e.clientX,
-            y: e.clientY,
-            duration: 0.5,
-            ease: 'power2.out',
-        });
+      // Limit cursor within viewport bounds (optional padding of 20px)
+      const boundedX = Math.min(window.innerWidth - 20, Math.max(20, clientX));
+      const boundedY = Math.min(window.innerHeight - 20, Math.max(20, clientY));
+      if(!isTracking) setIsTracking(true);
+
+      gsap.to(textRef.current, {
+        x: boundedX,
+        y: boundedY,
+        ease: 'power2.out',
+      });
     };
+
     window.addEventListener('mousemove', followCursor);
-    const tl = gsap.timeline({ onComplete: ()=>{
+
+    // GSAP timeline animation
+    const tl = gsap.timeline({
+      onComplete: () => {
         window.removeEventListener('mousemove', followCursor);
         onFinish();
-    } });
+      },
+    });
+
     tl.fromTo(
       textRef.current,
-      { y: 100, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1.5, ease: 'power4.out' }
+      { opacity: 0, scale: 0.9 },
+      { opacity: 1, scale: 1, duration: 1.5, ease: 'power4.out' }
     ).to(loaderRef.current, {
       y: '-100%',
+      opacity: 0,
       duration: 1.5,
       ease: 'power2.inOut',
       delay: 1,
-      opacity: 0,
-
     });
+
+    return () => {
+      window.removeEventListener('mousemove', followCursor);
+    };
   }, [onFinish]);
 
-
-  useEffect(()=>{
+  // Count-up logic for loading percentage
+  useEffect(() => {
     if (count < 100) {
-        const intervalId = setInterval(()=>{
-            setCount((prevCount) => prevCount + 1);
-
-        }, 30);
-        return () => clearInterval(intervalId);
+      const intervalId = setInterval(() => {
+        setCount((prevCount) => prevCount + 1);
+      }, 30);
+      return () => clearInterval(intervalId);
     }
-  },[count]);
+  }, [count]);
+
+  //cursor loading animation disable
+  useEffect(() => {
+    document.body.classList.add('loading');
+    return () => {
+      document.body.classList.remove('loading');
+    };
+  }, []);
 
   return (
     <div
       ref={loaderRef}
-      className="fixed top-0 left-0 w-full h-full bg-black text-white z-50"
+      className="fixed w-full h-full bg-black text-white z-50 cursor-none"
     >
       <div
         ref={textRef}
         className="pointer-events-none fixed text-2xl font-bold mix-blend-difference"
-        style={{transform: 'translate(-50%, -50%)'}}
+        style={{
+           top: isTracking ? undefined : '50%',
+    left: isTracking ? undefined : '50%',
+    transform: isTracking ? undefined : 'translate(-50%, -50%)',
+            position: 'fixed',
+            pointerEvents: 'none',
+          }}
       >
         Loading {count}%
       </div>
