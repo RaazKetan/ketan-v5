@@ -1,91 +1,88 @@
-import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import React, { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
 export const Loader: React.FC<{ onFinish: () => void }> = ({ onFinish }) => {
-  const loaderRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const loaderRef = useRef(null);
+  const textRef = useRef(null);
+  const progressBarRef = useRef(null);
   const [count, setCount] = useState(0);
-  const [isTracking, setIsTracking] = useState(false);
-  // Mouse-following animation
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+
+  // GSAP animation to smoothly move the cursor
   useEffect(() => {
-    const followCursor = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-
-      // Limit cursor within viewport bounds (optional padding of 20px)
-      const boundedX = Math.min(window.innerWidth - 20, Math.max(20, clientX));
-      const boundedY = Math.min(window.innerHeight - 20, Math.max(20, clientY));
-      if(!isTracking) setIsTracking(true);
-
-      gsap.to(textRef.current, {
-        x: boundedX,
-        y: boundedY,
-        ease: 'power2.out',
-      });
+    const handleMouseMove = (event: MouseEvent) => {
+      setPosition({ x: event.clientX, y: event.clientY });
     };
 
-    window.addEventListener('mousemove', followCursor);
+    window.addEventListener("mousemove", handleMouseMove); 
 
-    // GSAP timeline animation
+    gsap.to(textRef.current, {
+      x: position.x,
+      y: position.y,
+      duration: 0.2, 
+      overwrite: true,
+      ease: "power3.out",
+    });
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [position]);
+
+  // GSAP animation to fade out the loader
+  useEffect(() => {
     const tl = gsap.timeline({
       onComplete: () => {
-        window.removeEventListener('mousemove', followCursor);
         onFinish();
       },
     });
 
     tl.fromTo(
       textRef.current,
-      { opacity: 0, scale: 0.9 },
-      { opacity: 1, scale: 1, duration: 1.5, ease: 'power4.out' }
+      { opacity: 0, scale: 0.8 },
+      { opacity: 1, scale: 1, duration: 1, ease: "power2.out" }
     ).to(loaderRef.current, {
-      y: '-100%',
-      opacity: 0,
-      duration: 1.5,
-      ease: 'power2.inOut',
-      delay: 1,
+      opacity: 1,
+      duration: 1,
+      ease: "power2.out",
+      onComplete: () => {
+        gsap.set(loaderRef.current, { display: "none" });
+      },
     });
-
-    return () => {
-      window.removeEventListener('mousemove', followCursor);
-    };
   }, [onFinish]);
-
-  // Count-up logic for loading percentage
+  
+  //percentage loader
   useEffect(() => {
-    if (count < 100) {
+    if(count < 100){
       const intervalId = setInterval(() => {
         setCount((prevCount) => prevCount + 1);
       }, 30);
+
       return () => clearInterval(intervalId);
     }
   }, [count]);
 
-  //cursor loading animation disable
+  // cursor disappears when loading is done
   useEffect(() => {
     document.body.classList.add('loading');
     return () => {
       document.body.classList.remove('loading');
     };
   }, []);
-
   return (
+
     <div
       ref={loaderRef}
-      className="fixed w-full h-full bg-black text-white z-50 cursor-none"
+      className="w-full h-full bg-amber-300"
     >
+      {/* Your other content goes here */}{" "}
       <div
         ref={textRef}
-        className="pointer-events-none fixed text-2xl font-bold mix-blend-difference"
-        style={{
-           top: isTracking ? undefined : '50%',
-    left: isTracking ? undefined : '50%',
-    transform: isTracking ? undefined : 'translate(-50%, -50%)',
-            position: 'fixed',
-            pointerEvents: 'none',
-          }}
+        className="fixed top-0 left-0 pointer-none: text-lg  translate-x-[-50%] translate-y-[-50%]"
       >
-        Loading {count}%
+          Loading {count}%
       </div>
+      {" "}
     </div>
   );
 };

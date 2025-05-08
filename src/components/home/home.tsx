@@ -25,7 +25,7 @@ const Home: React.FC = () => {
           ref={contentRef}
           className="p-10 text-center opacity-0" // Start hidden
         >
-          <h1 className="text-3xl font-bold mb-4">Welcome to the Home Page!</h1>
+          <h1 className=" font-bold mb-4">Welcome to the Home Page!</h1>
           <p className="text-lg">Here’s where your main content starts.</p>
         </div>
       )}
