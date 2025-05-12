@@ -4,7 +4,7 @@ import { Footer } from '../../footer/footer';
 import { Info } from './info/info';
 
 const MyPage: React.FC = () => {
-  const [animationFinished, setAnimationFinished] = useState(false);
+  const [animationFinished, setAnimationFinished] = useState(true);
   const handleFooterAnimationComplete = () => {
     console.log('Footer animation completed!');
     setAnimationFinished(true);
@@ -15,11 +15,11 @@ const MyPage: React.FC = () => {
     <div className= " max-h-screen overflow-hidden">
       {<Loader />}
       <div>
-        <div className='relavtive max-h-screen'>
+        <div className='max-h-screen'>
       {/* Your page content */}
-      <Info/>
+     {animationFinished &&<Info/> }
       </div>
-      <Footer onAnimationComplete={handleFooterAnimationComplete} />
+      {/* <Footer  onAnimationComplete={handleFooterAnimationComplete} /> */}
       </div>
       {/* ... other elements ... */}
     </div>

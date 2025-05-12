@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
+import type { FooterProps } from '../types/types';
 
-interface FooterProps {
-  onAnimationComplete?: () => void;
-}
+
 
 export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
   const contentRef = useRef<HTMLDivElement>(null);
