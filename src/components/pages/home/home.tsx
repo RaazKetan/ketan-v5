@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Loader } from '../../loader/loader';
 import { Footer } from '../../footer/footer';
 import { Info } from './info/info';
 
 const MyPage: React.FC = () => {
-  const [animationFinished, setAnimationFinished] = useState(true);
+  const [animationFinished, setAnimationFinished] = useState(false);
   const handleFooterAnimationComplete = () => {
     console.log('Footer animation completed!');
     setAnimationFinished(true);
-    // You can perform other actions here based on the completion
   };
 
   return (
@@ -19,7 +18,7 @@ const MyPage: React.FC = () => {
       {/* Your page content */}
      {animationFinished &&<Info/> }
       </div>
-      {/* <Footer  onAnimationComplete={handleFooterAnimationComplete} /> */}
+      <Footer  onAnimationComplete={handleFooterAnimationComplete} />
       </div>
       {/* ... other elements ... */}
     </div>

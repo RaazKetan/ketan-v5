@@ -37,7 +37,7 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
           transform: 'translate(-50%, -50%)',
           duration: 2,
           ease: 'power2.out',
-          delay: 1.5,
+          delay: 1,
           onComplete: () => {
             const tl = gsap.timeline({ onComplete: handleAnimationComplete });
             const leftSpanWidth = leftSpan.offsetWidth || 0;
