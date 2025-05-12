@@ -36,14 +36,14 @@ export const Loader = () => {
       { y: 100 },
       { y: 0, opacity: 1, duration: 1, ease: "power4.out" }
     ).to(loaderRef.current, {
-      y: "-100%",
+      y: -20,
       duration: 1.5,
       ease: "power2.inOut",
       delay: 3,
       opacity: 0,
     });
   }, []);
-
+  
   //percentage loader
   useEffect(() => {
     if (count < 100) {
@@ -57,17 +57,18 @@ export const Loader = () => {
 
   // cursor disappears when loading is done
   useEffect(() => {
-    document.body.classList.add("loading");
-    return () => {
+    if (count >= 100) {
       document.body.classList.remove("loading");
-    };
-  }, []);
+    } else {
+      document.body.classList.add("loading");
+    }
+  }, [count]);
   return (
-    <div ref={loaderRef} className="w-full h-full fixed top-0 left-0">
+    <div ref={loaderRef} className="fixed top-0 left-0 z-10 text-center">
       {/* Your other content goes here */}{" "}
       <div
+        className="fixed top-0 left-0 pointer-events-none text-sm translate-x-[-50%] translate-y-[-50%] text-[#333]"
         ref={textRef}
-        className="fixed top-0 left-0 pointer-none: text-lg  translate-x-[-50%] translate-y-[-50%] text-[#333]"
       >
         Loading {count}%
       </div>{" "}
