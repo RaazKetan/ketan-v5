@@ -21,14 +21,12 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
     if (container && leftSpan && rightSpan) {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      const smallScreenWidth = 1024;
-
+      const smallScreenWidth = 768;
       gsap.fromTo(
         container,
         {
           opacity: 0,
-          y: 20,
-          x: -container.offsetWidth / 2,
+          y: 10,
           position: "absolute",
           top: viewportHeight / 2,
           left: viewportWidth / 2,
@@ -39,7 +37,6 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
         {
           opacity: 1,
           y: 0,
-          x: -container.offsetWidth / 2, // Maintain horizontal centering
           top: viewportHeight / 2,
           left: viewportWidth / 2,
           transform: "translate(-50%, -50%)",
@@ -52,13 +49,15 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
             const rightSpanWidth = rightSpan.offsetWidth || 0;
             const leftSpanHeight = leftSpan.offsetHeight || 0;
             const rightSpanHeight = rightSpan.offsetHeight || 0;
+            console.log(leftSpanWidth, "Px");
+            console.log(rightSpanWidth, "Px");
 
             if (viewportWidth > smallScreenWidth) {
               tl.to([leftSpan, rightSpan], {
                 x: (index) =>
                   index === 0
-                    ? -(viewportWidth / 2.4 - leftSpanWidth / 2.5)
-                    : viewportWidth / 2.4 - rightSpanWidth / 2.5,
+                    ? -(viewportWidth / 2.4 - leftSpanWidth / 2.4)
+                    : viewportWidth / 2.6 - rightSpanWidth / 2.6,
                 duration: 1.5,
                 ease: "power4.inOut",
               });
@@ -87,10 +86,10 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none">
       <div ref={contentRef} className="text-center relative">
         <div className={`flex items-center justify-center text-sm`}>
-          <span ref={leftSpanRef} className="p-0.5 whitespace-nowrap">
+          <span ref={leftSpanRef} className="p-0.5 whitespace-nowrap sm:text-sm">
             Just an ordinary DEVELOPER.
           </span>
-          <span ref={rightSpanRef} className="p-0.5 whitespace-nowrap">
+          <span ref={rightSpanRef} className="p-0.5 whitespace-nowrap sm:text-sm">
             From INDIA with pride
           </span>
         </div>

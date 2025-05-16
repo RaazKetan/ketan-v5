@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Loader } from '../../loader/loader';
-import { Footer } from '../../footer/footer';
+import { Loader } from '../../Loader/loader';
+import { Footer } from '../../Footer/footer';
 import { Info } from './info/info';
 
 const MyPage: React.FC = () => {
