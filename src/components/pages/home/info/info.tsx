@@ -46,11 +46,6 @@ export const Info: React.FC<FooterProps> = () => {
     const navItems = document.querySelectorAll(
       "#main-navbar span.cursor-pointer"
     );
-    console.log(
-      "Window width:",
-      typeof window !== "undefined" ? window.innerWidth : "N/A"
-    ),
-
     navItems.forEach((item) => {
       item.addEventListener("mouseenter", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
@@ -74,7 +69,6 @@ export const Info: React.FC<FooterProps> = () => {
           });
         }
       });
-
       item.addEventListener("mouseleave", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
           gsap.to(collapsableDivRef.current, {
