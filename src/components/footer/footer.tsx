@@ -1,8 +1,6 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import gsap from 'gsap';
-import type { FooterProps } from '../types/types';
-
-
+import React, { useEffect, useRef, useCallback } from "react";
+import gsap from "gsap";
+import type { FooterProps } from "../types/types";
 
 export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -27,16 +25,26 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
 
       gsap.fromTo(
         container,
-        { opacity: 0, y: 20, x: -container.offsetWidth / 2, position: 'absolute', top: viewportHeight / 2, left: viewportWidth / 2, transform: 'translate(-50%, -50%)', duration: 3, ease: 'power2.out' },
+        {
+          opacity: 0,
+          y: 20,
+          x: -container.offsetWidth / 2,
+          position: "absolute",
+          top: viewportHeight / 2,
+          left: viewportWidth / 2,
+          transform: "translate(-50%, -50%)",
+          duration: 3,
+          ease: "power2.out",
+        },
         {
           opacity: 1,
           y: 0,
           x: -container.offsetWidth / 2, // Maintain horizontal centering
           top: viewportHeight / 2,
           left: viewportWidth / 2,
-          transform: 'translate(-50%, -50%)',
+          transform: "translate(-50%, -50%)",
           duration: 2,
-          ease: 'power2.out',
+          ease: "power2.out",
           delay: 1,
           onComplete: () => {
             const tl = gsap.timeline({ onComplete: handleAnimationComplete });
@@ -46,38 +54,29 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
             const rightSpanHeight = rightSpan.offsetHeight || 0;
 
             if (viewportWidth > smallScreenWidth) {
-              tl.to(
-                [leftSpan, rightSpan],
-                {
-                  x: (index) =>
-                    index === 0
-                      ? -(viewportWidth / 2.4 - leftSpanWidth / 2.5)
-                      : viewportWidth / 2.4 - rightSpanWidth / 2.5,
-                  duration: 1.5,
-                  ease: 'power4.inOut',
-                }
-              );
+              tl.to([leftSpan, rightSpan], {
+                x: (index) =>
+                  index === 0
+                    ? -(viewportWidth / 2.4 - leftSpanWidth / 2.5)
+                    : viewportWidth / 2.4 - rightSpanWidth / 2.5,
+                duration: 1.5,
+                ease: "power4.inOut",
+              });
             }
 
-            tl.to(
-              [leftSpan, rightSpan],
-              {
-                y: (index: number) =>
-                  index === 0
-                    ? viewportHeight / 2.1 - leftSpanHeight
-                    : viewportHeight / 2.1 - rightSpanHeight,
-                duration: 2,
-                delay: viewportWidth <= smallScreenWidth ? 0 : 1.5, // Adjust delay for smaller screens
-                ease: 'power4.inOut',
-              }
-            ).to(
-              [leftSpan, rightSpan],
-              {
-                x: 0,
-                duration: 1.5,
-                ease: 'power4.inOut',
-              }
-            );
+            tl.to([leftSpan, rightSpan], {
+              y: (index: number) =>
+                index === 0
+                  ? viewportHeight / 2.1 - leftSpanHeight
+                  : viewportHeight / 2.1 - rightSpanHeight,
+              duration: 2,
+              delay: viewportWidth <= smallScreenWidth ? 0 : 1.5, // Adjust delay for smaller screens
+              ease: "power4.inOut",
+            }).to([leftSpan, rightSpan], {
+              x: 0,
+              duration: 1.5,
+              ease: "power4.inOut",
+            });
           },
         }
       );
