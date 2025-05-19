@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { TopBar } from "../../../Navbar/TopBar";
 import { HeroTitle } from "../../../Navbar/HeroTitle";
 import { MainNavbar } from "../../../Navbar/MainNavbar";
+import { useIsMobile } from "../../../../Hooks";
 
 export const Info: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -10,6 +11,7 @@ export const Info: React.FC = () => {
   const collapsableDivRef = useRef<HTMLDivElement>(null);
   const backgroundDivRef = useRef<HTMLDivElement>(null);
   const mainNavbarRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   const navData = [
     { number: "00", label: "Home" },
     { number: "01", label: "About" },
@@ -167,14 +169,16 @@ export const Info: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center">
       <div ref={contentRef}>
-        <TopBar />
+       <TopBar />
       </div>
       <HeroTitle nameRef={nameRef} />
+      {!isMobile && 
       <MainNavbar
         collapsableDivRef={collapsableDivRef}
         backgroundDivRef={backgroundDivRef}
         mainNavbarRef={mainNavbarRef}
       />
+}
     </div>
   );
 };
