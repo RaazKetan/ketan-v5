@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Info } from './info/info';
 import { Loader } from '../../Loader';
 import { Footer } from '../../Footer';
+import { useIsMobile } from '../../../Hooks';
 
 const MyPage: React.FC = () => {
+  const isMoible = useIsMobile();
   const [animationFinished, setAnimationFinished] = useState(false);
   const handleFooterAnimationComplete = () => {
     console.log('Footer animation completed!');
@@ -15,12 +17,10 @@ const MyPage: React.FC = () => {
       {<Loader />}
       <div>
         <div className='max-h-screen'>
-      {/* Your page content */}
      {animationFinished &&<Info/> }
       </div>
-      <Footer  onAnimationComplete={handleFooterAnimationComplete} />
       </div>
-      {/* ... other elements ... */}
+      <Footer  onAnimationComplete={handleFooterAnimationComplete} />
     </div>
   );
 };
