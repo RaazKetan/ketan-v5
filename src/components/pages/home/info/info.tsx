@@ -157,13 +157,6 @@ export const Info: React.FC = () => {
         }
       });
     });
-
-    // return () => {
-    //   navItems.forEach((item) => {
-    //     // item.removeEventListener("mouseenter", () => {});
-    //     // item.removeEventListener("mouseleave", () => {});
-    //   });
-    // };
   }, []);
 
   return (
