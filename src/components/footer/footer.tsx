@@ -19,11 +19,11 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
   return (
     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none">
       <div ref={contentRef} className="text-center relative">
-        <div className="flex items-center justify-center text-sm relative">
-          <span ref={leftSpanRef} className="p-0.5 whitespace-nowrap sm:text-sm">
+        <div className={`flex items-center justify-center`}>
+          <span ref={leftSpanRef} className="p-0.5 whitespace-nowrap text-[10px]">
             Just an ordinary DEVELOPER.
           </span>
-          <span ref={rightSpanRef} className="p-0.5 whitespace-nowrap sm:text-sm">
+          <span ref={rightSpanRef} className="p-0.5 whitespace-nowrap text-[10px]">
             From INDIA with pride
           </span>
         </div>

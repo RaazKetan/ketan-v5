@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { Loader } from '../../Loader';
 import { Info } from './info/info';
-import { Loader } from '../../loader';
-import { Footer } from '../../footer';
+import { Footer } from '../../Footer';
 
 const MyPage: React.FC = () => {
   const [animationFinished, setAnimationFinished] = useState(false);
