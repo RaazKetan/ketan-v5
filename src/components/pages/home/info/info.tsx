@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { TopBar } from "../../../Navbar/TopBar";
-import { HeroTitle } from "../../../Navbar/HeroTitle";
 import { MainNavbar } from "../../../Navbar/MainNavbar";
 import { useIsMobile } from "../../../../Hooks";
+import { HeroTitle } from "./HeroTitle";
 
 export const Info: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);

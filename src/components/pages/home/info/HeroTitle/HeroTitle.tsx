@@ -1,6 +1,6 @@
 import React from "react";
 import type { HeroTitleProps } from "./types";
-import { useIsMobile } from "../../../Hooks";
+import { useIsMobile } from "../../../../../Hooks";
 
 export const HeroTitle: React.FC<HeroTitleProps> = ({ nameRef }) => {
   const isMobile = useIsMobile();
