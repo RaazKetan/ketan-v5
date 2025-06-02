@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Loader } from '../../Loader';
-import { Info } from './info/info';
+import { Info } from './Info/info';
 import { Footer } from '../../Footer';
 
 const MyPage: React.FC = () => {
@@ -12,7 +12,7 @@ const MyPage: React.FC = () => {
 
   return (
     <div className= " max-h-screen overflow-hidden">
-      {<Loader />}
+      {/* {<Loader />} */}
       <div>
         <div className='max-h-screen'>
       {/* Your page content */}

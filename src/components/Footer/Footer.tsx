@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
         {/* Image container that appears in the middle */}
         <div 
           ref={imageRef} 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-32 sm:w-80 sm:h-40"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-200 h-100 sm:w-80 sm:h-40 bg-red-500"
         >
           {/* SVG Illustration similar to your design */}
           <svg 
