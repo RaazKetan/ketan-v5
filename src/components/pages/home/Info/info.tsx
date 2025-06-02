@@ -172,6 +172,14 @@ export const Info: React.FC = () => {
         mainNavbarRef={mainNavbarRef}
       />
 }
+<div className="flex flex-col  mt-10 items-center">
+            <div className="text-sm uppercase mt-4 w-[70%] ">
+            Ketan Raj (He/Him) AKA Raaz is a Software Engineer from Gaya, Bihar, India. 
+            </div>
+            <div className="text-sm uppercase mt-4 w-[60%]">
+            passionate about building innovative solutions and solving complex problems.
+              </div>
+            </div>
     </div>
   );
 };
