@@ -1,12 +1,14 @@
 import React, { useRef } from "react";
 import type { FooterProps } from "../types/types";
 import { useFooterAnimation } from "../../Hooks";
+import { usePersonalData } from "../../context/PersonalDataContext";
 
 export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const leftSpanRef = useRef<HTMLSpanElement>(null);
   const rightSpanRef = useRef<HTMLSpanElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
+  const { footerData } = usePersonalData();
 
   useFooterAnimation({
     contentRef,
@@ -21,10 +23,10 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
       <div ref={contentRef} className="text-center relative">
         <div className={`flex items-center justify-center`}>
           <span ref={leftSpanRef} className="p-0.5 whitespace-nowrap text-[10px]">
-            Just an ordinary DEVELOPER.
+           {footerData.tagline}
           </span>
           <span ref={rightSpanRef} className="p-0.5 whitespace-nowrap text-[10px]">
-            From INDIA with pride
+            {footerData.footerNote}
           </span>
         </div>
         
