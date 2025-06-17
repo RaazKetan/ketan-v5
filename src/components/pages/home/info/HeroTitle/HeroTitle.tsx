@@ -1,9 +1,11 @@
 import React from "react";
 import type { HeroTitleProps } from "./types";
 import { useIsMobile } from "../../../../../Hooks";
+import { usePersonalData } from "../../../../../context/PersonalDataContext";
 
 export const HeroTitle: React.FC<HeroTitleProps> = ({ nameRef }) => {
   const isMobile = useIsMobile();
+  const { name, title, company, aboutP1, aboutP2 } = usePersonalData();
   return (
     <div className={`flex pt-2 ${isMobile ? "flex-col mt-10" : ""}  justify-center text-center mt-4 sm:mt-8`}>
       <span
@@ -11,22 +13,22 @@ export const HeroTitle: React.FC<HeroTitleProps> = ({ nameRef }) => {
 
         ref={nameRef}
       >
-        {"Ketan Raj".split("").map((char, index) => (
+        {name.split("").map((char, index) => (
           <span key={index} className="inline-block">
             {char}
           </span>
         ))}
       </span>
       <div className="flex flex-col">
-        <span className={`${isMobile ? "font-bold mt-10" : ""}`}>(SDE)</span>
-        <h3>@Google</h3>
+        <span className={`${isMobile ? "font-bold mt-10" : ""}`}>({title})</span>
+        <h3>@{company}</h3>
         {isMobile && (
           <div className="flex flex-col  mt-10 items-center">
             <div className="text-sm uppercase mt-4 w-[70%] ">
-            Ketan Raj (He/Him) AKA Raaz is a Software Engineer from Gaya, Bihar, India. 
+           {aboutP1}
             </div>
             <div className="text-sm uppercase mt-4 w-[60%]">
-            passionate about building innovative solutions and solving complex problems.
+          {aboutP2}
               </div>
             </div>
         )}

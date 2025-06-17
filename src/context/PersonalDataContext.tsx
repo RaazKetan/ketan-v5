@@ -22,6 +22,8 @@ type PersonalData = {
     title: string;
     company: string;
     location: string;
+    aboutP1: string;
+    aboutP2: string;
     footerData: FooterProps;
     LoaderData: LoaderProps;
     MainNavbarData: MainNavbarProps;
@@ -33,6 +35,8 @@ const defaultData: PersonalData = {
     title: 'SDE',
     company: 'Google',
     location: 'India',
+    aboutP1: 'Ketan Raj (He/Him) AKA Raaz is a Software Engineer from Gaya, Bihar, India.',
+    aboutP2: 'He is passionate about building innovative solutions and solving complex problems.',
     footerData: {
         tagline: 'Just an ordinary Developer',
         footerNote: 'From India with pride',
