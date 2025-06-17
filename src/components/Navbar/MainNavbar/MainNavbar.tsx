@@ -1,11 +1,13 @@
 import React from "react";
 import type { MainNavbarProps } from "./types";
+import { usePersonalData } from "../../../context/PersonalDataContext";
 
 export const MainNavbar: React.FC<MainNavbarProps> = ({
   collapsableDivRef,
   backgroundDivRef,
   mainNavbarRef,
 }) => {
+  const {MainNavbarData} = usePersonalData();
   return (
     <div
       ref={mainNavbarRef}
@@ -26,13 +28,7 @@ export const MainNavbar: React.FC<MainNavbarProps> = ({
           id="main-component-of-navbar"
           className="flex flex-row justify-between p-4 relative h-[5vw] items-center"
         >
-          {[
-            { number: "01", label: "About" },
-            { number: "02", label: "Experience" },
-            { number: "03", label: "Playground" },
-            { number: "04", label: "Contact" },
-            { number: "", label: "© 2025" },
-          ].map((item, i) => (
+          {MainNavbarData.navItems.map((item, i) => (
             <span key={i} className="cursor-pointer nav-item">
               {item.number && (
                 <span className="font-bold text-[0.75rem] text-amber-400">{item.number}</span>

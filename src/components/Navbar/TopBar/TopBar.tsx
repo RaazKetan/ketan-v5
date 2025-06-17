@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useIsMobile } from "../../../Hooks";
+import { usePersonalData } from "../../../context/PersonalDataContext";
 
 export const TopBar: React.FC = () => {
   const isMobile = useIsMobile();
@@ -8,7 +9,7 @@ export const TopBar: React.FC = () => {
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
   };
-
+const {TopBarData} = usePersonalData();
   return (
     <>
       <div className="w-screen flex justify-between items-center p-4 z-50 relative" id="navbar">
@@ -30,13 +31,13 @@ export const TopBar: React.FC = () => {
         {!isMobile && (
           <>
          <span
-        className="raaz-brand flex items-center justify-center relative w-1/3 text-center sm:text-xl md:text-2xl lg:text-4xl font-bold cursor-pointer"
+        className="flex items-center justify-center relative w-1/3 text-center sm:text-xl md:text-2xl lg:text-4xl font-bold cursor-pointer"
         data-text="00 Home"
       >
-        Raaz &copy;
+        {TopBarData?.topBarNickname} &copy;
       </span>
       <span className="flex justify-end relative w-1/3 text-center text-sm">
-        Folio v.5
+        {TopBarData?.topBarFolioVersion}
       </span>
       </>
 )}
@@ -49,7 +50,7 @@ export const TopBar: React.FC = () => {
               isMobile ? "" : "cursor-pointer"
             }`}
           >
-            Raaz &copy;
+            {TopBarData?.topBarNickname} &copy;
           </span>
           
           {/* Hamburger Close Open Icon */}
