@@ -31,7 +31,7 @@ const {TopBarData} = usePersonalData();
         {!isMobile && (
           <>
          <span
-        className="flex items-center justify-center relative w-1/3 text-center sm:text-xl md:text-2xl lg:text-4xl font-bold cursor-pointer"
+        className="raaz-brand flex items-center justify-center relative w-1/3 text-center sm:text-xl md:text-2xl lg:text-4xl font-bold cursor-pointer"
         data-text="00 Home"
       >
         {TopBarData?.topBarNickname} &copy;

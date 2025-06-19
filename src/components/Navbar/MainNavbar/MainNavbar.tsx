@@ -29,7 +29,7 @@ export const MainNavbar: React.FC<MainNavbarProps> = ({
           className="flex flex-row justify-between p-4 relative h-[5vw] items-center"
         >
           {MainNavbarData.navItems.map((item, i) => (
-            <span key={i} className="cursor-pointer nav-item">
+            <span key={i} className="cursor-pointer nav-item" data-index={i}>
               {item.number && (
                 <span className="font-bold text-[0.75rem] text-amber-400">{item.number}</span>
               )}

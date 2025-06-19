@@ -53,7 +53,7 @@ const defaultData: PersonalData = {
     loadingText: "Loading",
   },
   MainNavbarData: {
-    navItems: [
+    navItems: [  
       { number: "01", label: "About" },
       { number: "02", label: "Experience" },
       { number: "03", label: "Playground" },
