@@ -4,6 +4,7 @@ import { TopBar } from "../../../Navbar/TopBar";
 import { MainNavbar } from "../../../Navbar/MainNavbar";
 import { useIsMobile } from "../../../../Hooks";
 import { HeroTitle } from "./HeroTitle";
+import { usePersonalData } from "../../../../context/PersonalDataContext";
 
 export const Info: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -12,15 +13,7 @@ export const Info: React.FC = () => {
   const backgroundDivRef = useRef<HTMLDivElement>(null);
   const mainNavbarRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const navData = [
-    { number: "00", label: "Home" },
-    { number: "01", label: "About" },
-    { number: "02", label: "Experience" },
-    { number: "03", label: "Playground" },
-    { number: "04", label: "Contact" },
-    { number: "", label: "© 2025" },
-  ];
-
+  const { MainNavbarData } = usePersonalData();
   useEffect(() => {
     gsap.fromTo(
       contentRef.current,
@@ -95,7 +88,7 @@ export const Info: React.FC = () => {
     navItems.forEach((item, index) => {
       item.addEventListener("mouseenter", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
-          const data = navData[index];
+          const data = MainNavbarData.navItems[index];
           const numberHTML = data.number
             ? `<span style="font-weight: 700; color: #fbbf24;">${data.number}</span><br/>`
             : "";
@@ -162,16 +155,16 @@ export const Info: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center">
       <div ref={contentRef}>
-       <TopBar />
+        <TopBar />
       </div>
       <HeroTitle nameRef={nameRef} />
-      {!isMobile && 
-      <MainNavbar
-        collapsableDivRef={collapsableDivRef}
-        backgroundDivRef={backgroundDivRef}
-        mainNavbarRef={mainNavbarRef}
-      />
-}
+      {!isMobile && (
+        <MainNavbar
+          collapsableDivRef={collapsableDivRef}
+          backgroundDivRef={backgroundDivRef}
+          mainNavbarRef={mainNavbarRef}
+        />
+      )}
     </div>
   );
 };
