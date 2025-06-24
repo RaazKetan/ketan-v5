@@ -87,7 +87,7 @@ export const Info: React.FC = () => {
       "#main-navbar span.cursor-pointer, #navbar .raaz-brand"
     );
 
-    navItems.forEach((item) => { // Removed index from here
+    navItems.forEach((item) => {
       item.addEventListener("mouseenter", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
           let labelHTML = "";

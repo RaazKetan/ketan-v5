@@ -16,7 +16,7 @@ const MyPage: React.FC = () => {
       <div>
         <div className='max-h-screen'>
       {/* Your page content */}
-     {animationFinished &&<Info/> }
+     {animationFinished &&  <Info/> }
       </div>
       <Footer  onAnimationComplete={handleFooterAnimationComplete} />
       </div>
