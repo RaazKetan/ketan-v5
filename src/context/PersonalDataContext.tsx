@@ -37,13 +37,13 @@ export type PersonalData = {
 const defaultData: PersonalData = {
   heroTitle: {
     name: "Ketan Raj",
-    title: "SDE",
+    title: "SWE",
     company: "Google",
     location: "India",
     aboutP1:
       "Ketan Raj (He/Him) AKA Raaz is a Software Engineer from Gaya, Bihar, India.",
     aboutP2:
-      "He is passionate about building innovative solutions and solving complex problems.",
+      "Passionate about building innovative solutions and solving complex problems.",
   },
   footerData: {
     tagline: "Just an ordinary Developer",

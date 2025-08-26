@@ -5,6 +5,8 @@ import { MainNavbar } from "../../../Navbar/MainNavbar";
 import { useIsMobile } from "../../../../Hooks";
 import { HeroTitle } from "./HeroTitle";
 import { usePersonalData } from "../../../../context/PersonalDataContext";
+import { useNavigate } from "react-router-dom";
+import { usePageTransition } from "../../../../Hooks";
 
 export const Info: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -14,7 +16,10 @@ export const Info: React.FC = () => {
   const mainNavbarRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const { MainNavbarData, heroTitle } = usePersonalData();
+  const navigate = useNavigate();
+  const { navigateWithCenterFill } = usePageTransition();
 
+  // Fade in the top bar on initial load
   useEffect(() => {
     gsap.fromTo(
       contentRef.current,
@@ -28,6 +33,7 @@ export const Info: React.FC = () => {
     );
   }, []);
 
+  // Stagger in hero letters and then reveal the main navbar
   useEffect(() => {
     if (nameRef.current) {
       const children = Array.from(nameRef.current.children);
@@ -37,6 +43,7 @@ export const Info: React.FC = () => {
 
       const tl = gsap.timeline();
 
+      // Bring each hero letter from below with a center-origin stagger
       tl.fromTo(
         children,
         { y: 250, opacity: 0 },
@@ -52,6 +59,7 @@ export const Info: React.FC = () => {
         }
       );
 
+      // Expand and show the main navbar container
       tl.fromTo(
         "#main-navbar",
         {
@@ -67,6 +75,7 @@ export const Info: React.FC = () => {
         "-=1"
       );
 
+      // Then bring in the navbar items
       tl.fromTo(
         navItems,
         { y: 20, opacity: 0 },
@@ -82,6 +91,7 @@ export const Info: React.FC = () => {
     }
   }, []);
 
+  // Hover interactions: grow a black band from center and show contextual text
   useEffect(() => {
     const navItems = document.querySelectorAll(
       "#main-navbar span.cursor-pointer, #navbar .raaz-brand"
@@ -90,6 +100,7 @@ export const Info: React.FC = () => {
     navItems.forEach((item) => {
       item.addEventListener("mouseenter", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
+          // Build overlay text (number + label) based on hovered item
           let labelHTML = "";
           let numberHTML = "";
 
@@ -110,16 +121,23 @@ export const Info: React.FC = () => {
           }
 
           backgroundDivRef.current.innerHTML = numberHTML + labelHTML;
+          const targetHeight =
+            typeof window !== "undefined" && window.innerWidth > 1440 ? 200 : 100;
 
+          // Paint a background-only band that grows from the center
+          // (uses CSS background-size so children remain fully visible)
+          gsap.set(collapsableDivRef.current, {
+            backgroundImage: "linear-gradient(#000, #000)",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: `100% 0px`,
+          });
+
+          // Expand the band to the target height and tint hovered item text
           gsap.to(collapsableDivRef.current, {
-            height:
-              typeof window !== "undefined" && window.innerWidth > 1440
-                ? 200
-                : 100,
-            backgroundColor: "black",
-            duration: 0.3,
-            ease: "power2.out",
-            transformOrigin: "-50% -50%",
+            backgroundSize: `100% ${targetHeight}px`,
+            duration: 1,
+            ease: "power3.out",
             onStart: () => {
               if (!(item as HTMLElement).classList.contains("raaz-brand")) {
                 (item as HTMLElement).style.color = "white";
@@ -127,10 +145,24 @@ export const Info: React.FC = () => {
             },
           });
 
+          // Center the overlay text within the expanding band (non-interactive)
+          gsap.set(backgroundDivRef.current, {
+            position: "absolute",
+            left: 0,
+            top: "50%",
+            yPercent: -50,
+            width: "100%",
+            height: targetHeight,
+            zIndex: 1,
+            opacity: 0,
+            scale: 2,
+            pointerEvents: "none",
+          });
+
+          // Fade in overlay text slightly
           gsap.to(backgroundDivRef.current, {
-            opacity: 0.2,
-            scale: 4,
-            duration: 0.5,
+            opacity: 0.34,
+            duration: 1,
             ease: "power2.out",
           });
         }
@@ -138,30 +170,53 @@ export const Info: React.FC = () => {
 
       item.addEventListener("mouseleave", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
+          // Collapse the band back to zero height and reset temporary styles
           gsap.to(collapsableDivRef.current, {
-            height: 0,
-            backgroundColor: "transparent",
-            duration: 0.3,
-            ease: "power2.in",
-            transformOrigin: "-50% -50%",
+            backgroundSize: "100% 0px",
+            duration: 1,
+            ease: "power2.inOut",
             onComplete: () => {
-              collapsableDivRef.current!.style.height = "auto";
+              if (collapsableDivRef.current) {
+                collapsableDivRef.current.style.backgroundImage = "";
+                collapsableDivRef.current.style.backgroundRepeat = "";
+                collapsableDivRef.current.style.backgroundPosition = "";
+                collapsableDivRef.current.style.backgroundSize = "";
+              }
               if (!(item as HTMLElement).classList.contains("raaz-brand")) {
                 (item as HTMLElement).style.color = "";
               }
             },
           });
 
+          // Hide and clean up overlay text styles
           gsap.to(backgroundDivRef.current, {
             opacity: 0,
-            scale: 1,
             duration: 0.3,
             ease: "power2.in",
             onComplete: () => {
-              backgroundDivRef.current!.textContent = "";
+              if (backgroundDivRef.current) {
+                backgroundDivRef.current.textContent = "";
+                backgroundDivRef.current.style.position = "";
+                backgroundDivRef.current.style.top = "";
+                backgroundDivRef.current.style.left = "";
+                backgroundDivRef.current.style.width = "";
+                backgroundDivRef.current.style.height = "";
+                backgroundDivRef.current.style.transform = "";
+                backgroundDivRef.current.style.zIndex = "";
+              }
             },
           });
         }
+      });
+
+      // Click: center-fill overlay, then navigate
+      item.addEventListener("click", () => {
+        const label = (item.querySelector("span:last-child")?.textContent || "").trim();
+        const routeMap: Record<string, string> = {
+          About: "/about",
+        };
+        const path = routeMap[label] || "/";
+        navigateWithCenterFill(navigate, path);
       });
     });
   }, []);
