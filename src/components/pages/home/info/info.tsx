@@ -13,7 +13,7 @@ export const Info: React.FC = () => {
   const backgroundDivRef = useRef<HTMLDivElement>(null);
   const mainNavbarRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const { MainNavbarData } = usePersonalData();
+  const { MainNavbarData, heroTitle } = usePersonalData();
 
   useEffect(() => {
     gsap.fromTo(
@@ -178,6 +178,17 @@ export const Info: React.FC = () => {
           backgroundDivRef={backgroundDivRef}
           mainNavbarRef={mainNavbarRef}
         />
+      )}
+      {!isMobile && (
+         <div className="flex flex-row mt-30 items-center justify-between">
+            <div className="text-xs uppercase mt-4 w-[30%] text-center ">
+           {heroTitle.aboutP1}
+            </div>
+            <div className="text-xs uppercase mt-4 w-[30%] text-center">
+          {heroTitle.aboutP2}
+              </div>
+            </div>
+
       )}
     </div>
   );
