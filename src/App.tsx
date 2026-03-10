@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './components/pages/home/home';
 import { About } from './components/pages/about';
+import { Projects } from './components/pages/projects';
+import { OfficePage } from './components/pages/office/office';
 import { PageTransitionOverlay } from './components/Transition/PageTransitionOverlay';
 import { usePageTransition } from './Hooks';
 
@@ -26,6 +28,8 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/office" element={<OfficePage />} />
         {/* Add more routes here */}
       </Routes>
     </Router>

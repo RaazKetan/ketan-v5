@@ -1,100 +1,63 @@
 import React, { useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import gsap from "gsap";
-import { TopBar } from "../../../Navbar/TopBar";
-import { MainNavbar } from "../../../Navbar/MainNavbar";
-import { NavbarIntersectionContrast } from "../../../Navbar/behaviors/NavbarIntersectionContrast";
-import { useIsMobile } from "../../../../Hooks";
-import { HeroTitle } from "./HeroTitle";
-import { usePersonalData } from "../../../../context/PersonalDataContext";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { TopBar } from "../../Navbar/TopBar";
+import { MainNavbar } from "../../Navbar/MainNavbar";
+import { NavbarIntersectionContrast } from "../../Navbar/behaviors/NavbarIntersectionContrast";
+import { useIsMobile } from "../../../Hooks";
+import { usePersonalData } from "../../../context/PersonalDataContext";
 import { useNavigate } from "react-router-dom";
-import { usePageTransition } from "../../../../Hooks";
+import { usePageTransition } from "../../../Hooks";
+import { ProjectsGame } from "../../ProjectsGame";
 
-export const Info: React.FC = () => {
+gsap.registerPlugin(ScrollTrigger);
+
+/* ─── Main Projects Component ─── */
+export const Projects: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
-  const nameRef = useRef<HTMLSpanElement>(null);
   const collapsableDivRef = useRef<HTMLDivElement>(null);
   const backgroundDivRef = useRef<HTMLDivElement>(null);
   const mainNavbarRef = useRef<HTMLDivElement>(null);
+
   const isMobile = useIsMobile();
-  const { MainNavbarData, heroTitle } = usePersonalData();
+  const { MainNavbarData } = usePersonalData();
   const navigate = useNavigate();
   const { navigateWithCenterFill } = usePageTransition();
 
-  // Fade in the top bar on initial load
+  /* ─── Entrance animations ─── */
   useEffect(() => {
-    gsap.fromTo(
+    const tl = gsap.timeline();
+
+    tl.fromTo(
       contentRef.current,
-      { opacity: 0, y: 20 },
+      { opacity: 0 },
+      { opacity: 1, duration: 0.8, ease: "power2.out" }
+    );
+
+    tl.to(
+      "#main-navbar",
+      { height: "auto", opacity: 1, duration: 0.6, ease: "power2.out" },
+      "-=0.6"
+    );
+
+    const navItems = document.querySelectorAll(
+      "#main-navbar span.cursor-pointer"
+    );
+    tl.to(
+      navItems,
       {
-        opacity: 1,
         y: 0,
-        duration: 2,
-        ease: "expo.out",
-      }
+        opacity: 1,
+        duration: 0.6,
+        ease: "power3.out",
+        stagger: 0.08,
+      },
+      "-=0.4"
     );
   }, []);
 
-  // Stagger in hero letters and then reveal the main navbar
-  useEffect(() => {
-    if (nameRef.current) {
-      const children = Array.from(nameRef.current.children);
-      const navItems = document.querySelectorAll(
-        "#main-navbar span.cursor-pointer"
-      );
-
-      const tl = gsap.timeline();
-
-      // Bring each hero letter from below with a center-origin stagger
-      tl.fromTo(
-        children,
-        { y: 250, opacity: 0 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.5,
-          ease: "expo.out",
-          stagger: {
-            amount: 0.18,
-            from: "center",
-          },
-        }
-      );
-
-      // After hero animation, show the navbar
-      tl.to("#main-navbar", {
-        height: "auto",
-        opacity: 1,
-        duration: 0.5,
-        ease: "power2.out",
-      }, "+=0.3");
-
-      // Animate navbar items
-      tl.to(
-        navItems,
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.4,
-          ease: "power3.out",
-          stagger: 0.05,
-        },
-        "-=0.3"
-      );
-    }
-  }, []);
-
-  // Keep navbar visible on scroll (no hide behavior)
-  useEffect(() => {
-    const handleScroll = () => {
-      // Navbar stays visible - no hide/show logic needed
-      // You can add other scroll-based effects here if needed
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Hover interactions: grow a black band from center and show contextual text
+  /* ─── Navbar interactions ─── */
   useEffect(() => {
     const navItems = document.querySelectorAll(
       "#main-navbar span.cursor-pointer, #navbar .raaz-brand"
@@ -103,7 +66,6 @@ export const Info: React.FC = () => {
     navItems.forEach((item) => {
       item.addEventListener("mouseenter", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
-          // Build overlay text (number + label) based on hovered item
           let labelHTML = "";
           let numberHTML = "";
 
@@ -113,10 +75,11 @@ export const Info: React.FC = () => {
             numberHTML = `<span style="font-weight: 700; color: #fbbf24;">${number}</span><br/>`;
             labelHTML = `<span>${label}</span>`;
           } else {
-            // Get the data-index from the hovered item
-            const itemIndex = parseInt((item as HTMLElement).dataset.index || "0");
+            const itemIndex = parseInt(
+              (item as HTMLElement).dataset.index || "0"
+            );
             const data = MainNavbarData.navItems[itemIndex];
-            
+
             numberHTML = data.number
               ? `<span style="font-weight: 700; color: #fbbf24;">${data.number}</span><br/>`
               : "";
@@ -125,10 +88,10 @@ export const Info: React.FC = () => {
 
           backgroundDivRef.current.innerHTML = numberHTML + labelHTML;
           const targetHeight =
-            typeof window !== "undefined" && window.innerWidth > 1440 ? 200 : 100;
+            typeof window !== "undefined" && window.innerWidth > 1440
+              ? 200
+              : 100;
 
-          // Paint a background-only band that grows from the center
-          // (uses CSS background-size so children remain fully visible)
           gsap.set(collapsableDivRef.current, {
             backgroundImage: "linear-gradient(#000, #000)",
             backgroundRepeat: "no-repeat",
@@ -136,7 +99,6 @@ export const Info: React.FC = () => {
             backgroundSize: `100% 0px`,
           });
 
-          // Expand the band to the target height and tint hovered item text
           gsap.to(collapsableDivRef.current, {
             backgroundSize: `100% ${targetHeight}px`,
             duration: 1,
@@ -148,7 +110,6 @@ export const Info: React.FC = () => {
             },
           });
 
-          // Center the overlay text within the expanding band (non-interactive)
           gsap.set(backgroundDivRef.current, {
             position: "absolute",
             left: 0,
@@ -162,7 +123,6 @@ export const Info: React.FC = () => {
             pointerEvents: "none",
           });
 
-          // Fade in overlay text slightly
           gsap.to(backgroundDivRef.current, {
             opacity: 0.34,
             duration: 1,
@@ -173,7 +133,6 @@ export const Info: React.FC = () => {
 
       item.addEventListener("mouseleave", () => {
         if (collapsableDivRef.current && backgroundDivRef.current) {
-          // Collapse the band back to zero height and reset temporary styles
           gsap.to(collapsableDivRef.current, {
             backgroundSize: "100% 0px",
             duration: 1,
@@ -191,7 +150,6 @@ export const Info: React.FC = () => {
             },
           });
 
-          // Hide and clean up overlay text styles
           gsap.to(backgroundDivRef.current, {
             opacity: 0,
             duration: 0.3,
@@ -212,26 +170,38 @@ export const Info: React.FC = () => {
         }
       });
 
-      // Click: center-fill overlay, then navigate
       item.addEventListener("click", () => {
-        const label = (item.querySelector("span:last-child")?.textContent || "").trim();
+        const label = (
+          item.querySelector("span:last-child")?.textContent || ""
+        ).trim();
         const routeMap: Record<string, string> = {
           About: "/about",
+          Projects: "/projects",
+          Home: "/",
           "Agent Office": "/office",
         };
+
+        if ((item as HTMLElement).classList.contains("raaz-brand")) {
+          navigateWithCenterFill(navigate, "/");
+          return;
+        }
+
         const path = routeMap[label] || "/";
         navigateWithCenterFill(navigate, path);
       });
     });
-  }, []);
+  }, [MainNavbarData, navigate, navigateWithCenterFill]);
 
   return (
-    <div className="flex flex-col items-center justify-center" data-nav-contrast="light">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white overflow-hidden selection:bg-amber-100 selection:text-amber-900">
       <NavbarIntersectionContrast />
+
+      {/* Top Bar */}
       <div ref={contentRef}>
         <TopBar />
       </div>
-      <HeroTitle nameRef={nameRef} />
+
+      {/* Main Navbar */}
       {!isMobile && (
         <MainNavbar
           collapsableDivRef={collapsableDivRef}
@@ -239,17 +209,78 @@ export const Info: React.FC = () => {
           mainNavbarRef={mainNavbarRef}
         />
       )}
-      {!isMobile && (
-         <div className="flex flex-row mt-30 items-center justify-between">
-            <div className="text-xs uppercase mt-4 w-[30%] text-center ">
-           {heroTitle.aboutP1}
-            </div>
-            <div className="text-xs uppercase mt-4 w-[30%] text-center">
-          {heroTitle.aboutP2}
-              </div>
-            </div>
 
-      )}
+      {/* Hero Section */}
+      <section
+        className="relative px-6 md:px-20 max-w-7xl mx-auto pt-32 pb-8"
+        data-nav-contrast="dark"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-center"
+        >
+          <motion.h1
+            className="text-4xl md:text-6xl font-bold mb-4 pixel-text"
+            style={{ textShadow: "4px 4px 0px rgba(0,0,0,0.5)" }}
+          >
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              PROJECT OFFICE
+            </span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-lg text-gray-400 mb-4"
+          >
+            Explore the office and meet my projects. Walk up to a character and
+            press{" "}
+            <kbd
+              style={{
+                background: "#374151",
+                border: "1px solid #4b5563",
+                borderRadius: "4px",
+                padding: "1px 8px",
+                fontFamily: "monospace",
+                fontSize: "0.9em",
+                color: "#fbbf24",
+              }}
+            >
+              E
+            </kbd>{" "}
+            to open its details.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="flex flex-wrap justify-center gap-4 text-sm text-gray-500"
+          >
+            <span>🎨 Left zone — Frontend</span>
+            <span>⚙️ Centre zone — Backend</span>
+            <span>🔬 Right zone — Experimental</span>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Game Section */}
+      <section
+        className="px-4 md:px-10 max-w-7xl mx-auto pb-20"
+        data-nav-contrast="dark"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+        >
+          <ProjectsGame />
+        </motion.div>
+      </section>
+
+      {/* Bottom spacing */}
+      <div className="h-20" />
     </div>
   );
 };

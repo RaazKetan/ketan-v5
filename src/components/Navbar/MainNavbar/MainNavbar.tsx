@@ -12,7 +12,7 @@ export const MainNavbar: React.FC<MainNavbarProps> = ({
     <div
       ref={mainNavbarRef}
       id="main-navbar"
-      className="mt-8 opacity-0 h-0 overflow-hidden"
+      className="fixed top-1/2 left-0 right-0 -translate-y-1/2 z-40 opacity-0 h-0 overflow-hidden"
     >
       <div
         ref={collapsableDivRef}

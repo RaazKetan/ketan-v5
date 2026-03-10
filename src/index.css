@@ -70,3 +70,75 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* ━━━ Pixel Art Styles ━━━ */
+.pixel-text {
+  font-family: 'Courier New', 'Courier', monospace;
+  letter-spacing: 0.05em;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  shape-rendering: crispEdges;
+}
+
+.pixel-border {
+  box-shadow: 
+    0 0 0 4px rgba(0, 0, 0, 0.5),
+    0 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+.pixel-dot {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Retro CRT effect (optional) */
+@keyframes flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.97; }
+}
+
+.crt-effect {
+  animation: flicker 0.15s infinite;
+}
+
+/* Scanlines effect */
+.scanlines {
+  position: relative;
+}
+
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 0, 0, 0.05) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Pixel button hover effect */
+.pixel-button {
+  transition: all 0.1s steps(3);
+}
+
+.pixel-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.pixel-button:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
