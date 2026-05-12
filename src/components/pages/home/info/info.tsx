@@ -20,14 +20,17 @@ export const Info: React.FC = () => {
   const navigate = useNavigate();
   const { navigateWithCenterFill } = usePageTransition();
 
-  // Fade in the top bar on initial load
+  // Fade in the top bar on initial load with enhanced GSAP animation
   useEffect(() => {
-    gsap.fromTo(
+    const tl = gsap.timeline();
+    
+    tl.fromTo(
       contentRef.current,
-      { opacity: 0, y: 20 },
+      { opacity: 0, y: 50, scale: 0.95 },
       {
         opacity: 1,
         y: 0,
+        scale: 1,
         duration: 2,
         ease: "expo.out",
       }
@@ -83,11 +86,29 @@ export const Info: React.FC = () => {
     }
   }, []);
 
-  // Keep navbar visible on scroll (no hide behavior)
+  // Enhanced scroll effects with parallax
   useEffect(() => {
     const handleScroll = () => {
-      // Navbar stays visible - no hide/show logic needed
-      // You can add other scroll-based effects here if needed
+      const scrollY = window.scrollY;
+      
+      // Parallax effect on hero title
+      if (nameRef.current) {
+        gsap.to(nameRef.current, {
+          y: scrollY * 0.3,
+          duration: 0.5,
+          ease: "power2.out"
+        });
+      }
+      
+      // Fade navbar slightly on scroll
+      if (mainNavbarRef.current) {
+        const opacity = Math.max(0.7, 1 - scrollY / 500);
+        gsap.to(mainNavbarRef.current, {
+          opacity,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+      }
     };
 
     window.addEventListener("scroll", handleScroll);

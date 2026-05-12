@@ -4,7 +4,7 @@ import { useFooterAnimation } from "../../Hooks";
 import { usePersonalData } from "../../context/PersonalDataContext";
 import bgVideo from "../../assets/me.mp4";
 
-export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
+export const Footer: React.FC<FooterProps> = ({ onAnimationComplete, skipAnimation }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const leftSpanRef = useRef<HTMLSpanElement>(null);
   const rightSpanRef = useRef<HTMLSpanElement>(null);
@@ -17,6 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ onAnimationComplete }) => {
     rightSpanRef,
     imageRef,
     onAnimationComplete,
+    skipAnimation,
   });
 
   return (

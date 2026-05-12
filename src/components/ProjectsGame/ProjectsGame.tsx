@@ -204,62 +204,111 @@ function drawBookshelf(ctx: CanvasRenderingContext2D, x: number, y: number) {
   }
 }
 
-// ─── Pixel Character Drawing ─────────────────────────────────────────────────
+// ─── Ghost/Blob Character Drawing (matches Character.tsx style) ───────────────
 
-function drawPixelCharacter(
+function drawBlobCharacter(
   ctx: CanvasRenderingContext2D,
   cx: number,    // center-x
-  cy: number,    // feet-y
+  cy: number,    // center-y (blob center)
   color: string,
-  scale: number,
-  facing: "left" | "right",
-  walkFrame: number,
-  isPlayer = false
+  size: number,  // radius
+  isPlayer = false,
+  bobOffset = 0,
+  state: "idle" | "walking" | "typing" | "reading" | "waiting" = "idle"
 ) {
   ctx.save();
-  ctx.translate(cx, cy);
-  if (facing === "left") ctx.scale(-1, 1);
-
-  const s = scale; // pixel size
+  ctx.translate(cx, cy + bobOffset);
 
   // Shadow
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.fillStyle = "rgba(0,0,0,0.22)";
   ctx.beginPath();
-  ctx.ellipse(0, 2, 11 * s, 3 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, size + 4, size * 0.8, size * 0.22, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Legs (animated walk)
-  const legOffset = walkFrame === 0 ? 0 : (walkFrame === 1 ? 3 : -3);
-  ctx.fillStyle = isPlayer ? "#d97706" : "#374151";
-  ctx.fillRect(-4 * s, -8 * s + legOffset, 3 * s, 8 * s); // left leg
-  ctx.fillRect(s, -8 * s - legOffset, 3 * s, 8 * s); // right leg
+  // Body: rounded-top blob (like the ghost/pac-man style in Character.tsx)
+  const w = size * 1.5;
+  const h = size * 1.8;
+  const r = w / 2;
 
-  // Body
-  const bodyGrad = ctx.createLinearGradient(-5 * s, -22 * s, 5 * s, -10 * s);
-  bodyGrad.addColorStop(0, color);
-  bodyGrad.addColorStop(1, `${color}aa`);
-  ctx.fillStyle = bodyGrad;
-  ctx.fillRect(-5 * s, -22 * s, 10 * s, 14 * s);
+  ctx.beginPath();
+  // Top semicircle
+  ctx.arc(0, -h / 2 + r, r, Math.PI, 0, false);
+  // Right side down to wavy bottom
+  ctx.lineTo(r, h / 2);
+  // Bottom wavy "ghost skirt"
+  const waves = 3;
+  for (let i = 0; i < waves; i++) {
+    const waveW = (w / waves);
+    const xStart = r - i * waveW;
+    const xEnd = xStart - waveW;
+    const ctrl = xStart - waveW / 2;
+    ctx.quadraticCurveTo(ctrl, h / 2 + (i % 2 === 0 ? 5 : -5), xEnd, h / 2);
+  }
+  ctx.lineTo(-r, -h / 2 + r);
+  ctx.closePath();
 
-  // Arms
-  ctx.fillStyle = color;
-  const armSwing = walkFrame === 1 ? -2 : (walkFrame === 2 ? 2 : 0);
-  ctx.fillRect(-8 * s, -21 * s + armSwing, 3 * s, 9 * s);  // left arm
-  ctx.fillRect(5 * s, -21 * s - armSwing, 3 * s, 9 * s);   // right arm
+  // Fill with gradient
+  const grad = ctx.createLinearGradient(-r, -h / 2, r, h / 2);
+  grad.addColorStop(0, color);
+  grad.addColorStop(1, `${color}99`);
+  ctx.fillStyle = grad;
+  ctx.fill();
 
-  // Head
-  ctx.fillStyle = "#fbbf24"; // skin tone
-  ctx.fillRect(-4 * s, -32 * s, 8 * s, 8 * s);
+  // Outline
+  ctx.strokeStyle = "rgba(0,0,0,0.35)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
 
   // Eyes
-  ctx.fillStyle = "#111827";
-  ctx.fillRect(-2 * s, -30 * s, 2 * s, 2 * s);
-  ctx.fillRect(s, -30 * s, 2 * s, 2 * s);
+  const eyeY = -h / 2 + r * 0.8;
+  const eyeX = r * 0.28;
+  const eyeSize = r * 0.22;
+  const eyeColor = state === "waiting" ? "#fbbf24" : "#1a1a2e";
 
-  // Hair / hat for player
+  ctx.fillStyle = eyeColor;
+  ctx.beginPath();
+  ctx.arc(-eyeX, eyeY, eyeSize, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(eyeX, eyeY, eyeSize, 0, Math.PI * 2);
+  ctx.fill();
+
+  // White eye glint
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  ctx.beginPath();
+  ctx.arc(-eyeX + eyeSize * 0.3, eyeY - eyeSize * 0.3, eyeSize * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(eyeX + eyeSize * 0.3, eyeY - eyeSize * 0.3, eyeSize * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Mouth line for reading state
+  if (state === "reading") {
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-eyeX, eyeY + eyeSize * 2);
+    ctx.lineTo(eyeX, eyeY + eyeSize * 2);
+    ctx.stroke();
+  }
+
+  // Crown for player
   if (isPlayer) {
-    ctx.fillStyle = "#92400e";
-    ctx.fillRect(-4 * s, -33 * s, 8 * s, 3 * s);
+    const crownY = -h / 2 + r - 2;
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.6, crownY);
+    ctx.lineTo(-r * 0.6, crownY - 8);
+    ctx.lineTo(-r * 0.2, crownY - 4);
+    ctx.lineTo(0, crownY - 10);
+    ctx.lineTo(r * 0.2, crownY - 4);
+    ctx.lineTo(r * 0.6, crownY - 8);
+    ctx.lineTo(r * 0.6, crownY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#d97706";
+    ctx.lineWidth = 1;
+    ctx.stroke();
   }
 
   ctx.restore();
@@ -272,17 +321,18 @@ function drawNPC(
   isNear: boolean
 ) {
   const bob = Math.sin(time * 0.003 + npc.bobPhase) * 2;
-  const cy = npc.y + bob;
   const moving = Math.abs(npc.wanderVx) > 0.1 || Math.abs(npc.wanderVy) > 0.1;
+  const state = moving ? "walking" : (time % 400 < 100 ? "typing" : "idle");
 
-  drawPixelCharacter(
+  drawBlobCharacter(
     ctx,
     npc.x,
-    cy,
+    npc.y,
     npc.project.color,
-    1,
-    npc.facing,
-    moving ? npc.walkFrame : 0
+    18,
+    false,
+    bob,
+    state
   );
 
   // Name label
@@ -292,7 +342,7 @@ function drawNPC(
     : npc.project.name;
   const labelW = Math.max(name.length * 6.5 + 10, 60);
   const labelX = npc.x - labelW / 2;
-  const labelY = cy - 44;
+  const labelY = npc.y - 52;
 
   ctx.fillStyle = "rgba(17,24,39,0.9)";
   ctx.beginPath();
@@ -331,22 +381,24 @@ function drawNPC(
 }
 
 function drawPlayer(ctx: CanvasRenderingContext2D, player: Player) {
-  drawPixelCharacter(
+  const moving = player.vx !== 0 || player.vy !== 0;
+  const state = moving ? "walking" : "idle";
+  drawBlobCharacter(
     ctx,
     player.x,
     player.y,
     "#fbbf24",
-    1,
-    player.facing,
-    player.walkFrame,
-    true
+    20,
+    true,
+    0,
+    state
   );
 
   // "YOU" label
   ctx.save();
   const labelW = 36;
   const labelX = player.x - labelW / 2;
-  const labelY = player.y - 46;
+  const labelY = player.y - 56;
 
   ctx.fillStyle = "rgba(251,191,36,0.95)";
   ctx.beginPath();

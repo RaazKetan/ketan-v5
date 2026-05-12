@@ -23,5 +23,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/components/pages/home/Scene3D.tsx",
+    "src/components/pages/home/Scene3DAdvanced.tsx",
+    "src/components/pages/home/Scene3DMinimal.tsx"
+  ]
 }

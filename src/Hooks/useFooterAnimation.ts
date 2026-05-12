@@ -8,6 +8,7 @@ interface UseFooterAnimationProps {
   rightSpanRef: RefObject<HTMLSpanElement | null>;
   imageRef: RefObject<HTMLDivElement | null>;
   onAnimationComplete?: () => void;
+  skipAnimation?: boolean;
 }
 
 export const useFooterAnimation = ({
@@ -16,14 +17,19 @@ export const useFooterAnimation = ({
   rightSpanRef,
   imageRef,
   onAnimationComplete,
+  skipAnimation,
 }: UseFooterAnimationProps) => {
   const handleAnimationComplete = useCallback(() => {
     if (onAnimationComplete) {
       onAnimationComplete();
     }
-  }, [onAnimationComplete]); // It's crucial to include onAnimationComplete in dependencies here
+  }, [onAnimationComplete]);
 
   useEffect(() => {
+    if (skipAnimation) {
+      handleAnimationComplete();
+      return;
+    }
     const leftSpan = leftSpanRef.current;
     const rightSpan = rightSpanRef.current;
     const container = contentRef.current;
