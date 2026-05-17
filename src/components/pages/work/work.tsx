@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -11,17 +11,12 @@ import {
   Word,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { ARCHIVE } from "../../../data/projects";
+import { EXPERIENCE } from "../../../data/experience";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ROWS = ARCHIVE.map((p, i) => ({
-  ...p,
-  num: String(i + 1).padStart(2, "0"),
-  href: p.live || p.repo,
-}));
-
 export const Work: React.FC = () => {
+  const [openSlug, setOpenSlug] = useState<string | null>(EXPERIENCE[0]?.slug ?? null);
   useDesignAnimations();
 
   useEffect(() => {
@@ -41,17 +36,25 @@ export const Work: React.FC = () => {
         scrollTrigger: { trigger: ".w-stats", start: "top 90%" },
       });
 
-      gsap.from(".w-row", {
+      gsap.from(".w-exp-item", {
         y: 30,
         autoAlpha: 0,
         duration: 0.9,
-        stagger: 0.04,
+        stagger: 0.06,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".w-archive", start: "top 80%" },
+        scrollTrigger: { trigger: ".w-experience", start: "top 80%" },
       });
     });
     return () => ctx.revert();
   }, []);
+
+  const totalYears = (() => {
+    const years = EXPERIENCE.map((e) =>
+      parseInt(e.yearStart.replace(/[^0-9]/g, "").slice(-4), 10)
+    ).filter((n) => !isNaN(n));
+    if (!years.length) return 5;
+    return new Date().getFullYear() - Math.min(...years) + 1;
+  })();
 
   return (
     <DesignLayout>
@@ -60,17 +63,17 @@ export const Work: React.FC = () => {
           <GridBg count={3} />
         </div>
         <div>
-          <div className="w-label">03 / Work · archive</div>
+          <div className="w-label">03 / Work · experience</div>
           <h1 data-split>
-            <Word>Five</Word> <Word em>years</Word> <Word>of</Word>{" "}
-            <Word>shipping.</Word>
+            <Word>{totalYears < 10 ? "Five" : `${totalYears}`}</Word>{" "}
+            <Word em>years</Word> <Word>of</Word> <Word>shipping.</Word>
           </h1>
           <div className="w-lede">
-            <div className="l">Selected · 2021 — 2026</div>
+            <div className="l">Selected · 2021 — Now</div>
             <div className="r">
-              Things I've made, broken, fixed, deleted and shipped — across
-              agents, full-stack apps, dev tooling, and the thin glass between
-              people and machines.
+              Roles, internships, and independent stints — what I've worked on,
+              with whom, and what I shipped. Tap any row for the bullet-point
+              version.
             </div>
           </div>
         </div>
@@ -79,10 +82,17 @@ export const Work: React.FC = () => {
       <div className="w-stats">
         <div className="stat">
           <div className="num">
-            <NumberTicker value={5} />
+            <NumberTicker value={totalYears} />
             <span className="suffix">yrs</span>
           </div>
           <div className="lbl">Years shipping software</div>
+        </div>
+        <div className="stat">
+          <div className="num">
+            <NumberTicker value={EXPERIENCE.length} />
+            <span className="suffix">·</span>
+          </div>
+          <div className="lbl">Roles &amp; stints</div>
         </div>
         <div className="stat">
           <div className="num">
@@ -93,13 +103,6 @@ export const Work: React.FC = () => {
         </div>
         <div className="stat">
           <div className="num">
-            <NumberTicker value={ARCHIVE.length} />
-            <span className="suffix">·</span>
-          </div>
-          <div className="lbl">Selected projects in the archive</div>
-        </div>
-        <div className="stat">
-          <div className="num">
             <NumberTicker value={6} />
             <span className="suffix">×</span>
           </div>
@@ -107,37 +110,25 @@ export const Work: React.FC = () => {
         </div>
       </div>
 
-      <section className="w-archive">
+      <section className="w-experience">
         <div className="row-head">
           <div>№</div>
-          <div>Project</div>
-          <div>Role</div>
-          <div>Stack</div>
+          <div>Role &amp; Company</div>
+          <div>Location</div>
           <div>Year</div>
+          <div />
         </div>
 
-        {ROWS.map((r) => (
-          <a
-            key={r.slug}
-            className="w-row"
-            href={r.href}
-            target="_blank"
-            rel="noreferrer"
-            data-magnet="0.05"
-          >
-            <div className="idx">{r.num}</div>
-            <div className="pname">
-              {r.name}, <em>{r.short.split(".")[0].toLowerCase()}</em>
-              <span className="desc">{r.short}</span>
-            </div>
-            <div className="role">{r.role.split("·")[0].trim()}</div>
-            <div className="tags">
-              {r.tech.slice(0, 3).map((t) => (
-                <Chip key={t}>{t}</Chip>
-              ))}
-            </div>
-            <div className="year">{r.year}</div>
-          </a>
+        {EXPERIENCE.map((exp, i) => (
+          <ExperienceRow
+            key={exp.slug}
+            exp={exp}
+            index={i}
+            isOpen={openSlug === exp.slug}
+            onToggle={() =>
+              setOpenSlug((cur) => (cur === exp.slug ? null : exp.slug))
+            }
+          />
         ))}
       </section>
 
@@ -160,6 +151,115 @@ export const Work: React.FC = () => {
 
       <style>{styles}</style>
     </DesignLayout>
+  );
+};
+
+const ExperienceRow: React.FC<{
+  exp: (typeof EXPERIENCE)[number];
+  index: number;
+  isOpen: boolean;
+  onToggle: () => void;
+}> = ({ exp, index, isOpen, onToggle }) => {
+  const detailRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = detailRef.current;
+    if (!el) return;
+    if (isOpen) {
+      gsap.fromTo(
+        el,
+        { height: 0, autoAlpha: 0 },
+        {
+          height: "auto",
+          autoAlpha: 1,
+          duration: 0.55,
+          ease: "power3.out",
+        }
+      );
+    } else {
+      gsap.to(el, {
+        height: 0,
+        autoAlpha: 0,
+        duration: 0.4,
+        ease: "power3.in",
+      });
+    }
+  }, [isOpen]);
+
+  return (
+    <div className={`w-exp-item${isOpen ? " is-open" : ""}`}>
+      <button
+        type="button"
+        className="w-exp-row"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={`exp-${exp.slug}`}
+        data-magnet="0.04"
+      >
+        <span className="idx">{String(index + 1).padStart(2, "0")}</span>
+        <div className="role">
+          <span className="role-line">
+            <span className="r-title">{exp.role}</span>
+            <span className="r-at"> · </span>
+            <em>{exp.company}</em>
+          </span>
+          <span className="r-sum">{exp.summary}</span>
+        </div>
+        <span className="loc">{exp.location}</span>
+        <span className="year">{exp.year}</span>
+        <span className="toggle" aria-hidden>
+          {isOpen ? "−" : "+"}
+        </span>
+      </button>
+
+      <div
+        id={`exp-${exp.slug}`}
+        ref={detailRef}
+        className="w-exp-detail"
+        style={{ height: 0, opacity: 0, overflow: "hidden" }}
+      >
+        <div className="w-exp-detail-inner">
+          <div className="detail-meta">
+            <div>
+              <span className="k">Period</span>
+              <span className="v">
+                {exp.yearStart} — {exp.yearEnd}
+              </span>
+            </div>
+            <div>
+              <span className="k">Location</span>
+              <span className="v">{exp.location}</span>
+            </div>
+            <div className="stack-cell">
+              <span className="k">Stack</span>
+              <div className="v">
+                {exp.stack.map((t) => (
+                  <Chip key={t}>{t}</Chip>
+                ))}
+              </div>
+            </div>
+          </div>
+          <ul className="bullets">
+            {exp.bullets.map((b, i) => (
+              <li key={i}>
+                <span className="dot" />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+          {exp.link && (
+            <a
+              href={exp.link}
+              target="_blank"
+              rel="noreferrer"
+              className="detail-link"
+            >
+              Read more →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -215,48 +315,108 @@ const styles = `
     max-width: 22ch;
   }
 
-  .w-archive { padding: 0 56px 160px; max-width: var(--maxw); margin: 0 auto; }
+  /* Experience accordion */
+  .w-experience { padding: 0 56px 160px; max-width: var(--maxw); margin: 0 auto; }
   .row-head {
-    display: grid; grid-template-columns: 60px 1.5fr 1fr 1fr 80px;
+    display: grid;
+    grid-template-columns: 60px 1.8fr 1fr 120px 40px;
     gap: 32px; padding: 16px 0; border-bottom: 1px solid var(--ink);
     font-family: var(--mono); font-size: 10px; text-transform: uppercase;
     letter-spacing: .14em; color: var(--muted);
   }
-  .w-row {
-    display: grid; grid-template-columns: 60px 1.5fr 1fr 1fr 80px;
-    gap: 32px; padding: 32px 0; border-bottom: 1px solid var(--line);
-    align-items: baseline; position: relative;
+  .w-exp-item {
+    border-bottom: 1px solid var(--line);
+    transition: background .35s var(--ease);
+  }
+  .w-exp-item.is-open { background: color-mix(in oklab, var(--accent) 5%, transparent); }
+  .w-exp-row {
+    display: grid;
+    grid-template-columns: 60px 1.8fr 1fr 120px 40px;
+    gap: 32px; padding: 28px 0;
+    align-items: center;
+    width: 100%; background: transparent; border: 0;
+    font: inherit; color: inherit; text-align: left;
+    cursor: pointer;
+    position: relative; overflow: hidden;
     transition: padding .4s var(--ease);
   }
-  .w-row::after {
-    content: ""; position: absolute; left: 0; bottom: -1px; height: 1px;
+  .w-exp-row:hover { padding-left: 12px; }
+  .w-exp-row::after {
+    content: ""; position: absolute; left: 0; bottom: 0; height: 1px;
     width: 0; background: var(--accent); transition: width .6s var(--ease);
   }
-  .w-row:hover { padding-left: 12px; }
-  .w-row:hover::after { width: 100%; }
-  .w-row:hover .pname,
-  .w-row:hover .pname em { color: var(--accent); }
+  .w-exp-row:hover::after { width: 100%; }
 
-  .w-row .idx { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-  .w-row .pname {
-    font-family: var(--serif); font-size: 32px; line-height: 1.05;
-    letter-spacing: -0.01em; transition: color .3s;
+  .w-exp-row .idx { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .w-exp-row .role { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .w-exp-row .role-line {
+    font-family: var(--serif); font-size: 28px; line-height: 1.05;
+    letter-spacing: -0.01em;
   }
-  .w-row .pname em { font-style: italic; color: var(--accent); transition: color .3s; }
-  .w-row .pname .desc {
-    display: block; margin-top: 8px;
-    font-family: var(--sans); font-style: normal;
-    font-size: 14px; line-height: 1.6; color: var(--ink-2); max-width: 56ch;
+  .w-exp-row .role-line em { font-style: italic; color: var(--accent); }
+  .w-exp-row .r-at { color: var(--muted); }
+  .w-exp-row .r-sum {
+    font-family: var(--sans); font-size: 13px; line-height: 1.55;
+    color: var(--ink-2); max-width: 56ch;
   }
-  .w-row .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .w-row .role {
-    font-family: var(--mono); font-size: 11px;
-    text-transform: uppercase; letter-spacing: .14em; color: var(--ink-2);
+  .w-exp-row .loc {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2);
+    text-transform: uppercase; letter-spacing: .14em;
   }
-  .w-row .year {
+  .w-exp-row .year {
     font-family: var(--mono); font-size: 12px;
-    text-align: right; color: var(--muted);
+    color: var(--muted); text-align: right;
   }
+  .w-exp-row .toggle {
+    font-family: var(--mono); font-size: 20px; color: var(--ink);
+    text-align: right; transition: transform .4s var(--ease), color .3s;
+    line-height: 1;
+  }
+  .w-exp-item.is-open .toggle { color: var(--accent); transform: rotate(180deg); }
+
+  /* Detail panel */
+  .w-exp-detail-inner {
+    padding: 0 0 36px 92px; /* indent past the 60px idx + 32px gap */
+    display: grid; gap: 24px;
+    max-width: 980px;
+  }
+  .detail-meta {
+    display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 24px;
+    padding-bottom: 20px; border-bottom: 1px dashed var(--line);
+  }
+  .detail-meta .k {
+    display: block;
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .14em;
+    margin-bottom: 6px;
+  }
+  .detail-meta .v {
+    font-family: var(--sans); font-size: 13px; color: var(--ink);
+  }
+  .detail-meta .stack-cell .v {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .bullets {
+    list-style: none; display: flex; flex-direction: column;
+    gap: 14px; padding: 0;
+  }
+  .bullets li {
+    display: grid; grid-template-columns: 12px 1fr; gap: 14px;
+    align-items: baseline;
+    font-size: 15px; line-height: 1.65; color: var(--ink-2);
+  }
+  .bullets .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    margin-top: 0.5em;
+  }
+  .detail-link {
+    display: inline-flex; gap: 8px;
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: .14em; color: var(--ink);
+    margin-top: 4px;
+    transition: gap .3s, color .3s;
+  }
+  .detail-link:hover { gap: 14px; color: var(--accent); }
 
   .w-cta {
     margin-top: 80px; padding: 96px 56px;
@@ -281,11 +441,19 @@ const styles = `
   @media (max-width: 900px) {
     .w-hero { padding: 130px 24px 60px; }
     .w-hero h1 { font-size: clamp(48px, 11vw, 96px); }
-    .w-archive { padding: 0 24px 80px; }
-    .row-head, .w-row { grid-template-columns: 40px 1fr; gap: 16px; padding: 20px 0; }
-    .row-head > *:nth-child(n+3),
-    .w-row > *:nth-child(n+3) { display: none; }
-    .w-row .pname { font-size: 22px; }
+    .w-experience { padding: 0 24px 80px; }
+    .row-head, .w-exp-row { grid-template-columns: 36px 1fr 60px; gap: 14px; padding: 18px 0; }
+    .row-head > *:nth-child(3),
+    .row-head > *:nth-child(4),
+    .w-exp-row .loc,
+    .w-exp-row .year { display: none; }
+    .row-head > *:last-child { text-align: right; }
+    .w-exp-row .role-line { font-size: 20px; }
+    .w-exp-row .toggle { font-size: 18px; }
+    .w-exp-detail-inner { padding: 0 0 28px 50px; }
+    .detail-meta { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .detail-meta .stack-cell { grid-column: span 2; }
+    .bullets li { font-size: 14px; }
     .w-stats {
       grid-template-columns: 1fr 1fr;
       padding: 28px 20px;
@@ -301,10 +469,15 @@ const styles = `
   @media (max-width: 600px) {
     .w-hero { padding: 140px 18px 40px; }
     .w-hero h1 { font-size: clamp(42px, 11vw, 72px); }
-    .w-archive { padding: 0 18px 60px; }
+    .w-experience { padding: 0 18px 60px; }
+    .w-exp-row { padding: 16px 0; grid-template-columns: 28px 1fr 30px; gap: 10px; }
+    .w-exp-row .idx { font-size: 11px; }
+    .w-exp-row .role-line { font-size: 18px; }
+    .w-exp-row .r-sum { font-size: 12px; }
+    .w-exp-detail-inner { padding: 0 0 24px 38px; }
+    .detail-meta { grid-template-columns: 1fr; gap: 12px; }
+    .detail-meta .stack-cell { grid-column: span 1; }
     .w-stats { padding: 22px 16px; margin: 0 18px 50px; }
-    .w-row { padding: 18px 0; }
-    .w-row .pname { font-size: 20px; }
     .w-cta { padding: 56px 18px; }
   }
 `;
