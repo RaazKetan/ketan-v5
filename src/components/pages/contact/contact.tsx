@@ -40,11 +40,11 @@ export const Contact: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.05, defaults: { ease: "power3.out" } });
-      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8 }, 0)
-        .from(".c-label", { autoAlpha: 0, y: 18, duration: 0.8 }, 0.15)
-        .from(".c-hero h1 .word > span", { yPercent: 110, duration: 1.1, stagger: 0.05 }, 0.25)
-        .from(".c-sub", { autoAlpha: 0, y: 18, duration: 0.9 }, 0.9);
+      const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
+      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 1.1 }, 0)
+        .from(".c-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0.2)
+        .from(".c-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
+        .from(".c-sub", { autoAlpha: 0, y: 18, duration: 1.2 }, 1.4);
     });
     return () => ctx.revert();
   }, []);

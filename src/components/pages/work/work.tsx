@@ -21,26 +21,24 @@ export const Work: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.05, defaults: { ease: "power3.out" } });
-      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8 }, 0)
-        .from(".w-label", { autoAlpha: 0, y: 18, duration: 0.8 }, 0.15)
-        .from(".w-hero h1 .word > span", { yPercent: 110, duration: 1.1, stagger: 0.05 }, 0.25)
-        .from(".w-lede > *", { autoAlpha: 0, y: 18, duration: 0.9, stagger: 0.1 }, 0.9);
+      const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
+      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 1.1 }, 0)
+        .from(".w-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0.2)
+        .from(".w-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
+        .from(".w-lede > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.4);
 
       gsap.from(".w-stats .stat", {
-        y: 20,
         autoAlpha: 0,
-        duration: 0.9,
-        stagger: 0.08,
+        duration: 1.3,
+        stagger: 0.12,
         ease: "power3.out",
         scrollTrigger: { trigger: ".w-stats", start: "top 90%" },
       });
 
       gsap.from(".w-exp-item", {
-        y: 30,
         autoAlpha: 0,
-        duration: 0.9,
-        stagger: 0.06,
+        duration: 1.1,
+        stagger: 0.1,
         ease: "power3.out",
         scrollTrigger: { trigger: ".w-experience", start: "top 80%" },
       });

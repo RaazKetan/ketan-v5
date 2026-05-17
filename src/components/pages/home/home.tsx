@@ -29,29 +29,27 @@ const Home: React.FC = () => {
   // Hero entrance timeline.
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.05, defaults: { ease: "power3.out" } });
-      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8 }, 0)
-        .from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 0.8 }, 0.15)
-        .from(".hero-name .word > span", { yPercent: 110, duration: 1.3, stagger: 0.08 }, 0.25)
-        .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 0.9, stagger: 0.1 }, 0.9)
-        .from(".hero-bottom > *", { autoAlpha: 0, y: 18, duration: 1, stagger: 0.08 }, 1.05)
-        .from(".scroll-hint", { autoAlpha: 0, y: 18, duration: 0.6 }, 1.2);
+      const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
+      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 1.1 }, 0)
+        .from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 1.1 }, 0.2)
+        .from(".hero-name .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
+        .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.4)
+        .from(".hero-bottom > *", { autoAlpha: 0, duration: 1.4, stagger: 0.12, clearProps: "transform" }, 1.8)
+        .from(".scroll-hint", { autoAlpha: 0, duration: 0.9 }, 2.2);
     }, heroRef);
     return () => ctx.revert();
   }, []);
 
   // Split-reveal for the "A few recent things" header.
   useEffect(() => {
-    const els = document.querySelectorAll<HTMLElement>("[data-split]");
     const ctx = gsap.context(() => {
-      els.forEach((el) => {
+      document.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
         const inners = el.querySelectorAll(".word > span");
-        gsap.set(inners, { yPercent: 110 });
-        gsap.to(inners, {
-          yPercent: 0,
-          duration: 1.1,
+        gsap.from(inners, {
+          yPercent: 110,
+          duration: 1.6,
           ease: "power3.out",
-          stagger: 0.05,
+          stagger: 0.1,
           scrollTrigger: { trigger: el, start: "top 85%", once: true },
         });
       });
@@ -132,33 +130,33 @@ const Home: React.FC = () => {
               <h5>Currently</h5>
               <ul>
                 <li>
-                  <span>SWE @ {heroTitle.company}</span>
+                  <span>SWE @ Google</span>
                   <span>'25—</span>
                 </li>
                 <li>
-                  <span>Agent systems / ADK</span>
+                  <span>AI agents on Google ADK</span>
                   <span>now</span>
                 </li>
                 <li>
-                  <span>Writing on engineering</span>
-                  <span>weekly</span>
+                  <span>Browser-based VM access</span>
+                  <span>shipped</span>
                 </li>
               </ul>
             </div>
             <div className="col">
-              <h5>Exploring</h5>
+              <h5>Recent</h5>
               <ul>
                 <li>
-                  <span>LLM orchestration</span>
-                  <span>'26</span>
-                </li>
-                <li>
-                  <span>Distributed systems</span>
-                  <span>'25</span>
-                </li>
-                <li>
-                  <span>Database-first design</span>
+                  <span>SDE @ Clear (ClearTax)</span>
                   <span>'24</span>
+                </li>
+                <li>
+                  <span>Imagine — AI image SaaS</span>
+                  <span>'24</span>
+                </li>
+                <li>
+                  <span>ADK workshops · 200+ eng.</span>
+                  <span>'25</span>
                 </li>
               </ul>
             </div>
@@ -166,15 +164,15 @@ const Home: React.FC = () => {
               <h5>Stack</h5>
               <ul>
                 <li>
-                  <span>TypeScript · Go · Python</span>
+                  <span>Python · Go · TypeScript</span>
                   <span>—</span>
                 </li>
                 <li>
-                  <span>Postgres · Redis · Kafka</span>
+                  <span>FastAPI · Angular · React</span>
                   <span>—</span>
                 </li>
                 <li>
-                  <span>React · GSAP · Three.js</span>
+                  <span>K8s · Vertex AI · Terraform</span>
                   <span>—</span>
                 </li>
               </ul>
@@ -350,7 +348,11 @@ const styles = `
     margin-top: 28px;
     display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 48px;
     align-items: start;
+    transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
   }
+  .hero-meta { transform: translateZ(0); }
   .hero-strip .col h5 {
     font-family: var(--mono); font-size: 11px;
     text-transform: uppercase; letter-spacing: .14em;

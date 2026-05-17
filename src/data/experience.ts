@@ -1,6 +1,5 @@
 /* Work experience entries for the /work page.
-   TODO(Ketan): edit company names, dates, and bullets to match your actual
-   roles. Bullets render as a dropdown when the row is clicked. */
+   Source: KetanRaj_SWE_Resume.pdf. Update bullets here when the resume changes. */
 
 export type Experience = {
   slug: string;
@@ -8,7 +7,7 @@ export type Experience = {
   company: string;
   location: string;
   year: string;       // short year/range shown on the row, e.g. "2025 — Now"
-  yearStart: string;  // long range used in expanded view, e.g. "Jan 2025"
+  yearStart: string;  // long range used in expanded view, e.g. "Apr 2025"
   yearEnd: string;    // e.g. "Present"
   summary: string;    // one-line tagline shown collapsed
   bullets: string[];  // bullet points shown when expanded
@@ -23,67 +22,76 @@ export const EXPERIENCE: Experience[] = [
     company: "Google",
     location: "Bengaluru, IN",
     year: "2025 — Now",
-    yearStart: "2025",
+    yearStart: "Apr 2025",
     yearEnd: "Present",
     summary:
-      "Building agent-driven systems and backend infrastructure at scale.",
+      "Building agent systems and secure-access infrastructure for production debugging.",
     bullets: [
-      "Designing agent orchestration patterns on Google's ADK for production workflows.",
-      "Owning backend services with a focus on correctness, observability, and latency.",
-      "Reducing manual ops by automating internal review and validation pipelines.",
-      "Mentoring early-career engineers on systems thinking and code review.",
+      "Designed and deployed a secure browser-based VM access platform that lets engineers debug production infrastructure without direct SSH.",
+      "Architected a Go WebSocket relay on Kubernetes that bridges browser WSS traffic to TCP VNC servers for scalable remote console access.",
+      "Shipped an Angular + noVNC browser console interface that replaced manual CLI workflows and improved operational accessibility by 100%.",
+      "Engineered 18+ AI agent systems on Google ADK, FastAPI, and Vertex AI to automate NOC alert investigation pipelines — reducing manual triage by ~40%.",
+      "Created Dev0, an AI-driven infrastructure orchestration platform that integrates Terraform + CI/CD for automated provisioning.",
+      "Implemented Human-in-the-Loop safeguards to prevent destructive infrastructure mutations in automated deployments.",
+      "Authored Google ADK + GCP deployment documentation that cut team onboarding time by 50% and errors by 15%.",
     ],
-    stack: ["Python", "Go", "Google ADK", "Postgres"],
+    stack: ["Go", "Python", "Angular", "Google ADK", "FastAPI", "Vertex AI", "Kubernetes", "Terraform"],
   },
   {
-    slug: "swe-intern",
-    role: "Software Engineering Intern",
-    company: "Google",
+    slug: "clear",
+    role: "Software Developer",
+    company: "Clear (ClearTax)",
     location: "Bengaluru, IN",
-    year: "2024",
-    yearStart: "May 2024",
-    yearEnd: "Aug 2024",
+    year: "2024 — 2025",
+    yearStart: "Jul 2024",
+    yearEnd: "Mar 2025",
     summary:
-      "Backend services intern — shipped agent tooling that turned into the full-time charter.",
+      "Frontend modules for tax workflows — engagement, validation, and page-load wins.",
     bullets: [
-      "Built and shipped an internal agent tooling proof-of-concept used by the team.",
-      "Wrote the design doc that led to the larger production rollout.",
-      "Worked across infra, application, and review surfaces — end-to-end ownership.",
+      "Built the Tax Savings Deductions module in React, Tailwind, and TypeScript with structured financial input validation.",
+      "Drove a 30% lift in product engagement and a 40% drop in incorrect tax submissions through improved validation workflows.",
+      "Spearheaded a full rewrite of the Loans Summary module using React + TypeScript, enabling adaptive display of deduction categories and cutting page load time by 50%.",
+      "Implemented real-time updates, edit/remove workflows, and an incremental form architecture.",
+      "Optimized frontend rendering pipelines to improve interaction speed by 40%.",
     ],
-    stack: ["Python", "Java", "Spanner"],
+    stack: ["React", "TypeScript", "Tailwind", "Jest"],
   },
   {
-    slug: "freelance",
-    role: "Freelance Engineer",
-    company: "Independent",
+    slug: "imagine",
+    role: "Founder · Solo Engineer",
+    company: "Imagine",
     location: "Remote",
-    year: "2022 — 2024",
-    yearStart: "2022",
+    year: "2024",
+    yearStart: "2024",
     yearEnd: "2024",
     summary:
-      "Built full-stack apps and AI-powered products for early-stage clients.",
+      "Scalable AI image SaaS — Next.js + MongoDB + Stripe, 2000+ daily transformations, 99.9% uptime.",
     bullets: [
-      "Shipped Imagine — Next.js AI image studio with auth, payments, and gallery.",
-      "Delivered ReadmeEditor, LuxeLenses, PerkPass — production-grade web apps.",
-      "Owned the full stack: design system, API, database, and deployment.",
+      "Built a scalable SaaS platform on Next.js, MongoDB, and Tailwind.",
+      "Integrated Cloudinary for image processing, Stripe for payments, and Clerk for authentication.",
+      "Handled 2000+ daily image transformations at 99.9% uptime.",
     ],
-    stack: ["Next.js", "TypeScript", "Firebase", "MongoDB", "Stripe"],
+    stack: ["Next.js", "MongoDB", "Tailwind", "Stripe", "Clerk", "Cloudinary", "Vercel"],
+    link: "https://github.com/RaazKetan/imagine",
   },
   {
-    slug: "campus",
-    role: "Open Source · Hackathons · Campus",
-    company: "Chandigarh University",
-    location: "Mohali, IN",
-    year: "2021 — 2024",
-    yearStart: "2021",
-    yearEnd: "2024",
+    slug: "achievements",
+    role: "Hackathons · Workshops · Open Source",
+    company: "Chandigarh University & Independent",
+    location: "Mohali / Remote",
+    year: "2020 — 2024",
+    yearStart: "Aug 2020",
+    yearEnd: "Jul 2024",
     summary:
-      "Hackathon wins, public-speaking, DSA grind, and dozens of small shipped projects.",
+      "B.E. Computer Science · CGPA 7.94 · hackathon podiums and Google ADK workshops.",
     bullets: [
-      "Built 70+ public repos across React, Three.js, Flutter, C++ DSA, and CSS playgrounds.",
-      "Won hackathons and competed in CodeChef / CSES coding challenges.",
-      "Spoke at campus events on engineering, AI, and shipping side projects.",
+      "B.E. Computer Science Engineering at Chandigarh University — CGPA 7.94.",
+      "Led technical workshops on Google ADK for 200+ engineers and partners (TCS, Wipro, HCL).",
+      "2nd place — LGBTQ+ community app/website category at Hack the Mountain Hackathon.",
+      "3rd place — Clear hackathon for seamless Slack UI integrations.",
+      "70+ public repos on GitHub spanning React, Three.js, Flutter, C++ DSA, and Python AI agents.",
+      "Certifications: AWS Cloud Technical Essentials, Web Development, Software Testing.",
     ],
-    stack: ["JavaScript", "C++", "React", "Three.js"],
+    stack: ["JavaScript", "C++", "Python", "React", "Three.js"],
   },
 ];

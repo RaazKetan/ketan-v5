@@ -117,21 +117,19 @@ export const About: React.FC = () => {
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(".bento .b-tile", {
-        y: 28,
         autoAlpha: 0,
-        duration: 0.9,
-        stagger: 0.05,
+        duration: 1.2,
+        stagger: 0.08,
         ease: "power3.out",
         scrollTrigger: { trigger: ".bento", start: "top 80%" },
       });
       document.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
         const inners = el.querySelectorAll(".word > span");
-        gsap.set(inners, { yPercent: 110 });
-        gsap.to(inners, {
-          yPercent: 0,
-          duration: 1.1,
+        gsap.from(inners, {
+          yPercent: 110,
+          duration: 1.6,
           ease: "power3.out",
-          stagger: 0.05,
+          stagger: 0.1,
           scrollTrigger: { trigger: el, start: "top 85%", once: true },
         });
       });
