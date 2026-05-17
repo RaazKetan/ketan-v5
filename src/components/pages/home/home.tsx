@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Link } from "react-router-dom";
 import {
   Btn,
   Chip,
@@ -18,55 +17,9 @@ import {
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
+import { FEATURED } from "../../../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const FEATURED = [
-  {
-    slug: "halcyon",
-    org: "Northbeam",
-    kind: "Real-time",
-    year: "2024",
-    title: "Halcyon — a",
-    titleEm: "real-time",
-    titleTail: "analytics editor.",
-    body: "Multiplayer SQL workspace with sub-50ms p99 query feedback. Built the streaming layer, the CRDT editor, and the type-aware completion engine.",
-    tags: ["Rust", "WASM", "TypeScript"],
-  },
-  {
-    slug: "tessera",
-    org: "Loop Labs",
-    kind: "Design system",
-    year: "2023",
-    title: "Tessera — a",
-    titleEm: "type-driven",
-    titleTail: "design system.",
-    body: "Token-first component library for a 40-engineer org. Replaced four divergent UI codebases with a single source of truth.",
-    tags: ["TypeScript", "React", "Radix"],
-  },
-  {
-    slug: "quartz",
-    org: "Open source",
-    kind: "Library",
-    year: "2023",
-    title: "Quartz — a",
-    titleEm: "tiny",
-    titleTail: "reactive runtime.",
-    body: "A 3kB signals library with first-class async and a debugger inspired by audio DAWs. 14k stars on GitHub.",
-    tags: ["TypeScript", "Signals", "OSS"],
-  },
-  {
-    slug: "atlas",
-    org: "Atlas Pay",
-    kind: "Infra",
-    year: "2022",
-    title: "Atlas — a",
-    titleEm: "fault-tolerant",
-    titleTail: "ledger.",
-    body: "Double-entry ledger for a payments processor moving $1.2B/year. Idempotent by construction, event-sourced, query layer engineers enjoy.",
-    tags: ["Go", "Kafka", "Postgres"],
-  },
-];
 
 const Home: React.FC = () => {
   const { heroTitle } = usePersonalData();
@@ -76,20 +29,13 @@ const Home: React.FC = () => {
   // Hero entrance timeline.
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.1, defaults: { ease: "power3.out" } });
-      tl.set(".hero-name .word > span", { yPercent: 110 });
-      tl.set(".hero-eyebrow", { autoAlpha: 0, y: 12 });
-      tl.set(".hero-tagline > *", { autoAlpha: 0, y: 18 });
-      tl.set(".hero-bottom > *", { autoAlpha: 0, y: 18 });
-      tl.set(".scroll-hint", { autoAlpha: 0, y: 18 });
-      tl.set(".ds-nav", { autoAlpha: 0, y: -16 });
-
-      tl.to(".ds-nav", { autoAlpha: 1, y: 0, duration: 0.8 }, 0)
-        .to(".hero-eyebrow", { autoAlpha: 1, y: 0, duration: 0.8 }, 0.15)
-        .to(".hero-name .word > span", { yPercent: 0, duration: 1.3, stagger: 0.08 }, 0.25)
-        .to(".hero-tagline > *", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.1 }, 0.9)
-        .to(".hero-bottom > *", { autoAlpha: 1, y: 0, duration: 1, stagger: 0.08 }, 1.05)
-        .to(".scroll-hint", { autoAlpha: 1, y: 0, duration: 0.6 }, 1.2);
+      const tl = gsap.timeline({ delay: 0.05, defaults: { ease: "power3.out" } });
+      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8 }, 0)
+        .from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 0.8 }, 0.15)
+        .from(".hero-name .word > span", { yPercent: 110, duration: 1.3, stagger: 0.08 }, 0.25)
+        .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 0.9, stagger: 0.1 }, 0.9)
+        .from(".hero-bottom > *", { autoAlpha: 0, y: 18, duration: 1, stagger: 0.08 }, 1.05)
+        .from(".scroll-hint", { autoAlpha: 0, y: 18, duration: 0.6 }, 1.2);
     }, heroRef);
     return () => ctx.revert();
   }, []);
@@ -151,8 +97,8 @@ const Home: React.FC = () => {
               <span>Selected work</span>
               <span>→</span>
             </Btn>
-            <Btn to="/about">
-              <span>About me</span>
+            <Btn to="/contact">
+              <span>Start a project</span>
               <span>↗</span>
             </Btn>
           </div>
@@ -261,14 +207,20 @@ const Home: React.FC = () => {
             <Word em>recent</Word> <Word>things.</Word>
           </h2>
           <div className="feature-head-aside">
-            Four highlights — explore the full archive on the projects page.
+            Four highlights — explore the full archive on the work page.
           </div>
         </div>
 
         <div className="feature-grid">
           {FEATURED.map((p, i) => (
             <BlurFade key={p.slug} delay={i * 0.08} className="feature-card-wrap">
-              <Link to="/projects" className="feature-card">
+              <a
+                href={p.live || p.repo}
+                target="_blank"
+                rel="noreferrer"
+                className="feature-card"
+                data-magnet="0.1"
+              >
                 <div className="img">
                   <div className="thumb-ph">
                     <span>
@@ -282,23 +234,23 @@ const Home: React.FC = () => {
                     <span>{p.kind}</span>
                   </div>
                   <h3>
-                    {p.title} <em>{p.titleEm}</em> {p.titleTail}
+                    {p.titleHead} <em>{p.titleEm}</em> {p.titleTail}
                   </h3>
-                  <p>{p.body}</p>
+                  <p>{p.short}</p>
                   <div className="tags">
-                    {p.tags.map((t) => (
+                    {p.tech.slice(0, 4).map((t) => (
                       <Chip key={t}>{t}</Chip>
                     ))}
                   </div>
                 </div>
-              </Link>
+              </a>
             </BlurFade>
           ))}
         </div>
 
         <div className="more-work-cta">
           <BeamFrame>
-            <Btn to="/projects">
+            <Btn to="/work">
               <span>View all work</span>
               <span>→</span>
             </Btn>
@@ -315,8 +267,8 @@ const Home: React.FC = () => {
           <Word>worth</Word> <Word em>building?</Word>
         </h2>
         <Reveal className="cta-actions">
-          <ShimmerBtn to="/about">
-            Start a conversation ↗
+          <ShimmerBtn to="/contact">
+            Start a project ↗
           </ShimmerBtn>
           <Btn to="/about">
             <span>About me</span>
@@ -405,11 +357,18 @@ const styles = `
     color: var(--muted); margin-bottom: 12px;
   }
   .hero-strip .col ul li {
-    list-style: none; padding: 6px 0; font-size: 14px;
-    display: flex; justify-content: space-between; border-bottom: 1px dashed var(--line);
+    list-style: none; padding: 8px 0; font-size: 14px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px; flex-wrap: wrap;
+    border-bottom: 1px dashed var(--line);
+    line-height: 1.4;
   }
   .hero-strip .col ul li:last-child { border-bottom: none; }
-  .hero-strip .col ul li span:last-child { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .hero-strip .col ul li span:first-child { flex: 1; min-width: 0; }
+  .hero-strip .col ul li span:last-child {
+    color: var(--muted); font-family: var(--mono); font-size: 11px;
+    flex-shrink: 0; white-space: nowrap;
+  }
 
   .feature-section { padding: 160px 56px 120px; max-width: var(--maxw); margin: 0 auto; }
   .feature-head {
@@ -474,19 +433,38 @@ const styles = `
   }
 
   @media (max-width: 1100px) {
-    .hero-name { font-size: clamp(72px, 15vw, 180px); }
+    .hero-name { font-size: clamp(64px, 15vw, 180px); }
     .hero-tagline { grid-template-columns: 1fr; gap: 24px; }
     .hero-tagline .tag-actions { justify-content: flex-start; }
   }
   @media (max-width: 900px) {
-    .hero-section { padding: 110px 24px 60px; }
-    .feature-section { padding: 100px 24px 80px; }
+    .hero-section { padding: 130px 24px 60px; min-height: auto; }
+    .feature-section { padding: 80px 24px 60px; }
     .hero-meta { grid-template-columns: 1fr 1fr; gap: 20px; }
     .hero-strip { grid-template-columns: 1fr; gap: 24px; }
     .feature-grid { grid-template-columns: 1fr; }
     .feature-head { flex-direction: column; align-items: flex-start; gap: 24px; }
+    .feature-head h2 { font-size: clamp(40px, 12vw, 80px); }
     .feature-head-aside { text-align: left; }
-    .cta-strip { padding: 64px 24px; }
+    .cta-strip { padding: 64px 24px; margin-top: 40px; }
+    .cta-strip h2 { font-size: clamp(40px, 12vw, 80px); }
+  }
+  @media (max-width: 600px) {
+    .hero-section { padding: 140px 18px 40px; }
+    .hero-name { font-size: clamp(54px, 14vw, 96px); letter-spacing: -0.03em; }
+    .hero-name .row { gap: 12px; }
+    .hero-eyebrow { font-size: 9px; gap: 8px; flex-wrap: wrap; }
+    .hero-eyebrow .ey-divider { width: 16px; }
+    .hero-tagline { margin-top: 24px; padding-top: 24px; }
+    .hero-tagline .t-body { font-size: 18px; }
+    .hero-tagline .tag-actions { gap: 8px; }
+    .hero-bottom { margin-top: 36px; }
+    .hero-meta { grid-template-columns: 1fr; gap: 12px; padding: 16px 0; }
+    .feature-section { padding: 60px 18px 40px; }
+    .feature-card .img { aspect-ratio: 4/3; }
+    .feature-card .info { padding: 20px; }
+    .feature-card h3 { font-size: 24px; }
+    .cta-strip { padding: 56px 18px; }
   }
 `;
 

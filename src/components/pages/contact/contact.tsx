@@ -24,10 +24,10 @@ const BUDGETS = [
 ];
 
 const CHANNELS = [
-  { label: "Email", value: "ketan@example.com", icon: "↗" },
-  { label: "GitHub", value: "@RaazKetan", icon: "↗" },
-  { label: "LinkedIn", value: "linkedin.com/in/ketanraj", icon: "↗" },
-  { label: "Calendar", value: "Book 30 min", icon: "↗" },
+  { label: "Email", value: "21ketanraaz@gmail.com", icon: "↗", href: "mailto:21ketanraaz@gmail.com" },
+  { label: "GitHub", value: "@RaazKetan", icon: "↗", href: "https://github.com/RaazKetan" },
+  { label: "Medium", value: "@ketanraaz", icon: "↗", href: "https://medium.com/@ketanraaz" },
+  { label: "Topmate", value: "Book 30 min", icon: "↗", href: "https://topmate.io/ketan_raj" },
 ];
 
 export const Contact: React.FC = () => {
@@ -40,25 +40,11 @@ export const Contact: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.1, defaults: { ease: "power3.out" } });
-      const heroWords = document.querySelectorAll<HTMLElement>(".c-hero h1 .word > span");
-      tl.set(heroWords, { yPercent: 110 });
-      tl.set(".c-label, .c-sub", { autoAlpha: 0, y: 18 });
-      tl.set(".ds-nav", { autoAlpha: 0, y: -16 });
-
-      tl.to(".ds-nav", { autoAlpha: 1, y: 0, duration: 0.8 }, 0)
-        .to(".c-label", { autoAlpha: 1, y: 0, duration: 0.8 }, 0.15)
-        .to(heroWords, { yPercent: 0, duration: 1.1, stagger: 0.05 }, 0.25)
-        .to(".c-sub", { autoAlpha: 1, y: 0, duration: 0.9 }, 0.9);
-
-      gsap.from(".form-side .item, .field, .submit-row, .channel", {
-        autoAlpha: 0,
-        y: 16,
-        duration: 0.8,
-        stagger: 0.06,
-        ease: "power3.out",
-        scrollTrigger: { trigger: ".form-wrap", start: "top 85%", once: true },
-      });
+      const tl = gsap.timeline({ delay: 0.05, defaults: { ease: "power3.out" } });
+      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8 }, 0)
+        .from(".c-label", { autoAlpha: 0, y: 18, duration: 0.8 }, 0.15)
+        .from(".c-hero h1 .word > span", { yPercent: 110, duration: 1.1, stagger: 0.05 }, 0.25)
+        .from(".c-sub", { autoAlpha: 0, y: 18, duration: 0.9 }, 0.9);
     });
     return () => ctx.revert();
   }, []);
@@ -118,34 +104,34 @@ export const Contact: React.FC = () => {
         <aside className="form-side">
           <div className="item">
             <h6>Email</h6>
-            <a className="v" href="mailto:ketan@example.com">
-              ketan@example.com
+            <a className="v" href="mailto:21ketanraaz@gmail.com">
+              21ketanraaz@gmail.com
             </a>
             <div className="small">Direct line · usually within 24h</div>
           </div>
           <div className="item">
-            <h6>Calendar</h6>
-            <a className="v" href="#">
+            <h6>Topmate</h6>
+            <a className="v" href="https://topmate.io/ketan_raj" target="_blank" rel="noreferrer">
               Book 30 min ↗
             </a>
-            <div className="small">Tue / Thu · IST afternoons</div>
+            <div className="small">1:1 chats · paid sessions</div>
           </div>
           <div className="item">
             <h6>Elsewhere</h6>
             <a className="v" href="https://github.com/RaazKetan" target="_blank" rel="noreferrer">
               GitHub ↗
             </a>
-            <a className="v" href="#">
-              LinkedIn ↗
+            <a className="v" href="https://medium.com/@ketanraaz" target="_blank" rel="noreferrer">
+              Medium ↗
             </a>
-            <a className="v" href="#">
-              Twitter ↗
+            <a className="v" href="https://www.linkedin.com/in/ketanraj" target="_blank" rel="noreferrer">
+              LinkedIn ↗
             </a>
           </div>
           <div className="item">
             <h6>Location</h6>
-            <span className="v">Gaya, India</span>
-            <div className="small">IST · UTC+5:30 · 24.7° N</div>
+            <span className="v">Bengaluru, India</span>
+            <div className="small">IST · UTC+5:30 · 12.97° N</div>
           </div>
         </aside>
 
@@ -235,7 +221,14 @@ export const Contact: React.FC = () => {
 
         <div className="channels">
           {CHANNELS.map((c) => (
-            <a key={c.label} className="channel" href="#" data-magnet="0.1">
+            <a
+              key={c.label}
+              className="channel"
+              href={c.href}
+              target={c.href.startsWith("mailto") ? undefined : "_blank"}
+              rel={c.href.startsWith("mailto") ? undefined : "noreferrer"}
+              data-magnet="0.1"
+            >
               <h6>{c.label}</h6>
               <div className="v">
                 <span>{c.value}</span>
@@ -397,11 +390,39 @@ const styles = `
   }
   .channel .v span:last-child { font-size: 14px; color: var(--accent); }
 
+  @media (max-width: 1100px) {
+    .c-hero h1 { font-size: clamp(64px, 13vw, 160px); }
+  }
   @media (max-width: 900px) {
-    .c-hero { padding: 120px 24px 60px; }
-    .form-wrap { grid-template-columns: 1fr; gap: 48px; padding: 60px 24px 100px; }
+    .c-hero { padding: 130px 24px 50px; min-height: auto; }
+    .c-hero h1 { font-size: clamp(48px, 12vw, 96px); }
+    .c-sub { font-size: 18px; }
+    .form-wrap {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      padding: 60px 24px 80px;
+    }
     .form-side { position: static; }
-    .closer { padding: 80px 24px; }
-    .channels { grid-template-columns: 1fr 1fr; }
+    .form-side .item { margin-bottom: 28px; }
+    .form-side .v { font-size: 22px; }
+    .field input, .field textarea { font-size: 20px; }
+    .submit-row { flex-direction: column; align-items: stretch; }
+    .submit-btn { justify-content: center; }
+    .closer { padding: 70px 24px; }
+    .closer .big { font-size: clamp(48px, 14vw, 120px); }
+    .channels { grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 50px; padding-top: 28px; }
+    .channel { padding: 18px; }
+    .channel .v { font-size: 18px; }
+  }
+  @media (max-width: 600px) {
+    .c-hero { padding: 140px 18px 40px; }
+    .c-hero h1 { font-size: clamp(42px, 12vw, 72px); }
+    .c-sub { font-size: 16px; }
+    .form-wrap { padding: 40px 18px 60px; gap: 32px; }
+    .form-side .v { font-size: 20px; }
+    .field input, .field textarea { font-size: 18px; }
+    .submit-btn { padding: 18px 28px; font-size: 11px; }
+    .closer { padding: 60px 18px; }
+    .channels { grid-template-columns: 1fr; }
   }
 `;

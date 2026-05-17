@@ -99,9 +99,9 @@ const defaultData: PersonalData = {
     name: "Ketan Raj",
     title: "SWE",
     company: "Google",
-    location: "India",
+    location: "Bengaluru, India",
     aboutP1:
-      "Ketan Raj (He/Him) AKA Raaz is a Software Engineer from Gaya, Bihar, India.",
+      "Ketan Raj (He/Him) AKA Raaz is a Software Engineer based in Bengaluru, India.",
     aboutP2:
       "Passionate about building innovative solutions and solving complex problems.",
   },

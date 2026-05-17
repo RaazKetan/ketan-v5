@@ -11,130 +11,27 @@ import {
   Word,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
+import { ARCHIVE } from "../../../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type Row = {
-  num: string;
-  name: string;
-  nameEm: string;
-  desc: string;
-  role: string;
-  tags: string[];
-  year: string;
-  href?: string;
-};
-
-const ROWS: Row[] = [
-  {
-    num: "01",
-    name: "Halcyon,",
-    nameEm: "real-time analytics editor",
-    desc: "Multiplayer SQL workspace · sub-50ms p99 query feedback · streaming layer + CRDT editor + type-aware completion.",
-    role: "Staff Engineer",
-    tags: ["Rust", "WASM", "TS"],
-    year: "2024 →",
-  },
-  {
-    num: "02",
-    name: "Tessera,",
-    nameEm: "type-driven design system",
-    desc: "Token-first component library · 40-engineer org · single source of truth across four product surfaces.",
-    role: "Founding Eng",
-    tags: ["TS", "React", "Radix"],
-    year: "2023",
-  },
-  {
-    num: "03",
-    name: "Quartz,",
-    nameEm: "tiny reactive runtime",
-    desc: "3kB signals library with first-class async and a debugger inspired by audio DAWs. 14k stars on GitHub.",
-    role: "Author",
-    tags: ["TS", "Signals", "OSS"],
-    year: "2023",
-  },
-  {
-    num: "04",
-    name: "Atlas,",
-    nameEm: "fault-tolerant ledger",
-    desc: "Double-entry ledger for a payments processor moving $1.2B/yr · idempotent by construction · event-sourced.",
-    role: "Senior Engineer",
-    tags: ["Go", "Kafka", "PG"],
-    year: "2022",
-  },
-  {
-    num: "05",
-    name: "Fieldnote,",
-    nameEm: "local-first notebook",
-    desc: "Markdown notebook with full-text search, e2e sync, plugin system on a postcard · three months solo · 10k MAU.",
-    role: "Solo",
-    tags: ["Swift", "Rust", "CRDT"],
-    year: "2022",
-  },
-  {
-    num: "06",
-    name: "Brut.io,",
-    nameEm: "edge function platform",
-    desc: "A V8 isolate runtime + scheduler for sub-100ms cold-starts globally · open-source, mid-five-figure deploys.",
-    role: "Eng Lead",
-    tags: ["Rust", "V8", "Edge"],
-    year: "2021",
-  },
-  {
-    num: "07",
-    name: "Cinder,",
-    nameEm: "terminal scheduler",
-    desc: "A tiny cron-replacement with structured outputs, retries, and a tui. Birthday-project gone semi-popular.",
-    role: "Author",
-    tags: ["Go", "TUI", "OSS"],
-    year: "2020",
-  },
-  {
-    num: "08",
-    name: "Stripe ·",
-    nameEm: "merchant tooling",
-    desc: "Internal devtools · onboarding flows · latency work on the API edge. Years of small, important fixes.",
-    role: "Software Engineer",
-    tags: ["Ruby", "Scala", "JS"],
-    year: "2017—20",
-  },
-  {
-    num: "09",
-    name: "Lume,",
-    nameEm: "WebGL data lab",
-    desc: "A shader-driven visualization library used by a couple of newsrooms. Built for the joy of it.",
-    role: "Author",
-    tags: ["GLSL", "WebGL", "OSS"],
-    year: "2016",
-  },
-  {
-    num: "10",
-    name: "Studio ·",
-    nameEm: "independent work",
-    desc: "Interactive work for cultural institutions, agencies, and a handful of early-stage startups.",
-    role: "Freelance",
-    tags: ["Various"],
-    year: "2014—17",
-  },
-];
+const ROWS = ARCHIVE.map((p, i) => ({
+  ...p,
+  num: String(i + 1).padStart(2, "0"),
+  href: p.live || p.repo,
+}));
 
 export const Work: React.FC = () => {
   useDesignAnimations();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.1, defaults: { ease: "power3.out" } });
-      const heroWords = document.querySelectorAll<HTMLElement>(".w-hero h1 .word > span");
-      tl.set(heroWords, { yPercent: 110 });
-      tl.set(".w-label, .w-lede > *", { autoAlpha: 0, y: 18 });
-      tl.set(".ds-nav", { autoAlpha: 0, y: -16 });
+      const tl = gsap.timeline({ delay: 0.05, defaults: { ease: "power3.out" } });
+      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8 }, 0)
+        .from(".w-label", { autoAlpha: 0, y: 18, duration: 0.8 }, 0.15)
+        .from(".w-hero h1 .word > span", { yPercent: 110, duration: 1.1, stagger: 0.05 }, 0.25)
+        .from(".w-lede > *", { autoAlpha: 0, y: 18, duration: 0.9, stagger: 0.1 }, 0.9);
 
-      tl.to(".ds-nav", { autoAlpha: 1, y: 0, duration: 0.8 }, 0)
-        .to(".w-label", { autoAlpha: 1, y: 0, duration: 0.8 }, 0.15)
-        .to(heroWords, { yPercent: 0, duration: 1.1, stagger: 0.05 }, 0.25)
-        .to(".w-lede > *", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.1 }, 0.9);
-
-      // Stats entrance
       gsap.from(".w-stats .stat", {
         y: 20,
         autoAlpha: 0,
@@ -144,7 +41,6 @@ export const Work: React.FC = () => {
         scrollTrigger: { trigger: ".w-stats", start: "top 90%" },
       });
 
-      // Archive rows entrance
       gsap.from(".w-row", {
         y: 30,
         autoAlpha: 0,
@@ -166,14 +62,14 @@ export const Work: React.FC = () => {
         <div>
           <div className="w-label">03 / Work · archive</div>
           <h1 data-split>
-            <Word>Twelve</Word> <Word em>years</Word> <Word>of</Word>{" "}
+            <Word>Five</Word> <Word em>years</Word> <Word>of</Word>{" "}
             <Word>shipping.</Word>
           </h1>
           <div className="w-lede">
-            <div className="l">Selected · 2014 — 2026</div>
+            <div className="l">Selected · 2021 — 2026</div>
             <div className="r">
               Things I've made, broken, fixed, deleted and shipped — across
-              distributed systems, dev tooling, and the thin glass between
+              agents, full-stack apps, dev tooling, and the thin glass between
               people and machines.
             </div>
           </div>
@@ -183,31 +79,31 @@ export const Work: React.FC = () => {
       <div className="w-stats">
         <div className="stat">
           <div className="num">
-            <NumberTicker value={12} />
+            <NumberTicker value={5} />
             <span className="suffix">yrs</span>
           </div>
-          <div className="lbl">Years shipping production software</div>
+          <div className="lbl">Years shipping software</div>
         </div>
         <div className="stat">
           <div className="num">
-            <NumberTicker value={48} />
+            <NumberTicker value={70} />
+            <span className="suffix">+</span>
+          </div>
+          <div className="lbl">Public repos on GitHub</div>
+        </div>
+        <div className="stat">
+          <div className="num">
+            <NumberTicker value={ARCHIVE.length} />
             <span className="suffix">·</span>
           </div>
-          <div className="lbl">Projects launched end-to-end</div>
+          <div className="lbl">Selected projects in the archive</div>
         </div>
         <div className="stat">
           <div className="num">
-            <NumberTicker value={3} />
+            <NumberTicker value={6} />
             <span className="suffix">×</span>
           </div>
-          <div className="lbl">Founding engineer · venture-backed</div>
-        </div>
-        <div className="stat">
-          <div className="num">
-            <NumberTicker value={220} />
-            <span className="suffix">M</span>
-          </div>
-          <div className="lbl">Monthly events processed · peak</div>
+          <div className="lbl">Deep case studies</div>
         </div>
       </div>
 
@@ -221,15 +117,22 @@ export const Work: React.FC = () => {
         </div>
 
         {ROWS.map((r) => (
-          <a key={r.num} className="w-row" href={r.href || "#"} data-magnet="0.05">
+          <a
+            key={r.slug}
+            className="w-row"
+            href={r.href}
+            target="_blank"
+            rel="noreferrer"
+            data-magnet="0.05"
+          >
             <div className="idx">{r.num}</div>
             <div className="pname">
-              {r.name} <em>{r.nameEm}</em>
-              <span className="desc">{r.desc}</span>
+              {r.name}, <em>{r.short.split(".")[0].toLowerCase()}</em>
+              <span className="desc">{r.short}</span>
             </div>
-            <div className="role">{r.role}</div>
+            <div className="role">{r.role.split("·")[0].trim()}</div>
             <div className="tags">
-              {r.tags.map((t) => (
+              {r.tech.slice(0, 3).map((t) => (
                 <Chip key={t}>{t}</Chip>
               ))}
             </div>
@@ -372,14 +275,36 @@ const styles = `
     position: relative;
   }
 
+  @media (max-width: 1100px) {
+    .w-hero h1 { font-size: clamp(56px, 12vw, 140px); }
+  }
   @media (max-width: 900px) {
-    .w-hero { padding: 120px 24px 60px; }
-    .w-archive { padding: 0 24px 100px; }
-    .row-head, .w-row { grid-template-columns: 40px 1fr; gap: 16px; }
+    .w-hero { padding: 130px 24px 60px; }
+    .w-hero h1 { font-size: clamp(48px, 11vw, 96px); }
+    .w-archive { padding: 0 24px 80px; }
+    .row-head, .w-row { grid-template-columns: 40px 1fr; gap: 16px; padding: 20px 0; }
     .row-head > *:nth-child(n+3),
     .w-row > *:nth-child(n+3) { display: none; }
-    .w-stats { grid-template-columns: 1fr 1fr; padding: 32px 24px; margin: 0 24px 80px; }
+    .w-row .pname { font-size: 22px; }
+    .w-stats {
+      grid-template-columns: 1fr 1fr;
+      padding: 28px 20px;
+      margin: 0 24px 60px;
+      gap: 16px;
+    }
+    .stat .num { font-size: clamp(36px, 9vw, 56px); }
     .w-lede { grid-template-columns: 1fr; gap: 16px; }
+    .w-lede .r { font-size: 18px; }
     .w-cta { padding: 64px 24px; }
+    .w-cta h2 { font-size: clamp(36px, 10vw, 72px); }
+  }
+  @media (max-width: 600px) {
+    .w-hero { padding: 140px 18px 40px; }
+    .w-hero h1 { font-size: clamp(42px, 11vw, 72px); }
+    .w-archive { padding: 0 18px 60px; }
+    .w-stats { padding: 22px 16px; margin: 0 18px 50px; }
+    .w-row { padding: 18px 0; }
+    .w-row .pname { font-size: 20px; }
+    .w-cta { padding: 56px 18px; }
   }
 `;

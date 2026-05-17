@@ -312,11 +312,47 @@ body.loading { cursor: none !important; overflow: hidden; }
 /* Responsive */
 @media (max-width: 900px) {
   .ds-section { padding: 0 24px; }
-  .ds-nav { padding: 18px 20px; grid-template-columns: 1fr auto; }
+  .ds-nav {
+    padding: 16px 20px;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    font-size: 11px;
+    letter-spacing: .06em;
+  }
+  .ds-nav .links { gap: 16px; }
+  .ds-nav .mark span:not(.dot) { font-size: 10px; letter-spacing: .04em; }
   .ds-nav .meta { display: none; }
   .frame { display: none; }
-  .scroll-hint { left: 24px; }
-  .ds-footer { padding: 28px 24px; flex-wrap: wrap; }
+  .scroll-hint { left: 24px; bottom: 32px; }
+  .ds-footer {
+    padding: 24px; flex-wrap: wrap;
+    gap: 12px; justify-content: center; text-align: center;
+    font-size: 10px;
+  }
+  .ds-marquee { margin-top: 60px; padding: 20px 0; }
+  .ds-marquee-track { gap: 40px; }
+  .ds-marquee-track .item { gap: 40px; }
+}
+@media (max-width: 600px) {
+  .ds-nav {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+  .ds-nav .mark { justify-content: flex-start; font-size: 10px; }
+  .ds-nav .links {
+    justify-content: flex-start;
+    gap: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .ds-nav .links::-webkit-scrollbar { display: none; }
+  .ds-nav .links a { white-space: nowrap; flex-shrink: 0; font-size: 10px; }
+  .ds-section { padding: 0 18px; }
+  .ds-btn, .ds-btn-shimmer { padding: 14px 22px; font-size: 11px; }
+  .ds-footer { padding: 20px 16px; }
 }
 
 /* ============ Legacy pixel art classes (preserved for ProjectsGame canvas) ============ */

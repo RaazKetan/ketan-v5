@@ -11,135 +11,20 @@ import {
   Word,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
+import { PROJECTS } from "../../../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type Panel = {
-  num: string;
-  year: string;
-  title: string;
-  titleEm: string;
-  titleTail: string;
-  body: string;
-  role: string;
-  org: string;
-  tags: string[];
-};
+const PANELS = PROJECTS.map((p, i) => ({
+  ...p,
+  num: `${String(i + 1).padStart(2, "0")} / ${String(PROJECTS.length).padStart(2, "0")}`,
+}));
 
-const PANELS: Panel[] = [
-  {
-    num: "01 / 06",
-    year: "2024 — Now",
-    title: "Halcyon —",
-    titleEm: "real-time",
-    titleTail: "analytics editor.",
-    body: "Multiplayer SQL workspace · sub-50ms p99 · streaming layer + CRDT editor + type-aware completion.",
-    role: "Staff Engineer",
-    org: "Northbeam · remote",
-    tags: ["Rust", "WASM", "TS"],
-  },
-  {
-    num: "02 / 06",
-    year: "2023",
-    title: "Tessera —",
-    titleEm: "type-driven",
-    titleTail: "design system.",
-    body: "Token-first component library replacing four divergent UI codebases with a single source of truth.",
-    role: "Founding Eng",
-    org: "Loop Labs · Berlin",
-    tags: ["React", "Radix", "TS"],
-  },
-  {
-    num: "03 / 06",
-    year: "2023",
-    title: "Quartz —",
-    titleEm: "tiny",
-    titleTail: "reactive runtime.",
-    body: "3kB signals library with first-class async and a debugger inspired by audio DAWs. 14k stars.",
-    role: "Author",
-    org: "Open source",
-    tags: ["TS", "Signals", "OSS"],
-  },
-  {
-    num: "04 / 06",
-    year: "2022",
-    title: "Atlas —",
-    titleEm: "fault-tolerant",
-    titleTail: "ledger.",
-    body: "Double-entry ledger for a $1.2B/yr payments processor. Idempotent, event-sourced, engineer-loved.",
-    role: "Senior Engineer",
-    org: "Atlas Pay · London",
-    tags: ["Go", "Kafka", "PG"],
-  },
-  {
-    num: "05 / 06",
-    year: "2022",
-    title: "Fieldnote —",
-    titleEm: "local-first",
-    titleTail: "notebook.",
-    body: "Markdown notebook · e2e sync, full-text search, plugin system on a postcard. 3 months solo.",
-    role: "Solo",
-    org: "Self-funded",
-    tags: ["Swift", "Rust", "CRDT"],
-  },
-  {
-    num: "06 / 06",
-    year: "2021",
-    title: "Brut.io —",
-    titleEm: "edge function",
-    titleTail: "platform.",
-    body: "V8 isolate runtime + scheduler · sub-100ms cold-starts globally, open-source, mid-five-figure deploys.",
-    role: "Engineering Lead",
-    org: "Open source",
-    tags: ["Rust", "V8", "Edge"],
-  },
-];
-
-const STACKS = [
-  {
-    case: "Case study · A",
-    name: "Halcyon",
-    year: "2024 — Now",
-    title: "A",
-    titleEm: "real-time",
-    titleTail: "editor for analysts who type fast.",
-    body: "We replaced a 14-second round-trip with a single keystroke. The execution layer is a Rust streaming engine compiled to WebAssembly, the editor is a CRDT-backed multiplayer model, and the completion engine knows your schema. The result: a tool that feels closer to a synthesizer than a SQL client.",
-    tags: ["Rust", "WASM", "TypeScript", "Postgres", "WebSockets", "CRDT"],
-    links: [
-      { label: "View live →", href: "#" },
-      { label: "Read writeup →", href: "#" },
-      { label: "Slack me ↗", href: "#" },
-    ],
-  },
-  {
-    case: "Case study · B",
-    name: "Tessera",
-    year: "2023",
-    title: "A design",
-    titleEm: "system",
-    titleTail: "on the boring side of clever.",
-    body: "Forty engineers, four product surfaces, a thousand inconsistent buttons. Tessera is the type-driven library we shipped to consolidate them — Figma variables compiled to design tokens, primitives built on Radix, themes that survive contract.",
-    tags: ["TypeScript", "React", "Radix", "Style Dictionary", "Storybook"],
-    links: [
-      { label: "View docs →", href: "#" },
-      { label: "GitHub ↗", href: "#" },
-    ],
-  },
-  {
-    case: "Case study · C",
-    name: "Atlas",
-    year: "2022",
-    title: "A",
-    titleEm: "ledger",
-    titleTail: "that engineers actually want to query.",
-    body: 'Atlas is a double-entry, event-sourced ledger moving $1.2B/yr. The interesting part isn\'t the writes — it\'s the query layer, which lets you ask "what was this account at this exact second" without writing a six-way join. Idempotent by construction, instrumented to the bone.',
-    tags: ["Go", "Kafka", "Postgres", "Event sourcing", "gRPC"],
-    links: [
-      { label: "Read post-mortem →", href: "#" },
-      { label: "Talk slides ↗", href: "#" },
-    ],
-  },
-];
+/* Top 3 projects get full case-study treatment in the stacked section. */
+const STACKS = PROJECTS.slice(0, 3).map((p, i) => ({
+  ...p,
+  case: `Case study · ${String.fromCharCode(65 + i)}`,
+}));
 
 export const Projects: React.FC = () => {
   const hscrollRef = useRef<HTMLElement>(null);
@@ -150,16 +35,11 @@ export const Projects: React.FC = () => {
   // Hero entrance.
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.1, defaults: { ease: "power3.out" } });
-      const heroWords = document.querySelectorAll<HTMLElement>(".p-hero h1 .word > span");
-      tl.set(heroWords, { yPercent: 110 });
-      tl.set(".p-label, .p-meta > *", { autoAlpha: 0, y: 18 });
-      tl.set(".ds-nav", { autoAlpha: 0, y: -16 });
-
-      tl.to(".ds-nav", { autoAlpha: 1, y: 0, duration: 0.8 }, 0)
-        .to(".p-label", { autoAlpha: 1, y: 0, duration: 0.8 }, 0.15)
-        .to(heroWords, { yPercent: 0, duration: 1.1, stagger: 0.05 }, 0.25)
-        .to(".p-meta > *", { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08 }, 0.9);
+      const tl = gsap.timeline({ delay: 0.05, defaults: { ease: "power3.out" } });
+      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8 }, 0)
+        .from(".p-label", { autoAlpha: 0, y: 18, duration: 0.8 }, 0.15)
+        .from(".p-hero h1 .word > span", { yPercent: 110, duration: 1.1, stagger: 0.05 }, 0.25)
+        .from(".p-meta > *", { autoAlpha: 0, y: 18, duration: 0.9, stagger: 0.08 }, 0.9);
     });
     return () => ctx.revert();
   }, []);
@@ -185,7 +65,8 @@ export const Projects: React.FC = () => {
           invalidateOnRefresh: true,
           anticipatePin: 1,
           onUpdate: (self) => {
-            const i = Math.min(5, Math.floor(self.progress * 6));
+            const n = PROJECTS.length;
+            const i = Math.min(n - 1, Math.floor(self.progress * n));
             setActiveTick(i);
           },
         },
@@ -234,11 +115,11 @@ export const Projects: React.FC = () => {
             </div>
             <div>
               <span className="k">Case studies</span>
-              <span className="v">06</span>
+              <span className="v">{String(PROJECTS.length).padStart(2, "0")}</span>
             </div>
             <div>
               <span className="k">Span</span>
-              <span className="v">2021 — 2026</span>
+              <span className="v">2024 — Now</span>
             </div>
             <div>
               <span className="k">Scroll</span>
@@ -262,20 +143,22 @@ export const Projects: React.FC = () => {
           </div>
 
           {PANELS.map((p) => (
-            <article key={p.num} className="panel">
+            <article key={p.slug} className="panel">
               <span className="num">{p.num}</span>
-              <span className="badge-y">{p.year}</span>
+              <span className="badge-y">{p.yearRange}</span>
               <div className="visual">
                 <div className="thumb-ph">
-                  <span>{p.title.toLowerCase().replace(/\s—.*/, "")} · {p.year}</span>
+                  <span>
+                    {p.slug} · {p.yearRange}
+                  </span>
                 </div>
               </div>
               <div className="info">
                 <div>
                   <h3>
-                    {p.title} <em>{p.titleEm}</em> {p.titleTail}
+                    {p.titleHead} <em>{p.titleEm}</em> {p.titleTail}
                   </h3>
-                  <p>{p.body}</p>
+                  <p>{p.short}</p>
                 </div>
                 <div className="right">
                   <div className="role">
@@ -284,7 +167,7 @@ export const Projects: React.FC = () => {
                     {p.org}
                   </div>
                   <div className="tags">
-                    {p.tags.map((t) => (
+                    {p.tech.slice(0, 3).map((t) => (
                       <Chip key={t}>{t}</Chip>
                     ))}
                   </div>
@@ -296,7 +179,7 @@ export const Projects: React.FC = () => {
           <div className="hs-end">
             <div className="hs-tag">End of reel</div>
             <h3>
-              That's the <em>six.</em>
+              That's the <em>{PROJECTS.length === 6 ? "six" : PROJECTS.length}.</em>
             </h3>
             <Btn to="/work">
               <span>See the full archive</span>
@@ -306,10 +189,13 @@ export const Projects: React.FC = () => {
         </div>
 
         <div className="hs-indicator">
-          <span>{String(activeTick + 1).padStart(2, "0")} / 06</span>
+          <span>
+            {String(activeTick + 1).padStart(2, "0")} /{" "}
+            {String(PROJECTS.length).padStart(2, "0")}
+          </span>
           <div className="ticks">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className={`tick${i <= activeTick ? " is-active" : ""}`} />
+            {PANELS.map((p, i) => (
+              <div key={p.slug} className={`tick${i <= activeTick ? " is-active" : ""}`} />
             ))}
           </div>
         </div>
@@ -334,38 +220,41 @@ export const Projects: React.FC = () => {
       <section className="stacks">
         {STACKS.map((s, i) => (
           <article
-            key={s.name}
+            key={s.slug}
             className="stack-item"
             style={{ top: `${8 + i * 3}vh`, zIndex: i + 1 }}
           >
             <div className="vis" data-image-in>
               <span className="corner">{s.case}</span>
               <div className="thumb-ph">
-                <span>{s.name.toLowerCase()}</span>
+                <span>{s.slug}</span>
               </div>
             </div>
             <div className="txt">
               <div className="top">
                 <span>{s.name}</span>
-                <span>{s.year}</span>
+                <span>{s.yearRange}</span>
               </div>
               <div>
                 <h3>
-                  {s.title} <em>{s.titleEm}</em> {s.titleTail}
+                  {s.titleHead} <em>{s.titleEm}</em> {s.titleTail}
                 </h3>
-                <p className="body">{s.body}</p>
+                <p className="body">{s.long}</p>
                 <div className="tags">
-                  {s.tags.map((t) => (
+                  {s.tech.map((t) => (
                     <Chip key={t}>{t}</Chip>
                   ))}
                 </div>
               </div>
               <div className="links">
-                {s.links.map((l) => (
-                  <a key={l.label} href={l.href} data-magnet="0.2">
-                    {l.label}
+                {s.live && (
+                  <a href={s.live} target="_blank" rel="noreferrer" data-magnet="0.2">
+                    View live →
                   </a>
-                ))}
+                )}
+                <a href={s.repo} target="_blank" rel="noreferrer" data-magnet="0.2">
+                  View source ↗
+                </a>
               </div>
             </div>
           </article>
@@ -626,26 +515,48 @@ const styles = `
   }
 
   @media (max-width: 1100px) {
+    .p-hero h1 { font-size: clamp(56px, 12vw, 140px); }
     .hs-title { width: 80vw; }
     .panel { width: 78vw; }
     .hs-end { width: 60vw; }
   }
   @media (max-width: 900px) {
-    .p-hero { padding: 120px 24px 60px; }
+    .p-hero { padding: 130px 24px 60px; }
+    .p-hero h1 { font-size: clamp(48px, 11vw, 96px); }
     .p-meta { grid-template-columns: 1fr 1fr; gap: 20px; }
-    .interlude { padding: 100px 24px; grid-template-columns: 1fr; gap: 32px; }
-    .stacks { padding: 0 24px 120px; }
+    .interlude { padding: 80px 24px; grid-template-columns: 1fr; gap: 32px; }
+    .interlude h2 { font-size: clamp(36px, 9vw, 64px); }
+    .stacks { padding: 0 24px 80px; }
     .stack-item {
       grid-template-columns: 1fr; min-height: auto;
       position: static !important; margin-bottom: 24px;
     }
     .stack-item .vis { aspect-ratio: 16/10; border-right: none; border-bottom: 1px solid var(--line); }
-    .stack-item .txt { padding: 32px; }
+    .stack-item .txt { padding: 28px; gap: 24px; }
+    .stack-item .txt h3 { font-size: clamp(28px, 6vw, 44px); }
     .hscroll-section { height: auto; }
     .hscroll-track { flex-direction: column; padding: 0 24px; gap: 24px; }
     .hs-title, .hs-end, .panel { width: 100%; height: auto; }
+    .hs-title h2 { font-size: clamp(48px, 12vw, 96px); }
     .panel { aspect-ratio: 4/5; }
+    .panel .info h3 { font-size: 24px; }
     .hs-indicator { display: none; }
     .p-cta { padding: 64px 24px; }
+    .p-cta h2 { font-size: clamp(36px, 10vw, 72px); }
+  }
+  @media (max-width: 600px) {
+    .p-hero { padding: 140px 18px 40px; }
+    .p-hero h1 { font-size: clamp(42px, 11vw, 72px); }
+    .p-meta { grid-template-columns: 1fr; gap: 14px; }
+    .p-meta .lede { font-size: 18px; }
+    .interlude { padding: 60px 18px; }
+    .stacks { padding: 0 18px 60px; }
+    .stack-item .txt { padding: 22px; }
+    .stack-item .txt .links { flex-wrap: wrap; gap: 16px; }
+    .hscroll-track { padding: 0 18px; }
+    .panel .info { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
+    .panel .info .right { align-items: flex-start; }
+    .panel .info .tags { justify-content: flex-start; }
+    .p-cta { padding: 56px 18px; }
   }
 `;

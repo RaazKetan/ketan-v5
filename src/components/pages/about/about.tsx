@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -171,7 +172,7 @@ export const About: React.FC = () => {
               <Word>and</Word> <Word em>on&nbsp;purpose.</Word>
               <span className="badge" data-magnet="">
                 <span className="led" />
-                India · IST
+                Bengaluru · IST
               </span>
             </span>
           </h1>
@@ -179,7 +180,7 @@ export const About: React.FC = () => {
           <div className="a-meta">
             <div className="lede">
               This page isn't a résumé — that's{" "}
-              <a href="/work">over here</a>. This is the slower stuff: where
+              <Link to="/work">over here</Link>. This is the slower stuff: where
               I live, what I'm reading, the things I'm thinking about, and the
               small picture of a much longer story.
             </div>
@@ -193,7 +194,7 @@ export const About: React.FC = () => {
             </div>
             <div className="col">
               <h6>Currently</h6>
-              <p>India · IST</p>
+              <p>Bengaluru · IST</p>
             </div>
           </div>
         </div>
@@ -248,10 +249,10 @@ export const About: React.FC = () => {
           <div className="map" />
           <div className="pin" />
           <div className="body">
-            <h6>Gaya, IN</h6>
-            <div className="loc-line">Bihar · IST.</div>
+            <h6>Bengaluru, IN</h6>
+            <div className="loc-line">Karnataka · IST.</div>
           </div>
-          <span className="lcoord">24.7969° N · 84.9994° E</span>
+          <span className="lcoord">12.9716° N · 77.5946° E</span>
         </div>
 
         {/* Now */}
@@ -804,6 +805,7 @@ const styles = `
   }
 
   @media (max-width: 1100px) {
+    .a-hero h1 { font-size: clamp(56px, 12vw, 140px); }
     .bento { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 160px; }
     .b-portrait { grid-column: span 2; grid-row: span 3; }
     .b-statement { grid-column: span 2; grid-row: span 3; padding: 24px; }
@@ -811,16 +813,48 @@ const styles = `
     .b-photo-a, .b-photo-b { grid-column: span 2; grid-row: span 2; }
     .b-philo, .b-video, .b-music, .b-books, .b-stack, .b-soundtrack { grid-column: span 4; grid-row: span 2; }
     .b-mood-1, .b-mood-2, .b-mood-3 { grid-column: span 2; grid-row: span 2; }
+    .a-meta { grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .a-meta .lede { grid-column: span 3; }
+  }
+  @media (max-width: 900px) {
+    .about-section { padding: 0 24px; }
+    .a-hero { padding: 130px 24px 60px; }
+    .a-hero h1 { font-size: clamp(48px, 11vw, 96px); }
+    .a-hero h1 .row { gap: 16px; }
+    .a-hero h1 .badge { font-size: 10px; padding: 8px 12px; }
+    .a-meta { margin-top: 32px; padding-top: 24px; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .a-meta .lede { grid-column: span 2; font-size: 18px; }
+    .prologue { height: 180vh; margin: 40px 0; }
+    .prologue-pin h2 { font-size: clamp(32px, 7vw, 56px); }
+    .pullquote { padding: 100px 24px; }
+    .ambition { padding-top: 80px; }
+    .ambition-grid { grid-template-columns: 1fr; gap: 24px; }
   }
   @media (max-width: 700px) {
-    .a-hero { padding: 120px 24px 60px; }
-    .a-meta { grid-template-columns: 1fr 1fr; gap: 16px; }
-    .bento { padding: 80px 24px; grid-template-columns: 1fr; grid-auto-rows: minmax(180px, auto); }
-    .bento > .b-tile { grid-column: span 1 !important; grid-row: span 1 !important; min-height: 240px; }
-    .a-pullquote { padding: 80px 24px; }
-    .workspace { padding: 60px 24px 100px; grid-template-columns: 1fr; }
+    .a-hero { padding: 140px 18px 40px; }
+    .a-hero h1 { font-size: clamp(42px, 11vw, 72px); }
+    .a-hero h1 .row { gap: 10px; }
+    .a-hero h1 .badge {
+      font-size: 9px; padding: 6px 10px;
+      margin-top: 12px;
+    }
+    .a-meta { grid-template-columns: 1fr; gap: 12px; }
+    .a-meta .lede { grid-column: span 1; font-size: 16px; }
+    .prologue { height: 160vh; }
+    .prologue-pin h2 { font-size: clamp(26px, 8vw, 48px); padding: 0 18px; }
+    .bento { padding: 60px 18px; grid-template-columns: 1fr; grid-auto-rows: minmax(180px, auto); gap: 12px; }
+    .bento > .b-tile { grid-column: span 1 !important; grid-row: span 1 !important; min-height: 220px; }
+    .b-statement { padding: 20px !important; }
+    .b-statement .xl { font-size: 28px; }
+    .b-philo .lg, .b-now .lg { font-size: 22px; }
+    .a-pullquote { padding: 60px 18px; }
+    .a-pullquote q { font-size: clamp(28px, 9vw, 44px); }
+    .workspace { padding: 40px 18px 80px; grid-template-columns: 1fr; gap: 32px; }
+    .workspace h2 { font-size: clamp(32px, 10vw, 56px); }
+    .workspace .gear { grid-template-columns: 1fr; }
     .workspace .gear li:nth-child(odd) { padding-right: 0; border-right: none; }
     .workspace .gear li:nth-child(even) { padding-left: 0; }
-    .a-cta { padding: 64px 24px; }
+    .a-cta { padding: 56px 18px; }
+    .a-cta h2 { font-size: clamp(36px, 12vw, 72px); }
   }
 `;
