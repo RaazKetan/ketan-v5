@@ -57,10 +57,12 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   const recChunksRef = useRef<Blob[]>([]);
   const recAnalyserRef = useRef<AnalyserNode | null>(null);
 
-  /* Hands-free auto-loop toggle. When on, mic re-opens after every agent
-     reply. User can stop the loop with the End button. */
-  const [autoLoop, setAutoLoop] = useState(true);
-  const autoLoopRef = useRef(true);
+  /* Push-to-talk by default — the agent gets to finish speaking before
+     the mic re-opens, and only then if the user opts into hands-free.
+     Avoids the "always listening" feel where background noise can trigger
+     another STT round through VAD. Toggle in the status row flips it. */
+  const [autoLoop, setAutoLoop] = useState(false);
+  const autoLoopRef = useRef(false);
   useEffect(() => { autoLoopRef.current = autoLoop; }, [autoLoop]);
 
   const ensureCtx = async () => {
@@ -100,12 +102,13 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   ) => {
     const data = new Uint8Array(analyser.frequencyBinCount);
 
-    /* Voice activity detection state. */
+    /* Voice activity detection state. Threshold tuned higher so room
+       fan / typing noise doesn't register as speech. */
     let hasSpoken = false;
     let lastVoiceAt = performance.now();
-    const SPEAK_THRESHOLD = 0.12;   // avg level above this counts as speech
-    const SILENCE_HANG_MS = 1300;   // ms of silence after speech before stop
-    const MIN_SPEAK_MS = 250;       // ignore brief blips
+    const SPEAK_THRESHOLD = 0.2;    // avg level above this counts as speech
+    const SILENCE_HANG_MS = 1500;   // ms of silence after speech before stop
+    const MIN_SPEAK_MS = 400;       // ignore brief blips (typing / cough)
     let speakStartedAt = 0;
     let vadFired = false;
 
@@ -205,9 +208,10 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     addMessage("agent", GREETING, "voice");
     await speak(GREETING);
     setStage("ready");
-    /* Hands-free: auto-open the mic right after the agent finishes. */
+    /* Hands-free only: auto-open the mic after agent finishes. Default
+       is push-to-talk, so this is opt-in. */
     if (autoLoopRef.current) {
-      window.setTimeout(() => startRecording(), 350);
+      window.setTimeout(() => startRecording(), 600);
     }
   };
 
@@ -226,11 +230,17 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   const startRecording = async () => {
     if (stage !== "ready") return;
     try {
+      /* Aggressive mic constraints: noise suppression + echo cancel +
+         AGC, single-channel, 16kHz (matches Sarvam's preferred STT
+         sample rate, halves uploaded audio size, and gives the noise
+         suppressor a tighter band to clean). */
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
+          channelCount: 1,
+          sampleRate: 16000,
         },
       });
       recStreamRef.current = stream;
@@ -294,9 +304,10 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
         setStage("agent-reply");
         await speak(answer);
         setStage("ready");
-        /* Hands-free: re-open mic for the next turn. */
+        /* Hands-free only: re-open mic after agent finishes its reply.
+           Default is push-to-talk so user clicks the mic for next turn. */
         if (autoLoopRef.current) {
-          window.setTimeout(() => startRecording(), 350);
+          window.setTimeout(() => startRecording(), 600);
         }
       };
       recorderRef.current = rec;
@@ -338,8 +349,8 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     switch (stage) {
       case "idle": return "Press play to start";
       case "agent-speak": return "Agent · speaking";
-      case "ready": return autoLoop ? "Listening…" : "Press the mic icon";
-      case "recording": return autoLoop ? "Talking · I'll stop on silence" : "Recording · press the stop icon";
+      case "ready": return autoLoop ? "Listening…" : "Your turn · press the mic icon";
+      case "recording": return autoLoop ? "Talking · I'll stop on silence" : "Recording · I'll stop on silence";
       case "processing": return "Thinking…";
       case "agent-reply": return "Agent · speaking";
     }
