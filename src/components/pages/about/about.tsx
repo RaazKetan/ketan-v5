@@ -10,6 +10,7 @@ import {
   ShimmerBtn,
   GridBg,
   Word,
+  WithGoogleMark,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
@@ -194,16 +195,13 @@ export const About: React.FC = () => {
           <div className="body">
             <div>
               <h6>Statement</h6>
-              <div className="xl">
-                I build software that <em>disappears</em> - calm interfaces,
-                predictable systems, tools that respect the people using them.
-              </div>
+              <div
+                className="xl"
+                dangerouslySetInnerHTML={{ __html: bentoData.statement }}
+              />
             </div>
             <p>
-              I grew up helping run a small family business - learned early
-              that constraints create creativity. Today I apply the same
-              thinking to software: limited time, limited compute, limited
-              attention. Build clean systems within constraints.
+              <WithGoogleMark text={bentoData.statementBody} />
             </p>
           </div>
         </div>
@@ -228,12 +226,13 @@ export const About: React.FC = () => {
                 <span className="pulse" />
                 Right now
               </h6>
-              <div className="lg" style={{ marginTop: 8 }}>
-                Filter coffee in hand. Sketching an <em>agent</em> orchestration
-                spec.
-              </div>
+              <div
+                className="lg"
+                style={{ marginTop: 8 }}
+                dangerouslySetInnerHTML={{ __html: bentoData.nowText }}
+              />
             </div>
-            <p>Updated 06 min ago · auto</p>
+            <p>{bentoData.nowUpdated}</p>
           </div>
         </div>
 
@@ -248,22 +247,19 @@ export const About: React.FC = () => {
           <div className="body" style={{ padding: 0 }}>
             <div>
               <h6>How I think about the craft</h6>
-              <div className="lg" style={{ marginTop: 12 }}>
-                Software is mostly <em>typography</em> and time.
-                <br />
-                Latency is a feature. The best abstraction is the one you delete.
-              </div>
+              <div
+                className="lg"
+                style={{ marginTop: 12 }}
+                dangerouslySetInnerHTML={{ __html: bentoData.philosophyTagline }}
+              />
             </div>
-            <p style={{ marginTop: 16 }}>
-              Think in systems, not features. Complexity is a design smell. If a
-              task is done twice manually, it should be code. Depth over trends.
-            </p>
+            <p style={{ marginTop: 16 }}>{bentoData.philosophyBody}</p>
           </div>
         </div>
 
         {/* Video */}
         <div className="b-tile b-video" data-image-in>
-          <div className="title-overlay">Showreel · live</div>
+          <div className="title-overlay">{bentoData.reelLabel}</div>
           <div className="video-frame">
             <video
               ref={videoRef}
@@ -289,9 +285,11 @@ export const About: React.FC = () => {
               <span className="pulse" />
               Now playing
             </h6>
-            <div className="lg" style={{ marginTop: 8 }}>
-              Lofi for late commits - <em>monsoon mix vol. 4.</em>
-            </div>
+            <div
+              className="lg"
+              style={{ marginTop: 8 }}
+              dangerouslySetInnerHTML={{ __html: bentoData.musicTitle }}
+            />
           </div>
           <div>
             <div className="eq" aria-hidden>

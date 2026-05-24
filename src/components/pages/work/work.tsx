@@ -13,7 +13,13 @@ import {
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
+import { GoogleMark } from "../../design/GoogleMark";
 import type { Experience } from "../../../data/experience";
+
+/* Render company name with the Google wordmark when the company is Google,
+   otherwise as plain italic. Keeps the brand color treatment consistent. */
+const CompanyName: React.FC<{ name: string }> = ({ name }) =>
+  /\bGoogle\b/i.test(name) ? <GoogleMark scale={1.05} /> : <em>{name}</em>;
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -201,7 +207,7 @@ const ExperienceRow: React.FC<{
           <span className="role-line">
             <span className="r-title">{exp.role}</span>
             <span className="r-at"> · </span>
-            <em>{exp.company}</em>
+            <CompanyName name={exp.company} />
           </span>
           <span className="r-sum">{exp.summary}</span>
         </div>

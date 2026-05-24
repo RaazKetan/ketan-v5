@@ -17,19 +17,11 @@ const TOPICS = [
   "Something else",
 ];
 
-const BUDGETS = [
-  "Under $25k",
-  "$25k - $75k",
-  "$75k - $150k",
-  "$150k+",
-  "Equity / retainer",
-];
 
 export const Contact: React.FC = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
   const [topics, setTopics] = useState<Set<string>>(new Set());
-  const [budget, setBudget] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const { contactInfo } = usePersonalData();
   useDesignAnimations();
@@ -156,21 +148,6 @@ export const Contact: React.FC = () => {
                       onClick={() => toggleTopic(t)}
                     >
                       {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="field">
-                <label>Budget · ballpark</label>
-                <div className="pill-row">
-                  {BUDGETS.map((b) => (
-                    <button
-                      key={b}
-                      type="button"
-                      className={`pill${budget === b ? " is-active" : ""}`}
-                      onClick={() => setBudget(b)}
-                    >
-                      {b}
                     </button>
                   ))}
                 </div>

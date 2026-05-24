@@ -26,3 +26,23 @@ export const GoogleMark: React.FC<{ scale?: number }> = ({ scale = 1.35 }) => (
     <span style={{ color: "#EA4335" }}>e</span>
   </span>
 );
+
+/* Renders a string with every occurrence of the word "Google" swapped for
+   the branded wordmark. Use for plain-text copy that mentions Google. */
+export const WithGoogleMark: React.FC<{ text: string; scale?: number }> = ({
+  text,
+  scale = 1,
+}) => {
+  const parts = text.split(/\b(Google)\b/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part === "Google" ? (
+          <GoogleMark key={i} scale={scale} />
+        ) : (
+          <React.Fragment key={i}>{part}</React.Fragment>
+        )
+      )}
+    </>
+  );
+};
