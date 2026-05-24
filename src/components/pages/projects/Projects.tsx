@@ -114,26 +114,24 @@ export const Projects: React.FC = () => {
           <GridBg count={2} />
         </div>
         <div>
-          <div className="p-label">02 / Projects · case studies + writing</div>
+          <div className="p-label">02 / Projects &amp; blogs</div>
           <h1 data-split>
-            <Word>{wordFor(PROJECTS.length).charAt(0).toUpperCase() + wordFor(PROJECTS.length).slice(1)}</Word>{" "}
-            <Word>projects,</Word>{" "}
-            <Word>{wordFor(BLOGS.length)}</Word>{" "}
-            <Word em>essays.</Word>
+            <Word>Projects</Word> <Word>and</Word>{" "}
+            <Word em>blogs.</Word>
           </h1>
           <div className="p-meta">
             <div className="lede">
-              A few bets on what software could feel like - built slowly, tested
-              in production, written down honestly. Plus three essays on the
-              engineering ideas worth sharing.
+              Bets on what software could feel like - built slowly, tested in
+              production, written down honestly. Plus essays on the engineering
+              ideas worth sharing.
             </div>
             <div>
-              <span className="k">Projects</span>
-              <span className="v">{String(PROJECTS.length).padStart(2, "0")}</span>
+              <span className="k">Format</span>
+              <span className="v">Case studies + writing</span>
             </div>
             <div>
-              <span className="k">Essays</span>
-              <span className="v">{String(BLOGS.length).padStart(2, "0")}</span>
+              <span className="k">Span</span>
+              <span className="v">2024 - Now</span>
             </div>
             <div>
               <span className="k">Scroll</span>
@@ -561,6 +559,76 @@ const styles = `
     transition: gap .3s, color .3s;
   }
   .stack-item .txt .links a:hover { gap: 14px; color: var(--accent); }
+
+  /* Writing / blog */
+  .writing-section {
+    padding: 0 56px 80px;
+    max-width: var(--maxw); margin: 0 auto;
+  }
+  .writing-head {
+    margin-bottom: 48px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .writing-tag {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .14em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .writing-tag::before { content: ""; width: 32px; height: 1px; background: var(--ink); }
+  .writing-head h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(40px, 6vw, 88px);
+    line-height: 0.96; letter-spacing: -0.02em;
+  }
+  .writing-head h2 em { font-style: italic; color: var(--accent); }
+  .writing-sub {
+    font-family: var(--serif); font-style: italic;
+    font-size: 18px; line-height: 1.5; color: var(--ink-2); max-width: 56ch;
+  }
+  .writing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .blog-card {
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); padding: 24px;
+    display: flex; flex-direction: column; gap: 14px;
+    text-decoration: none; color: inherit;
+    min-width: 0;
+    transition: transform .4s var(--ease), border-color .3s var(--ease),
+                box-shadow .4s var(--ease);
+  }
+  .blog-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--ink) 30%, var(--line));
+    box-shadow: 0 12px 28px rgba(22, 21, 19, 0.06);
+  }
+  .blog-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: .14em; color: var(--muted);
+  }
+  .blog-card h3 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: 24px; line-height: 1.15; letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .blog-card h3 em { font-style: italic; color: var(--accent); }
+  .blog-card p {
+    font-size: 13px; line-height: 1.6; color: var(--ink-2);
+    flex: 1; margin: 0;
+  }
+  .blog-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .blog-cta {
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: .14em;
+    color: var(--ink); padding-top: 14px; margin-top: auto;
+    border-top: 1px solid var(--line);
+    transition: color .3s, padding-left .3s var(--ease);
+  }
+  .blog-card:hover .blog-cta { color: var(--accent); padding-left: 4px; }
 
   /* CTA */
   .p-cta {

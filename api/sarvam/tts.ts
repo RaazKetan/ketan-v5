@@ -2,9 +2,13 @@ import { guard, json, getSarvamKey } from "./_shared";
 
 export const config = { runtime: "edge" };
 
-/* Allow-list of speaker IDs we expose. Anything else falls back to default. */
+/* Allow-list of Bulbul v3 speaker IDs we expose. Sourced from Sarvam docs. */
 const SPEAKERS = new Set([
-  "shubh", "varun", "anushka", "manisha", "arvind", "vidya", "arya",
+  "shubh", "aditya", "ritu", "priya", "neha", "rahul", "pooja", "rohan",
+  "simran", "kavya", "amit", "dev", "ishita", "shreya", "ratan", "varun",
+  "manan", "sumit", "roopa", "kabir", "aayan", "ashutosh", "advait", "anand",
+  "tanya", "tarun", "sunny", "mani", "gokul", "vijay", "shruti", "suhani",
+  "mohit", "kavitha", "rehan", "soham", "rupali",
 ]);
 
 const MAX_TEXT_LEN = 500;
@@ -30,6 +34,8 @@ export default async function handler(req: Request): Promise<Response> {
   const key = getSarvamKey();
   if (!key) return json({ error: "Server not configured" }, 503);
 
+  /* Streaming endpoint caps sample_rate at 24000 (32k/44k/48k are
+     REST-only on bulbul:v3). Using 48k here returned 502 from upstream. */
   const upstream = await fetch("https://api.sarvam.ai/text-to-speech/stream", {
     method: "POST",
     headers: {
@@ -42,7 +48,7 @@ export default async function handler(req: Request): Promise<Response> {
       speaker,
       model: "bulbul:v3",
       pace: 0.97,
-      speech_sample_rate: 48000,
+      speech_sample_rate: 24000,
       output_audio_codec: "mp3",
       enable_preprocessing: true,
     }),
