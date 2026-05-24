@@ -2,15 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import { sarvamSpeak } from "../../services/sarvam";
 import { PlayIcon, StopIcon } from "./icons";
 
-const BAR_COUNT = 22;
 const GREETING =
   "Hi, I'm Ketan. I build AI agents at Emergent. Tap the chat to ask me anything.";
 
-/* Inline voice greeting widget for the home hero. Click play -> Sarvam TTS
-   streams the greeting, the AudioContext analyser drives the bar heights
-   in real time, and the transcript fades in / out. Idle state still
-   shows a gentle breathing animation so the panel doesn't feel dead. */
-export const VoiceAnalyzer: React.FC = () => {
+/* Inline voice greeting widget. Click play -> Sarvam TTS streams the
+   greeting, the AudioContext analyser drives the bar heights in real
+   time, and the transcript fades in / out. Idle state shows a gentle
+   breathing animation so the panel doesn't feel dead.
+
+   variant="compact" = small inline (hero strip column)
+   variant="feature" = large featured (replaces a featured section) */
+export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
+  variant = "compact",
+}) => {
+  const BAR_COUNT = variant === "feature" ? 56 : 22;
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -141,12 +146,17 @@ export const VoiceAnalyzer: React.FC = () => {
     tick();
   };
 
+  const isFeature = variant === "feature";
+  const playSize = isFeature ? 22 : 12;
+
   return (
-    <div className="va-wrap">
-      <h5 className="va-label">
-        <span className="va-led" />
-        Voice
-      </h5>
+    <div className={`va-wrap va-${variant}`}>
+      {!isFeature && (
+        <h5 className="va-label">
+          <span className="va-led" />
+          Voice
+        </h5>
+      )}
       <div className="va-row">
         <button
           type="button"
@@ -155,7 +165,7 @@ export const VoiceAnalyzer: React.FC = () => {
           disabled={loading}
           aria-label={playing ? "Stop" : "Play greeting"}
         >
-          {playing ? <StopIcon size={12} /> : <PlayIcon size={12} />}
+          {playing ? <StopIcon size={playSize} /> : <PlayIcon size={playSize} />}
         </button>
         <div className={`va-bars${playing ? " is-live" : ""}`}>
           {levels.map((v, i) => (
@@ -168,7 +178,7 @@ export const VoiceAnalyzer: React.FC = () => {
         </div>
       </div>
       <div className={`va-transcript${transcript ? " is-on" : ""}`}>
-        {transcript || "Click play to hear from me."}
+        {transcript || (isFeature ? "Press play to hear from me." : "Click play to hear from me.")}
       </div>
 
       <style>{styles}</style>
@@ -231,5 +241,33 @@ const styles = `
   }
   .va-transcript.is-on {
     opacity: 1; transform: translateY(0); color: var(--ink-2);
+  }
+
+  /* Featured (large) variant */
+  .va-wrap.va-feature {
+    width: 100%; gap: 40px; align-items: center;
+  }
+  .va-wrap.va-feature .va-row {
+    width: 100%;
+    gap: 28px;
+    min-height: 96px;
+    align-items: center;
+  }
+  .va-wrap.va-feature .va-play {
+    width: 64px; height: 64px;
+  }
+  .va-wrap.va-feature .va-bars {
+    height: 96px;
+    gap: 4px;
+  }
+  .va-wrap.va-feature .va-bar {
+    max-width: 4px;
+  }
+  .va-wrap.va-feature .va-transcript {
+    font-size: clamp(20px, 2.2vw, 32px);
+    line-height: 1.4;
+    text-align: center;
+    max-width: 56ch;
+    min-height: 3em;
   }
 `;

@@ -4,7 +4,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import {
   Btn,
-  Chip,
   GridBg,
   Marquee,
   SectionTag,
@@ -12,7 +11,6 @@ import {
   BeamFrame,
   Word,
   Reveal,
-  BlurFade,
   DesignLayout,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
@@ -22,7 +20,7 @@ import { VoiceAnalyzer } from "../../Chat/VoiceAnalyzer";
 gsap.registerPlugin(ScrollTrigger);
 
 const Home: React.FC = () => {
-  const { heroTitle, heroStrip, featured } = usePersonalData();
+  const { heroTitle, heroStrip } = usePersonalData();
   const heroRef = useRef<HTMLElement>(null);
   useDesignAnimations();
 
@@ -132,9 +130,9 @@ const Home: React.FC = () => {
           </div>
 
           <div className="hero-strip">
-            {(["currently", "stack"] as const).map((key) => (
+            {(["currently", "recent", "stack"] as const).map((key) => (
               <div className="col" key={key}>
-                <h5>{key === "currently" ? "Currently" : "Stack"}</h5>
+                <h5>{key === "currently" ? "Currently" : key === "recent" ? "Recent" : "Stack"}</h5>
                 <ul>
                   {heroStrip[key].map((item, i) => (
                     <li key={i}>
@@ -145,9 +143,6 @@ const Home: React.FC = () => {
                 </ul>
               </div>
             ))}
-            <div className="col">
-              <VoiceAnalyzer />
-            </div>
           </div>
         </div>
 
@@ -166,60 +161,27 @@ const Home: React.FC = () => {
         ]}
       />
 
-      <section className="feature-section">
-        <SectionTag>Index · 02 / Featured</SectionTag>
+      <section className="feature-section voice-section">
+        <SectionTag>Index · 02 / Voice</SectionTag>
 
         <div className="feature-head">
           <h2 data-split>
-            <Word>A</Word> <Word>few</Word>{" "}
-            <Word em>recent</Word> <Word>things.</Word>
+            <Word>Hear</Word> <Word em>from</Word> <Word>me.</Word>
           </h2>
           <div className="feature-head-aside">
-            Four highlights - explore the full archive on the work page.
+            Press play - Sarvam streams the voice, the bars run on a real
+            AnalyserNode, transcript fades with the audio.
           </div>
         </div>
 
-        <div className="feature-grid">
-          {featured.map((p, i) => (
-            <BlurFade key={p.slug} delay={i * 0.08} className="feature-card-wrap">
-              <a
-                href={p.live || p.repo}
-                target="_blank"
-                rel="noreferrer"
-                className="feature-card"
-                data-magnet="0.1"
-              >
-                <div className="img">
-                  <div className="thumb-ph">
-                    <span>
-                      {p.slug} · {p.year}
-                    </span>
-                  </div>
-                </div>
-                <div className="info">
-                  <div className="meta-row">
-                    <span>{p.org}</span>
-                    <span>{p.kind}</span>
-                  </div>
-                  <h3>
-                    {p.titleHead} <em>{p.titleEm}</em> {p.titleTail}
-                  </h3>
-                  <p>{p.short}</p>
-                  <div className="tags">
-                    {p.tech.slice(0, 4).map((t) => (
-                      <Chip key={t}>{t}</Chip>
-                    ))}
-                  </div>
-                </div>
-              </a>
-            </BlurFade>
-          ))}
+        <div className="voice-feature">
+          <VoiceAnalyzer variant="feature" />
         </div>
 
         <div className="more-work-cta">
           <BeamFrame>
-            <Btn to="/work">
-              <span>View all work</span>
+            <Btn to="/projects">
+              <span>See the projects</span>
               <span>→</span>
             </Btn>
           </BeamFrame>
