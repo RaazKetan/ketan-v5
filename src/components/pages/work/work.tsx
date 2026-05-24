@@ -15,6 +15,11 @@ import { EXPERIENCE } from "../../../data/experience";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const NUMBER_WORDS: Record<number, string> = {
+  1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five",
+  6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten",
+};
+
 export const Work: React.FC = () => {
   const [openSlug, setOpenSlug] = useState<string | null>(EXPERIENCE[0]?.slug ?? null);
   useDesignAnimations();
@@ -46,13 +51,10 @@ export const Work: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
-  const totalYears = (() => {
-    const years = EXPERIENCE.map((e) =>
-      parseInt(e.yearStart.replace(/[^0-9]/g, "").slice(-4), 10)
-    ).filter((n) => !isNaN(n));
-    if (!years.length) return 5;
-    return new Date().getFullYear() - Math.min(...years) + 1;
-  })();
+  /* Years of shipping — counts from the first project year (2021), not when
+     I started university. Update SHIPPING_START_YEAR if the narrative changes. */
+  const SHIPPING_START_YEAR = 2021;
+  const totalYears = new Date().getFullYear() - SHIPPING_START_YEAR;
 
   return (
     <DesignLayout>
@@ -63,7 +65,7 @@ export const Work: React.FC = () => {
         <div>
           <div className="w-label">03 / Work · experience</div>
           <h1 data-split>
-            <Word>{totalYears < 10 ? "Five" : `${totalYears}`}</Word>{" "}
+            <Word>{NUMBER_WORDS[totalYears] ?? String(totalYears)}</Word>{" "}
             <Word em>years</Word> <Word>of</Word> <Word>shipping.</Word>
           </h1>
           <div className="w-lede">
