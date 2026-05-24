@@ -310,8 +310,11 @@ const styles = `
     line-height: 1.4;
   }
   .hero-strip .col ul li:last-child { border-bottom: none; }
-  .hero-strip .col ul li span:first-child { flex: 1; min-width: 0; }
-  .hero-strip .col ul li span:last-child {
+  /* Direct children only - without ">", the :last-child rule was also
+     matching the last letter span ("e") inside <GoogleMark/>, which sits
+     inside the label, so the "e" was getting mono 11px and looked shrunk. */
+  .hero-strip .col ul li > span:first-child { flex: 1; min-width: 0; }
+  .hero-strip .col ul li > span:last-child {
     color: var(--muted); font-family: var(--mono); font-size: 11px;
     flex-shrink: 0; white-space: nowrap;
   }
