@@ -26,7 +26,7 @@ type Speaker = "agent" | "user";
 type Line = { speaker: Speaker; text: string };
 
 const GREETING =
-  "Hi, I'm Ketan. I build AI agents at Emergent, previously at Google. Press speak and ask me anything about the work.";
+  "Hi, I'm Ketan. I build AI agents at Emergent, previously at Google. Press the mic icon and ask me anything about the work.";
 
 export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   variant = "compact",
@@ -326,7 +326,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
       case "agent-reply":
         return { onClick: stopAgent, icon: <StopIcon size={isFeature ? 22 : 12} />, label: "Stop", busy: false };
       case "ready":
-        return { onClick: startRecording, icon: <MicIcon size={isFeature ? 22 : 12} />, label: "Speak", busy: false };
+        return { onClick: startRecording, icon: <MicIcon size={isFeature ? 22 : 12} />, label: "Press the mic icon", busy: false };
       case "recording":
         return { onClick: stopRecording, icon: <StopIcon size={isFeature ? 22 : 12} />, label: "Send", busy: false };
       case "processing":
@@ -338,8 +338,8 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     switch (stage) {
       case "idle": return "Press play to start";
       case "agent-speak": return "Agent · speaking";
-      case "ready": return autoLoop ? "Listening…" : "Click the mic to speak";
-      case "recording": return autoLoop ? "Speak · I'll stop on silence" : "You · recording · click stop";
+      case "ready": return autoLoop ? "Listening…" : "Press the mic icon";
+      case "recording": return autoLoop ? "Talking · I'll stop on silence" : "Recording · press the stop icon";
       case "processing": return "Thinking…";
       case "agent-reply": return "Agent · speaking";
     }
