@@ -269,9 +269,10 @@ const styles = `
   }
   .hero-eyebrow .ey-google .g-mark {
     font-family: "Product Sans", "Google Sans", var(--sans);
-    font-weight: 500; font-size: 13px; letter-spacing: -0.01em;
-    text-transform: none;
+    font-weight: 500; font-size: 18px; letter-spacing: -0.01em;
+    text-transform: none; line-height: 1;
     display: inline-flex; align-items: baseline;
+    margin-left: 2px;
   }
   .hero-eyebrow .ey-google .g-mark > span { display: inline-block; }
 
