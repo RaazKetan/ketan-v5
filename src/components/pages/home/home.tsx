@@ -528,12 +528,14 @@ const styles = `
   @media (max-width: 600px) {
     .hero-section { padding: 140px 18px 40px; }
     .hero-agent-cta {
-      margin-top: 14px; padding: 8px 14px 8px 12px; gap: 10px;
-      font-size: 9px; letter-spacing: .12em;
+      margin-top: 14px; padding: 9px 14px 9px 12px; gap: 8px;
+      font-size: 10px; letter-spacing: .12em;
+      max-width: calc(100vw - 36px);
     }
     .agent-cta-dot { width: 6px; height: 6px; }
     .agent-cta-pulse { font-size: 8px; padding: 2px 6px; letter-spacing: .14em; }
     .agent-cta-arrow { font-size: 14px; }
+    .agent-cta-rotator { height: 1.4em; }
     .voice-section .feature-head h2 { font-size: clamp(36px, 11vw, 64px); }
     .voice-section .feature-head-aside { font-size: 12px; }
     .hero-name { font-size: clamp(54px, 14vw, 96px); letter-spacing: -0.03em; }

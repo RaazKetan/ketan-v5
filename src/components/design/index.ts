@@ -15,3 +15,4 @@ export { DesignNav } from "./DesignNav";
 export { DesignFooter } from "./DesignFooter";
 export { DesignLayout } from "./DesignLayout";
 export { GoogleMark, WithGoogleMark } from "./GoogleMark";
+export { SocialDock } from "./SocialDock";

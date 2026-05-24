@@ -499,7 +499,17 @@ const styles = `
   }
 
   @media (max-width: 600px) {
-    .chat-fab { right: 16px; bottom: 16px; padding: 12px 18px; }
-    .chat-panel { right: 12px; left: 12px; bottom: 76px; width: auto; max-height: calc(100vh - 100px); }
+    .chat-fab { right: 16px; bottom: 16px; padding: 12px 18px; font-size: 10px; }
+    .chat-fab-label { font-size: 10px; }
+    .chat-panel {
+      right: 12px; left: 12px; bottom: 76px;
+      width: auto;
+      /* dvh handles the iOS / Android URL bar collapsing so the keyboard
+         doesn't push the panel off-screen. */
+      max-height: min(640px, calc(100dvh - 96px));
+    }
+    .chat-msg { font-size: 13px; padding: 9px 12px; }
+    .chat-input input { font-size: 16px; /* avoids iOS zoom-on-focus */ }
+    .chat-mic, .chat-send { width: 36px; height: 36px; }
   }
 `;
