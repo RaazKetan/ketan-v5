@@ -174,15 +174,29 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   const startRecording = async () => {
     if (stage !== "ready") return;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
       recStreamRef.current = stream;
 
       const ctx = await ensureCtx();
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 64;
-      analyser.smoothingTimeConstant = 0.7;
+      analyser.fftSize = 128;
+      analyser.smoothingTimeConstant = 0.6;
       source.connect(analyser);
+      /* Silent gain so the audio graph actually pumps data through the
+         analyser. Some browsers (Chromium with mic streams) won't process
+         audio unless a destination is in the path. gain=0 keeps it muted
+         so we don't hear ourselves echo. */
+      const muted = ctx.createGain();
+      muted.gain.value = 0;
+      analyser.connect(muted);
+      muted.connect(ctx.destination);
       recAnalyserRef.current = analyser;
       runAnalyserLoop(analyser);
 
@@ -261,8 +275,8 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     switch (stage) {
       case "idle": return "Press play to start";
       case "agent-speak": return "Agent · speaking";
-      case "ready": return "Your turn · press speak";
-      case "recording": return "You · recording";
+      case "ready": return "Click the mic to speak";
+      case "recording": return "You · recording · click stop when done";
       case "processing": return "Thinking…";
       case "agent-reply": return "Agent · speaking";
     }
