@@ -7,7 +7,7 @@ export type ProjectKind = "Agent" | "AI" | "Full-stack" | "Tooling" | "Creative"
 export type Project = {
   slug: string;
   name: string;       // hero name, e.g. "Origin"
-  titleHead: string;  // "Origin —"
+  titleHead: string;  // "Origin -"
   titleEm: string;    // emphasised italic word
   titleTail: string;  // remainder
   short: string;      // 1-line tagline (cards)
@@ -26,29 +26,29 @@ export const PROJECTS: Project[] = [
   {
     slug: "origin",
     name: "Origin",
-    titleHead: "Origin — an",
+    titleHead: "Origin - an",
     titleEm: "agentic",
     titleTail: "AI hiring platform.",
     short:
-      "Agents source jobs based on the work you've actually shipped — no resumes, no keyword games.",
-    long: "Origin is a hiring platform run by agents. Candidates ship work; agents read it, match it against real openings, and shortlist on substance. The whole loop — sourcing, screening, scheduling — happens autonomously in the background while you keep building. The bet: signal beats application volume, and agents are good enough to find it.",
+      "Agents source jobs based on the work you've actually shipped - no resumes, no keyword games.",
+    long: "Origin is a hiring platform run by agents. Candidates ship work; agents read it, match it against real openings, and shortlist on substance. The whole loop - sourcing, screening, scheduling - happens autonomously in the background while you keep building. The bet: signal beats application volume, and agents are good enough to find it.",
     role: "Founder · Author",
     org: "In development",
     kind: "Agent",
     tech: ["Python", "LLM", "Agents", "Hiring"],
     year: "2026",
-    yearRange: "2025 — Now",
+    yearRange: "2025 - Now",
     repo: "https://github.com/RaazKetan/Origin",
   },
   {
     slug: "reublic",
     name: "Reublic",
-    titleHead: "Reublic — a",
+    titleHead: "Reublic - a",
     titleEm: "revolutionary",
     titleTail: "AI agent.",
     short:
       "Multi-step planning agent that automates complex workflows end-to-end.",
-    long: "Reublic is an agent built for ambitious, multi-step workflows — research, drafting, execution. Plans are explicit, intermediate state is inspectable, and recovery is built in. The point is to make agentic work auditable, not magic.",
+    long: "Reublic is an agent built for ambitious, multi-step workflows - research, drafting, execution. Plans are explicit, intermediate state is inspectable, and recovery is built in. The point is to make agentic work auditable, not magic.",
     role: "Author · Solo",
     org: "Open source",
     kind: "Agent",
@@ -60,11 +60,11 @@ export const PROJECTS: Project[] = [
   {
     slug: "resume-agent",
     name: "Resume Sortlist Agent",
-    titleHead: "Resume Sortlist — an",
+    titleHead: "Resume Sortlist - an",
     titleEm: "AI",
     titleTail: "screening agent.",
     short:
-      "AI agent that screens and ranks resumes against a job spec — explainable and fast.",
+      "AI agent that screens and ranks resumes against a job spec - explainable and fast.",
     long: "Hiring managers waste hours on resume screening; the agent turns that into seconds. It reads a JD, parses incoming resumes, and ranks candidates with a justification trail. Built so the agent's reasoning is the product, not a hidden black box.",
     role: "Author · Solo",
     org: "Open source",
@@ -77,12 +77,12 @@ export const PROJECTS: Project[] = [
   {
     slug: "adk-voice",
     name: "ADK Voice Agent",
-    titleHead: "Voice Agent — built on",
+    titleHead: "Voice Agent - built on",
     titleEm: "Google",
     titleTail: "ADK.",
     short:
       "Voice-driven assistant built on Google's Agent Development Kit.",
-    long: "A real-time voice agent built on Google's ADK — speech in, tool-using reasoning, structured output. The interesting part is the latency budget: every hop has to fit inside a conversational rhythm. Built as a reference for what voice-native agents feel like.",
+    long: "A real-time voice agent built on Google's ADK - speech in, tool-using reasoning, structured output. The interesting part is the latency budget: every hop has to fit inside a conversational rhythm. Built as a reference for what voice-native agents feel like.",
     role: "Author · Solo",
     org: "Open source",
     kind: "Agent",
@@ -94,12 +94,12 @@ export const PROJECTS: Project[] = [
   {
     slug: "imagine",
     name: "Imagine",
-    titleHead: "Imagine — an",
+    titleHead: "Imagine - an",
     titleEm: "AI",
     titleTail: "image studio.",
     short:
-      "AI image generation studio — Next.js, Clerk, Cloudinary, Stripe.",
-    long: "Imagine is an end-to-end AI image studio: prompt → generation → gallery, with credits and billing wired in. Full-stack Next.js with Clerk for auth, Cloudinary for media, and Stripe for payments — the kind of project that exercises every layer.",
+      "AI image generation studio - Next.js, Clerk, Cloudinary, Stripe.",
+    long: "Imagine is an end-to-end AI image studio: prompt → generation → gallery, with credits and billing wired in. Full-stack Next.js with Clerk for auth, Cloudinary for media, and Stripe for payments - the kind of project that exercises every layer.",
     role: "Author · Solo",
     org: "Open source",
     kind: "Full-stack",
@@ -112,12 +112,12 @@ export const PROJECTS: Project[] = [
   {
     slug: "taskmaster",
     name: "TaskMaster",
-    titleHead: "TaskMaster — a",
+    titleHead: "TaskMaster - a",
     titleEm: "collaborative",
     titleTail: "task workspace.",
     short:
       "Real-time collaborative task management with team workspaces and analytics.",
-    long: "TaskMaster is a clean take on shared task lists — multi-user workspaces, real-time updates, and just enough analytics to keep teams honest. Built to be the lightest possible tool that still feels serious.",
+    long: "TaskMaster is a clean take on shared task lists - multi-user workspaces, real-time updates, and just enough analytics to keep teams honest. Built to be the lightest possible tool that still feels serious.",
     role: "Author · Solo",
     org: "Open source",
     kind: "Full-stack",
@@ -135,7 +135,7 @@ export const ARCHIVE: Project[] = [
   {
     slug: "tata-cliq-agent",
     name: "Tata Cliq Agent",
-    titleHead: "Tata Cliq Agent — a",
+    titleHead: "Tata Cliq Agent - a",
     titleEm: "browsing",
     titleTail: "automation.",
     short:
@@ -152,7 +152,7 @@ export const ARCHIVE: Project[] = [
   {
     slug: "linkedin-post-agent",
     name: "LinkedIn Post Agent",
-    titleHead: "LinkedIn Agent — a",
+    titleHead: "LinkedIn Agent - a",
     titleEm: "drafting",
     titleTail: "agent.",
     short:
@@ -169,11 +169,11 @@ export const ARCHIVE: Project[] = [
   {
     slug: "adk-postgres",
     name: "ADK + Postgres",
-    titleHead: "ADK Postgres — an",
+    titleHead: "ADK Postgres - an",
     titleEm: "agent",
     titleTail: "memory.",
     short:
-      "Google ADK agent wired to Postgres — agentic queries with structured memory.",
+      "Google ADK agent wired to Postgres - agentic queries with structured memory.",
     long: "",
     role: "Author · Solo",
     org: "Open source",
@@ -186,7 +186,7 @@ export const ARCHIVE: Project[] = [
   {
     slug: "adk-streamlit",
     name: "ADK on Streamlit",
-    titleHead: "ADK Streamlit — a",
+    titleHead: "ADK Streamlit - a",
     titleEm: "live",
     titleTail: "agent UI.",
     short:
@@ -203,7 +203,7 @@ export const ARCHIVE: Project[] = [
   {
     slug: "readme-editor",
     name: "README Editor",
-    titleHead: "ReadmeEditor — a",
+    titleHead: "ReadmeEditor - a",
     titleEm: "live",
     titleTail: "markdown editor.",
     short:
@@ -221,11 +221,11 @@ export const ARCHIVE: Project[] = [
   {
     slug: "perkpass",
     name: "PerkPass",
-    titleHead: "PerkPass — a",
+    titleHead: "PerkPass - a",
     titleEm: "perks",
     titleTail: "aggregator.",
     short:
-      "Discover and stack consumer perks in one place — built on Next.js.",
+      "Discover and stack consumer perks in one place - built on Next.js.",
     long: "",
     role: "Author · Solo",
     org: "Open source",
@@ -239,11 +239,11 @@ export const ARCHIVE: Project[] = [
   {
     slug: "luxelenses",
     name: "LuxeLenses",
-    titleHead: "LuxeLenses — a",
+    titleHead: "LuxeLenses - a",
     titleEm: "premium",
     titleTail: "eyewear store.",
     short:
-      "E-commerce for premium eyewear — Firebase auth, Firestore, Redux.",
+      "E-commerce for premium eyewear - Firebase auth, Firestore, Redux.",
     long: "",
     role: "Author · Solo",
     org: "Open source",
@@ -257,11 +257,11 @@ export const ARCHIVE: Project[] = [
   {
     slug: "portfolio-v4",
     name: "Portfolio v4",
-    titleHead: "Folio v4 — the",
+    titleHead: "Folio v4 - the",
     titleEm: "previous",
     titleTail: "portfolio.",
     short:
-      "Previous portfolio iteration — minimal, scroll-driven, with Three.js scenes.",
+      "Previous portfolio iteration - minimal, scroll-driven, with Three.js scenes.",
     long: "",
     role: "Author · Solo",
     org: "Open source",
@@ -275,7 +275,7 @@ export const ARCHIVE: Project[] = [
   {
     slug: "social-extension",
     name: "Social Extension",
-    titleHead: "Social Extension — a",
+    titleHead: "Social Extension - a",
     titleEm: "browser",
     titleTail: "companion.",
     short:
@@ -292,7 +292,7 @@ export const ARCHIVE: Project[] = [
   {
     slug: "chatgpt-clone",
     name: "ChatGPT Clone",
-    titleHead: "ChatGPT clone — a",
+    titleHead: "ChatGPT clone - a",
     titleEm: "streaming",
     titleTail: "playground.",
     short:
@@ -310,7 +310,7 @@ export const ARCHIVE: Project[] = [
   {
     slug: "brewnation",
     name: "Brewnation",
-    titleHead: "Brewnation — a",
+    titleHead: "Brewnation - a",
     titleEm: "coffee",
     titleTail: "landing.",
     short:
@@ -328,11 +328,11 @@ export const ARCHIVE: Project[] = [
   {
     slug: "3dmania",
     name: "3D Mania",
-    titleHead: "3D Mania — a",
+    titleHead: "3D Mania - a",
     titleEm: "WebGL",
     titleTail: "playground.",
     short:
-      "Interactive WebGL playground — Three.js shader explorations.",
+      "Interactive WebGL playground - Three.js shader explorations.",
     long: "",
     role: "Author · Solo",
     org: "Open source",

@@ -25,7 +25,7 @@ const Home: React.FC = () => {
   const heroRef = useRef<HTMLElement>(null);
   useDesignAnimations();
 
-  // Hero entrance timeline — scoped via useGSAP so StrictMode + remounts
+  // Hero entrance timeline - scoped via useGSAP so StrictMode + remounts
   // never leave elements stuck in the from state.
   useGSAP(
     () => {
@@ -159,7 +159,7 @@ const Home: React.FC = () => {
             <Word em>recent</Word> <Word>things.</Word>
           </h2>
           <div className="feature-head-aside">
-            Four highlights — explore the full archive on the work page.
+            Four highlights - explore the full archive on the work page.
           </div>
         </div>
 

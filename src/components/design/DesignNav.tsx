@@ -16,10 +16,10 @@ export const DesignNav: React.FC<{ mark?: string; available?: boolean }> = ({
   available = true,
 }) => {
   const { pathname } = useLocation();
-  const [clock, setClock] = useState("— : —");
+  const [clock, setClock] = useState("- : -");
   const navRef = useRef<HTMLElement>(null);
 
-  /* Nav owns its own entrance — pages no longer try to animate .ds-nav,
+  /* Nav owns its own entrance - pages no longer try to animate .ds-nav,
      which removes the "GSAP target .ds-nav not found" warning and the
      race where the new page's timeline hides nav before its tween plays. */
   useGSAP(

@@ -30,7 +30,7 @@ export const ChatWidget: React.FC = () => {
     {
       id: 0,
       role: "assistant",
-      text: "Hi, I'm Ketan's portfolio agent. Ask me about projects, work, or how to get in touch — chat or voice both work.",
+      text: "Hi, I'm Ketan's portfolio agent. Ask me about projects, work, or how to get in touch - chat or voice both work.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -101,7 +101,7 @@ export const ChatWidget: React.FC = () => {
     };
     setMessages((m) => [...m, userMsg]);
 
-    /* RAG over Ketan's data — instant, deterministic. */
+    /* RAG over Ketan's data - instant, deterministic. */
     const chunks = retrieve(q, kb);
     const answer = composeAnswer(q, chunks);
     const botId = idRef.current++;
@@ -141,7 +141,7 @@ export const ChatWidget: React.FC = () => {
             {
               id: idRef.current++,
               role: "assistant",
-              text: "Didn't catch that — try typing instead, or check your mic.",
+              text: "Didn't catch that - try typing instead, or check your mic.",
             },
           ]);
         }

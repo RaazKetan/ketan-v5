@@ -1,5 +1,5 @@
 /* Lightweight RAG over Ketan's portfolio data.
-   No vector store — uses keyword scoring against PersonalDataContext +
+   No vector store - uses keyword scoring against PersonalDataContext +
    experience + projects. Good enough for a portfolio Q&A bot. */
 
 import type { PersonalData } from "../context/PersonalDataContext";
@@ -41,7 +41,7 @@ export function buildKnowledgeBase(data: PersonalData): RagChunk[] {
     chunks.push({
       id: `exp-${e.slug}`,
       title: `${e.role} at ${e.company}`,
-      body: `${e.role} at ${e.company} (${e.yearStart} — ${e.yearEnd}) in ${e.location}. ${e.summary} ${e.bullets.join(" ")} Stack: ${e.stack.join(", ")}.`,
+      body: `${e.role} at ${e.company} (${e.yearStart} - ${e.yearEnd}) in ${e.location}. ${e.summary} ${e.bullets.join(" ")} Stack: ${e.stack.join(", ")}.`,
       source: `Experience · ${e.company}`,
     });
   });
@@ -50,7 +50,7 @@ export function buildKnowledgeBase(data: PersonalData): RagChunk[] {
     chunks.push({
       id: `proj-${p.slug}`,
       title: p.name,
-      body: `${p.name} (${p.yearRange}) — ${p.short} ${p.long} Role: ${p.role} at ${p.org}. Tech: ${p.tech.join(", ")}.${p.live ? ` Live: ${p.live}.` : ""} Repo: ${p.repo}.`,
+      body: `${p.name} (${p.yearRange}) - ${p.short} ${p.long} Role: ${p.role} at ${p.org}. Tech: ${p.tech.join(", ")}.${p.live ? ` Live: ${p.live}.` : ""} Repo: ${p.repo}.`,
       source: `Project · ${p.name}`,
     });
   });
@@ -101,10 +101,10 @@ export function retrieve(
 }
 
 /* Compose a short answer from the retrieved chunks. Keeps it deterministic
-   (no LLM needed) — quotes from the source chunks directly. */
+   (no LLM needed) - quotes from the source chunks directly. */
 export function composeAnswer(_query: string, chunks: RagChunk[]): string {
   if (!chunks.length) {
-    return "I don't have that detail on hand — try asking about Ketan's experience at Google or Clear, his projects (Origin, Imagine, Reublic), or how to get in touch.";
+    return "I don't have that detail on hand - try asking about Ketan's experience at Google or Clear, his projects (Origin, Imagine, Reublic), or how to get in touch.";
   }
   const lead = chunks[0];
   // Take the first 2 sentences of the top chunk

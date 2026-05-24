@@ -483,7 +483,7 @@ const FURNITURE = (() => {
   const plants: { x: number; y: number }[] = [];
   const shelves: { x: number; y: number }[] = [];
 
-  // Desks — one per zone, two rows
+  // Desks - one per zone, two rows
   Object.values(ZONES).forEach(({ x }, zi) => {
     desks.push({ x: x + 20, y: 300 });
     desks.push({ x: x + 120, y: 370 });
@@ -758,7 +758,7 @@ export const ProjectsGame: React.FC = () => {
             whiteSpace: "nowrap",
           }}
         >
-          API rate-limited — showing fallback data
+          API rate-limited - showing fallback data
         </div>
       )}
 

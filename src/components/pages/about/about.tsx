@@ -39,7 +39,7 @@ export const About: React.FC = () => {
     });
   });
 
-  /* Prologue scaling — ONE timeline scrubbed across the whole prologue
+  /* Prologue scaling - ONE timeline scrubbed across the whole prologue
      section. The two-trigger version (entrance + exit) was getting confused
      by fast scrolls and reversals: each trigger lerped independently and
      they'd fight each other in the overlap region, sometimes leaving the
@@ -144,7 +144,7 @@ export const About: React.FC = () => {
 
           <div className="a-meta">
             <div className="lede">
-              This page isn't a résumé — that's{" "}
+              This page isn't a résumé - that's{" "}
               <Link to="/work">over here</Link>. This is the slower stuff: where
               I live, what I'm reading, the things I'm thinking about, and the
               small picture of a much longer story.
@@ -172,10 +172,10 @@ export const About: React.FC = () => {
             <h2>
               Most of life is <em>not</em> the highlight reel.
               <br />
-              It's the long quiet middle —<br />
+              It's the long quiet middle -<br />
               the part where the <em>real</em> work happens.
             </h2>
-            <div className="credit">— a thing I keep coming back to</div>
+            <div className="credit">- a thing I keep coming back to</div>
           </div>
         </div>
       </section>
@@ -195,12 +195,12 @@ export const About: React.FC = () => {
             <div>
               <h6>Statement</h6>
               <div className="xl">
-                I build software that <em>disappears</em> — calm interfaces,
+                I build software that <em>disappears</em> - calm interfaces,
                 predictable systems, tools that respect the people using them.
               </div>
             </div>
             <p>
-              I grew up helping run a small family business — learned early
+              I grew up helping run a small family business - learned early
               that constraints create creativity. Today I apply the same
               thinking to software: limited time, limited compute, limited
               attention. Build clean systems within constraints.
@@ -290,7 +290,7 @@ export const About: React.FC = () => {
               Now playing
             </h6>
             <div className="lg" style={{ marginTop: 8 }}>
-              Lofi for late commits — <em>monsoon mix vol. 4.</em>
+              Lofi for late commits - <em>monsoon mix vol. 4.</em>
             </div>
           </div>
           <div>
@@ -381,7 +381,7 @@ export const About: React.FC = () => {
           <Word>spinner</Word> <Word>is</Word> <Word>your</Word>{" "}
           <Word>résumé.</Word>
         </q>
-        <div className="attr">— from a margin in a notebook</div>
+        <div className="attr">- from a margin in a notebook</div>
       </section>
 
       {/* Workspace */}

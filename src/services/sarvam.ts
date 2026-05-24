@@ -1,17 +1,17 @@
 /* Client for the Sarvam proxy at /api/sarvam/*.
-   The API key NEVER leaves the server — see api/sarvam/tts.ts and stt.ts.
+   The API key NEVER leaves the server - see api/sarvam/tts.ts and stt.ts.
    This module only talks to our own origin, so abuse is gated by the
    serverless functions' rate limit, origin check, and payload caps. */
 
 const TTS_URL = "/api/sarvam/tts";
 const STT_URL = "/api/sarvam/stt";
 
-/* Voice features are always "configured" client-side now — the server
+/* Voice features are always "configured" client-side now - the server
    decides whether it can actually proxy (checks SARVAM_API_KEY). The
    client just attempts and degrades gracefully on 503. */
 export const sarvamConfigured = () => true;
 
-/* Streams the TTS response and starts playback as bytes arrive — much
+/* Streams the TTS response and starts playback as bytes arrive - much
    lower perceived latency than waiting for the full mp3.
 
    Strategy:

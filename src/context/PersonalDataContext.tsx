@@ -86,7 +86,7 @@ export type ProjectsPageProps = {
   categories: ProjectCategory[];
 };
 
-/* New centralized data shapes — every page reads from these. */
+/* New centralized data shapes - every page reads from these. */
 
 export type StripItem = { label: string; meta: string };
 export type HeroStripData = {
@@ -131,7 +131,7 @@ export type BentoData = {
   philosophyBody: string;
   nowText: string;           // "Filter coffee in hand. Sketching an <em>agent</em> orchestration spec."
   nowUpdated: string;
-  musicTitle: string;        // "Lofi for late commits — <em>monsoon mix vol. 4.</em>"
+  musicTitle: string;        // "Lofi for late commits - <em>monsoon mix vol. 4.</em>"
   musicMeta: string;
   reelLabel: string;
   pullQuote: string;         // serif italic quote with <em>
@@ -186,13 +186,13 @@ const defaultData: PersonalData = {
   heroStrip: {
     taglineNum: "01",
     taglineBody:
-      "Building <em>AI agents</em> &amp; intelligent backends — agentic loops that ship to real users and survive production.",
+      "Building <em>AI agents</em> &amp; intelligent backends - agentic loops that ship to real users and survive production.",
     focus: "AI agents · LLM systems · Backends",
     available: "",
     currently: [
-      { label: "SWE @ Emergent (YC24)", meta: "'26—" },
+      { label: "SWE @ Emergent (YC24)", meta: "'26-" },
       { label: "Agentic AI · production loops", meta: "now" },
-      { label: "Origin — agentic hiring platform", meta: "building" },
+      { label: "Origin - agentic hiring platform", meta: "building" },
     ],
     recent: [
       { label: "ex-Google · 18+ AI agents shipped", meta: "'25" },
@@ -200,9 +200,9 @@ const defaultData: PersonalData = {
       { label: "Vertex AI · RAG · LLM orchestration", meta: "'25" },
     ],
     stack: [
-      { label: "Python · TypeScript · Go", meta: "—" },
-      { label: "Google ADK · Vertex AI · LangChain", meta: "—" },
-      { label: "FastAPI · Postgres · Kubernetes", meta: "—" },
+      { label: "Python · TypeScript · Go", meta: "-" },
+      { label: "Google ADK · Vertex AI · LangChain", meta: "-" },
+      { label: "FastAPI · Postgres · Kubernetes", meta: "-" },
     ],
   },
   contactInfo: {
@@ -225,7 +225,7 @@ const defaultData: PersonalData = {
   bentoData: {
     statement: "I build <em>AI agents</em> that ship.",
     statementBody:
-      "Agentic loops with planning, tool use, structured memory, and human-in-the-loop safeguards — the boring infrastructure that lets agents actually run in production. Shipped 18+ at Google, now building Emergent's product surface and Origin (agentic hiring).",
+      "Agentic loops with planning, tool use, structured memory, and human-in-the-loop safeguards - the boring infrastructure that lets agents actually run in production. Shipped 18+ at Google, now building Emergent's product surface and Origin (agentic hiring).",
     philosophyTagline:
       "Software is mostly <em>typography</em> and time.<br/>Latency is a feature. The best abstraction is the one you delete.",
     philosophyBody:
@@ -233,12 +233,12 @@ const defaultData: PersonalData = {
     nowText:
       "Filter coffee in hand. Sketching an <em>agent</em> orchestration spec.",
     nowUpdated: "Updated 06 min ago · auto",
-    musicTitle: "Lofi for late commits — <em>monsoon mix vol. 4.</em>",
+    musicTitle: "Lofi for late commits - <em>monsoon mix vol. 4.</em>",
     musicMeta: "3'42\" / 7'18\" · headphones on",
     reelLabel: "Showreel · live",
     pullQuote:
       "Pay the <em>boring</em> debts first.<br/>The user's loading spinner is your résumé.",
-    pullQuoteAttr: "— from a margin in a notebook",
+    pullQuoteAttr: "- from a margin in a notebook",
     workshopTagline: "The <em>workshop.</em>",
     workshopBody:
       "A small desk by a tall window. Mechanical keyboard, filter coffee brewing, a notebook always open. The tools I reach for, daily.",
@@ -267,9 +267,9 @@ const defaultData: PersonalData = {
       { name: "Postgres · Kubernetes" },
     ],
     soundtrack: [
-      { title: "Sostre — Quietude", meta: "Ambient · 2024" },
-      { title: "The Necks — Three", meta: "Jazz · 2020" },
-      { title: "Floating Points — Promises", meta: "Modern classical · 2021" },
+      { title: "Sostre - Quietude", meta: "Ambient · 2024" },
+      { title: "The Necks - Three", meta: "Jazz · 2020" },
+      { title: "Floating Points - Promises", meta: "Modern classical · 2021" },
     ],
     gear: [
       { name: "MacBook", ds: "M2 · daily driver" },
@@ -284,9 +284,9 @@ const defaultData: PersonalData = {
   },
   workInfo: {
     shippingStartYear: 2021,
-    ledeShort: "Selected · 2021 — Now",
+    ledeShort: "Selected · 2021 - Now",
     ledeLong:
-      "Roles, internships, and independent stints — what I've worked on, with whom, and what I shipped. Tap any row for the bullet-point version.",
+      "Roles, internships, and independent stints - what I've worked on, with whom, and what I shipped. Tap any row for the bullet-point version.",
     ctaHeadline: ["Currently", "booking", "Q3."],
   },
   experience: EXPERIENCE,
@@ -317,7 +317,7 @@ const defaultData: PersonalData = {
   AboutPageData: {
     positioning: {
       statement: "I build systems that reduce human effort.",
-      subStatement: "I’m interested in leverage — automation, intelligent agents, and backend architecture that scales cleanly.",
+      subStatement: "I’m interested in leverage - automation, intelligent agents, and backend architecture that scales cleanly.",
       focus: "I care more about correctness and efficiency than buzzwords.",
     },
     philosophy: {

@@ -33,7 +33,7 @@ export const Projects: React.FC = () => {
   const [activeTick, setActiveTick] = useState(0);
   useDesignAnimations();
 
-  // Hero entrance — scoped to hscrollRef so StrictMode handles cleanup.
+  // Hero entrance - scoped to hscrollRef so StrictMode handles cleanup.
   useGSAP(() => {
     const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
     tl.from(".p-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0)
@@ -116,7 +116,7 @@ export const Projects: React.FC = () => {
           </h1>
           <div className="p-meta">
             <div className="lede">
-              Each one a small bet on what software could feel like — built
+              Each one a small bet on what software could feel like - built
               slowly, tested in production, written down honestly.
             </div>
             <div>
@@ -125,7 +125,7 @@ export const Projects: React.FC = () => {
             </div>
             <div>
               <span className="k">Span</span>
-              <span className="v">2024 — Now</span>
+              <span className="v">2024 - Now</span>
             </div>
             <div>
               <span className="k">Scroll</span>
@@ -135,7 +135,7 @@ export const Projects: React.FC = () => {
         </div>
       </section>
 
-      {/* HORIZONTAL SHOWCASE — sticky inner viewport, no ScrollTrigger pin
+      {/* HORIZONTAL SHOWCASE - sticky inner viewport, no ScrollTrigger pin
           (avoids the pinSpacer wrapper that confused React's commitDeletion). */}
       <section className="hscroll-section" ref={hscrollRef}>
         <div className="hscroll-sticky">
@@ -146,7 +146,7 @@ export const Projects: React.FC = () => {
               <em>Recent</em> work, slid sideways.
             </h2>
             <p className="hs-sub">
-              Scroll vertically — the panels slide. Six selected case studies.
+              Scroll vertically - the panels slide. Six selected case studies.
             </p>
           </div>
 
@@ -219,7 +219,7 @@ export const Projects: React.FC = () => {
         </div>
         <p>
           Each of these started as a one-page brief and turned into a year. I
-          keep these case studies short on purpose — full writeups
+          keep these case studies short on purpose - full writeups
           (architecture diagrams, decisions, post-mortems) are available on
           request.
         </p>
@@ -340,7 +340,7 @@ const styles = `
     text-transform: none; letter-spacing: 0; max-width: 42ch;
   }
 
-  /* Horizontal scroll — sticky inner viewport (no ScrollTrigger pin) */
+  /* Horizontal scroll - sticky inner viewport (no ScrollTrigger pin) */
   .hscroll-section {
     width: 100%;
     position: relative; background: var(--bg);

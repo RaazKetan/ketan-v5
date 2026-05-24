@@ -19,8 +19,8 @@ const TOPICS = [
 
 const BUDGETS = [
   "Under $25k",
-  "$25k — $75k",
-  "$75k — $150k",
+  "$25k - $75k",
+  "$75k - $150k",
   "$150k+",
   "Equity / retainer",
 ];
@@ -198,7 +198,7 @@ export const Contact: React.FC = () => {
                 Message <em>sent.</em>
               </h3>
               <p>
-                I'll get back to you within a day or two — thanks for writing.
+                I'll get back to you within a day or two - thanks for writing.
               </p>
             </div>
           )}

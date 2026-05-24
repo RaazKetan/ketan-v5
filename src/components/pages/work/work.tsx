@@ -54,7 +54,7 @@ export const Work: React.FC = () => {
     { scope: pageRef }
   );
 
-  /* Years of shipping — driven by workInfo.shippingStartYear in PersonalDataContext. */
+  /* Years of shipping - driven by workInfo.shippingStartYear in PersonalDataContext. */
   const totalYears = new Date().getFullYear() - workInfo.shippingStartYear;
 
   return (
@@ -223,7 +223,7 @@ const ExperienceRow: React.FC<{
             <div>
               <span className="k">Period</span>
               <span className="v">
-                {exp.yearStart} — {exp.yearEnd}
+                {exp.yearStart} - {exp.yearEnd}
               </span>
             </div>
             <div>

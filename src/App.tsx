@@ -59,7 +59,7 @@ const SmoothScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => 
    1. Stop and reset Lenis to scroll 0 immediately. Lenis owns window.scrollY
       while smooth scroll is active, so calling window.scrollTo bypasses it
       and the new page would land at whatever scroll position the previous
-      page was on — which produced the "page lands mid-horizontal-scroll
+      page was on - which produced the "page lands mid-horizontal-scroll
       showing one stray project badge" bug.
    2. Refresh ScrollTrigger after the new DOM has settled. */
 const RouteEffects: React.FC = () => {

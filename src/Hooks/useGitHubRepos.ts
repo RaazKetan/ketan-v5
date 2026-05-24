@@ -91,7 +91,7 @@ const FALLBACK_PROJECTS: GitHubProject[] = [
   {
     id: 1,
     name: "portfolio-v5",
-    description: "Personal portfolio — interactive pixel office edition",
+    description: "Personal portfolio - interactive pixel office edition",
     html_url: "https://github.com/RaazKetan/portfolio-v5",
     homepage: null,
     language: "TypeScript",

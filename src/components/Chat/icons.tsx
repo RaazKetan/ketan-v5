@@ -75,7 +75,7 @@ export const SpeakerOff: React.FC<IconProps> = ({ size, className }) =>
 export const PlayIcon: React.FC<IconProps> = ({ size, className }) =>
   wrap(<><path d="M6 4l8 5-8 5V4Z" /></>, size, className);
 
-/* Three vertical bars — a small "speaking" indicator. Animation is in CSS. */
+/* Three vertical bars - a small "speaking" indicator. Animation is in CSS. */
 export const WaveIcon: React.FC<IconProps> = ({ size, className }) => (
   <svg
     viewBox="0 0 18 18"
