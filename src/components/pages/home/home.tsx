@@ -92,7 +92,13 @@ const Home: React.FC = () => {
         >
           <span className="agent-cta-dot" />
           <span className="agent-cta-pulse">NEW</span>
-          <span>Talk to my AI agent</span>
+          <span className="agent-cta-rotator" aria-label="Talk to my AI agent">
+            <span className="agent-cta-rline agent-cta-rline-0">Talk to my AI agent</span>
+            <span className="agent-cta-rline agent-cta-rline-1">Ask about my work</span>
+            <span className="agent-cta-rline agent-cta-rline-2">Hear about Origin</span>
+            {/* Ghost line sets the width to the longest option to prevent jitter. */}
+            <span className="agent-cta-ghost">Talk to my AI agent</span>
+          </span>
           <span className="agent-cta-arrow">↓</span>
         </a>
 
@@ -337,12 +343,13 @@ const styles = `
     flex-shrink: 0; white-space: nowrap;
   }
 
-  /* "Talk to my AI agent" attention CTA — clean outlined pill with a
-     pulsing accent dot + flashing NEW badge + bobbing arrow.
-     Dropped the conic-gradient border beam (it bled through as a weird
-     bowtie/funnel shape on the page background). */
+  /* "Talk to my AI agent" attention CTA — outlined pill with a rotating
+     animated-gradient list (Magic UI animated-list + animated-gradient-
+     text combined). Pill is justify-self: start + width: fit-content
+     so the hero grid doesn't stretch it across the whole row. */
   .hero-agent-cta {
     display: inline-flex; align-items: center; gap: 12px;
+    width: fit-content; justify-self: start;
     margin-top: 18px; padding: 10px 18px 10px 14px;
     border: 1px solid var(--ink); border-radius: 999px;
     background: var(--bg); color: var(--ink); text-decoration: none;
@@ -370,15 +377,56 @@ const styles = `
     background: var(--ink); color: var(--bg);
     font-size: 9px; letter-spacing: .18em;
     animation: cta-flash 2.4s ease-in-out infinite;
+    flex-shrink: 0;
   }
   @keyframes cta-flash {
     0%, 100% { background: var(--ink); }
     50%      { background: var(--accent); }
   }
+
+  /* Rotating list — three lines, each visible for ~2s then slides up.
+     Total cycle 6s, so each lineN is offset by 2s (33%). The ghost
+     sets the container width to the longest line so the pill doesn't
+     jitter as labels change. */
+  .agent-cta-rotator {
+    position: relative; display: inline-block; overflow: hidden;
+    height: 1.2em; line-height: 1.2;
+  }
+  .agent-cta-ghost { visibility: hidden; white-space: nowrap; }
+  .agent-cta-rline {
+    position: absolute; left: 0; top: 0; white-space: nowrap;
+    opacity: 0; transform: translateY(110%);
+    /* Animated gradient text — Magic UI animated-gradient-text style. */
+    background: linear-gradient(
+      110deg,
+      var(--ink) 0%,
+      var(--accent) 35%,
+      color-mix(in oklab, var(--accent) 70%, white) 50%,
+      var(--accent) 65%,
+      var(--ink) 100%
+    );
+    background-size: 220% 100%;
+    background-clip: text; -webkit-background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+  }
+  .agent-cta-rline-0 { animation: cta-rotate 6s ease-in-out infinite 0s, cta-shine 3.5s linear infinite; }
+  .agent-cta-rline-1 { animation: cta-rotate 6s ease-in-out infinite 2s, cta-shine 3.5s linear infinite; }
+  .agent-cta-rline-2 { animation: cta-rotate 6s ease-in-out infinite 4s, cta-shine 3.5s linear infinite; }
+  @keyframes cta-rotate {
+    0%             { opacity: 0; transform: translateY(110%); }
+    6%, 28%        { opacity: 1; transform: translateY(0); }
+    34%, 100%      { opacity: 0; transform: translateY(-110%); }
+  }
+  @keyframes cta-shine {
+    0%   { background-position: 220% 0; }
+    100% { background-position: -220% 0; }
+  }
+
   .agent-cta-arrow {
     font-family: var(--serif); font-size: 16px; letter-spacing: 0;
     color: var(--accent);
     animation: bob 1.6s ease-in-out infinite;
+    flex-shrink: 0;
   }
   @keyframes bob {
     0%, 100% { transform: translateY(0); }
