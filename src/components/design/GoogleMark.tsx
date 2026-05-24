@@ -14,8 +14,11 @@ export const GoogleMark: React.FC<{ scale?: number }> = ({ scale = 1.35 }) => (
       letterSpacing: "-0.01em",
       textTransform: "none",
       lineHeight: 1,
-      display: "inline-flex",
-      alignItems: "baseline",
+      /* Plain inline so each letter sits on the same text baseline.
+         inline-flex was misaligning the last letter ("e") because the
+         flex baseline differs from text baseline in some fonts. */
+      display: "inline",
+      whiteSpace: "nowrap",
     }}
   >
     <span style={{ color: "#4285F4" }}>G</span>
