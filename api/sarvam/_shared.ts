@@ -27,16 +27,27 @@ export function getAllowedOrigins(): Set<string> {
   return new Set(list);
 }
 
-/* In-memory token-bucket rate limiter. Per-instance — adequate for low-volume
-   portfolio traffic combined with Vercel's edge auto-scaling. For high traffic
-   swap for Upstash Redis / Vercel KV. Keyed by client IP. */
+/* Two-tier in-memory rate limit: token-bucket for bursts + daily cap.
+   Per-instance only (each Edge instance has its own Map). Combined with
+   Vercel's auto-scaling this still bounds an abuser to roughly the limits
+   below across the platform. For real production-grade limits, swap for
+   Upstash Redis / Vercel KV. Keyed by client IP. */
 type Bucket = { tokens: number; refilled: number };
+type DailyEntry = { count: number; windowStart: number };
 const buckets = new Map<string, Bucket>();
-const CAPACITY = 20;          // burst: 20 requests
-const REFILL_PER_SEC = 0.5;   // ~30 req/min sustained
+const daily = new Map<string, DailyEntry>();
+
+/* Burst guard: 8 requests then refill ~12/min sustained. */
+const CAPACITY = 8;
+const REFILL_PER_SEC = 0.2;
+/* Daily cap: keeps one IP from spending the Sarvam credit overnight. */
+const DAILY_CAP = 80;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function rateLimit(ip: string): boolean {
   const now = Date.now();
+
+  /* Token bucket — handles bursts. */
   const b = buckets.get(ip) || { tokens: CAPACITY, refilled: now };
   const elapsed = (now - b.refilled) / 1000;
   b.tokens = Math.min(CAPACITY, b.tokens + elapsed * REFILL_PER_SEC);
@@ -45,6 +56,17 @@ export function rateLimit(ip: string): boolean {
     buckets.set(ip, b);
     return false;
   }
+
+  /* Daily cap — bounds total spend. */
+  const d = daily.get(ip);
+  if (!d || now - d.windowStart > DAY_MS) {
+    daily.set(ip, { count: 1, windowStart: now });
+  } else {
+    if (d.count >= DAILY_CAP) return false;
+    d.count += 1;
+    daily.set(ip, d);
+  }
+
   b.tokens -= 1;
   buckets.set(ip, b);
   return true;

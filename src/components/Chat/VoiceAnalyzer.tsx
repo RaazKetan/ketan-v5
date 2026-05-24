@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { sarvamSpeak, sarvamTranscribe } from "../../services/sarvam";
 import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
 import { usePersonalData } from "../../context/PersonalDataContext";
+import { useChatHistory } from "../../context/ChatHistoryContext";
 import { PlayIcon, StopIcon, MicIcon } from "./icons";
 
 /* Voice conversation widget.
@@ -32,6 +33,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
 }) => {
   const data = usePersonalData();
   const kb = useMemo(() => buildKnowledgeBase(data), [data]);
+  const { addMessage } = useChatHistory();
 
   const isFeature = variant === "feature";
   const BAR_COUNT = isFeature ? 56 : 22;
@@ -200,6 +202,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     if (stage !== "idle") return;
     setStage("agent-speak");
     setLine({ speaker: "agent", text: GREETING });
+    addMessage("agent", GREETING, "voice");
     await speak(GREETING);
     setStage("ready");
     /* Hands-free: auto-open the mic right after the agent finishes. */
@@ -270,12 +273,15 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
         setStage("processing");
         const transcript = await sarvamTranscribe(blob);
         if (!transcript.trim()) {
-          setLine({ speaker: "agent", text: "Didn't catch that. Try again?" });
+          const msg = "Didn't catch that. Try again?";
+          setLine({ speaker: "agent", text: msg });
+          addMessage("agent", msg, "voice");
           setStage("ready");
           return;
         }
-        /* Fade the user's line in. */
+        /* Fade the user's line in + log to shared chat history. */
         setLine({ speaker: "user", text: transcript });
+        addMessage("user", transcript, "voice");
 
         /* Pause briefly so the user sees their transcript before the
            reply starts, then run RAG + speak. */
@@ -284,6 +290,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
         const chunks = retrieve(transcript, kb);
         const answer = composeAnswer(transcript, chunks);
         setLine({ speaker: "agent", text: answer });
+        addMessage("agent", answer, "voice");
         setStage("agent-reply");
         await speak(answer);
         setStage("ready");

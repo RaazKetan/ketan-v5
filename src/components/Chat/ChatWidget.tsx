@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePersonalData } from "../../context/PersonalDataContext";
 import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
 import { sarvamSpeak, sarvamTranscribe } from "../../services/sarvam";
+import { useChatHistory } from "../../context/ChatHistoryContext";
 import {
   ChatIcon,
   CloseIcon,
@@ -10,39 +11,40 @@ import {
   StopIcon,
   SpeakerOn,
   SpeakerOff,
-  PlayIcon,
   WaveIcon,
 } from "./icons";
 
-type Msg = {
-  id: number;
-  role: "user" | "assistant";
-  text: string;
-  voice?: boolean; // true if the user sent this via voice input
-};
+const GREETING_TEXT =
+  "Hi, I'm Ketan's portfolio agent. Ask me about projects, work, or how to get in touch - chat or voice both work.";
 
 export const ChatWidget: React.FC = () => {
   const data = usePersonalData();
   const kb = useMemo(() => buildKnowledgeBase(data), [data]);
+  const { messages: history, addMessage } = useChatHistory();
 
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([
-    {
-      id: 0,
-      role: "assistant",
-      text: "Hi, I'm Ketan's portfolio agent. Ask me about projects, work, or how to get in touch - chat or voice both work.",
-    },
-  ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [recording, setRecording] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
   const [speakingId, setSpeakingId] = useState<number | null>(null);
 
+  /* Seed the shared history with the greeting the first time anyone
+     opens the chat / triggers the voice agent. Re-renders won't add
+     duplicates because we check before appending. */
+  useEffect(() => {
+    if (history.length === 0) addMessage("agent", GREETING_TEXT, "text");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* Render-friendly messages: the shared history plus the greeting fallback. */
+  const messages = history.length
+    ? history
+    : [{ id: 0, role: "agent" as const, text: GREETING_TEXT, source: "text" as const, ts: 0 }];
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const idRef = useRef(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -93,23 +95,15 @@ export const ChatWidget: React.FC = () => {
     setBusy(true);
     setInput("");
 
-    const userMsg: Msg = {
-      id: idRef.current++,
-      role: "user",
-      text: q,
-      voice: viaVoice,
-    };
-    setMessages((m) => [...m, userMsg]);
+    addMessage("user", q, viaVoice ? "voice" : "text");
 
     /* RAG over Ketan's data - instant, deterministic. */
     const chunks = retrieve(q, kb);
     const answer = composeAnswer(q, chunks);
-    const botId = idRef.current++;
-    const botMsg: Msg = { id: botId, role: "assistant", text: answer };
-    setMessages((m) => [...m, botMsg]);
+    const bot = addMessage("agent", answer, "text");
 
     if (voiceOn) {
-      playMessage(botId, answer);
+      playMessage(bot.id, answer);
     }
 
     setBusy(false);
@@ -136,14 +130,11 @@ export const ChatWidget: React.FC = () => {
         if (transcript) {
           await send(transcript, true);
         } else {
-          setMessages((m) => [
-            ...m,
-            {
-              id: idRef.current++,
-              role: "assistant",
-              text: "Didn't catch that - try typing instead, or check your mic.",
-            },
-          ]);
+          addMessage(
+            "agent",
+            "Didn't catch that - try typing instead, or check your mic.",
+            "text"
+          );
         }
       };
       recorderRef.current = rec;
@@ -212,30 +203,34 @@ export const ChatWidget: React.FC = () => {
           </header>
 
           <div className="chat-scroll" ref={scrollRef}>
-            {messages.map((m) => (
-              <div key={m.id} className={`chat-row ${m.role}`}>
-                {m.role === "user" && m.voice && (
-                  <span className="voice-tag" title="Sent via voice">
-                    <MicIcon size={11} />
-                  </span>
-                )}
-                <div className={`chat-msg ${m.role}`}>{m.text}</div>
-                {m.role === "assistant" && (
-                  <button
-                    type="button"
-                    className={`chat-replay${speakingId === m.id ? " is-speaking" : ""}`}
-                    onClick={() =>
-                      speakingId === m.id ? stopAudio() : playMessage(m.id, m.text)
-                    }
-                    aria-label={
-                      speakingId === m.id ? "Stop playback" : "Play message"
-                    }
-                  >
-                    {speakingId === m.id ? <WaveIcon size={12} /> : <PlayIcon size={11} />}
-                  </button>
-                )}
-              </div>
-            ))}
+            {messages.map((m) => {
+              const isUser = m.role === "user";
+              const rowClass = isUser ? "user" : "assistant";
+              return (
+                <div key={m.id} className={`chat-row ${rowClass}`}>
+                  {isUser && m.source === "voice" && (
+                    <span className="voice-tag" title="Sent via voice">
+                      <MicIcon size={11} />
+                    </span>
+                  )}
+                  <div className={`chat-msg ${rowClass}`}>{m.text}</div>
+                  {!isUser && (
+                    <button
+                      type="button"
+                      className={`chat-replay${speakingId === m.id ? " is-speaking" : ""}`}
+                      onClick={() =>
+                        speakingId === m.id ? stopAudio() : playMessage(m.id, m.text)
+                      }
+                      aria-label={
+                        speakingId === m.id ? "Stop playback" : "Play message"
+                      }
+                    >
+                      {speakingId === m.id ? <WaveIcon size={12} /> : <span className="play-glyph">▶</span>}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
             {busy && (
               <div className="chat-row assistant">
                 <div className="chat-msg assistant typing">

@@ -144,6 +144,24 @@ const Home: React.FC = () => {
               </div>
             ))}
           </div>
+
+          <a
+            href="#voice-feature"
+            className="hero-agent-hint"
+            onClick={(e) => {
+              e.preventDefault();
+              document
+                .getElementById("voice-feature")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            data-magnet="0.08"
+          >
+            <span className="hero-agent-led" />
+            <span>
+              Talk to my AI agent <em>below</em>
+            </span>
+            <span className="hero-agent-arrow">↓</span>
+          </a>
         </div>
 
       </section>
@@ -161,7 +179,7 @@ const Home: React.FC = () => {
         ]}
       />
 
-      <section className="feature-section voice-section">
+      <section className="feature-section voice-section" id="voice-feature">
         <SectionTag>Index · 02 / Voice</SectionTag>
 
         <div className="feature-head">
@@ -317,6 +335,40 @@ const styles = `
   .hero-strip .col ul li > span:last-child {
     color: var(--muted); font-family: var(--mono); font-size: 11px;
     flex-shrink: 0; white-space: nowrap;
+  }
+
+  /* "Talk to my AI agent below" hint sitting under the hero strip. */
+  .hero-agent-hint {
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-top: 28px; padding: 12px 18px;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: var(--bg);
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: .14em;
+    color: var(--ink-2); text-decoration: none;
+    width: fit-content; cursor: pointer;
+    transition: border-color .35s var(--ease), color .35s var(--ease),
+                background .35s var(--ease), transform .35s var(--ease);
+  }
+  .hero-agent-hint:hover {
+    border-color: var(--ink); color: var(--ink); transform: translateY(-2px);
+  }
+  .hero-agent-hint em {
+    font-family: var(--serif); font-style: italic; text-transform: none;
+    color: var(--accent); letter-spacing: 0; padding: 0 3px;
+  }
+  .hero-agent-led {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
+    animation: pulse 2s infinite ease-in-out;
+  }
+  .hero-agent-arrow {
+    font-family: var(--serif); font-size: 16px; letter-spacing: 0;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(3px); }
   }
 
   .feature-section { padding: 160px 56px 120px; max-width: var(--maxw); margin: 0 auto; }
