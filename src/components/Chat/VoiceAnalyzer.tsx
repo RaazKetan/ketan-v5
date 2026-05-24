@@ -55,6 +55,12 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   const recChunksRef = useRef<Blob[]>([]);
   const recAnalyserRef = useRef<AnalyserNode | null>(null);
 
+  /* Hands-free auto-loop toggle. When on, mic re-opens after every agent
+     reply. User can stop the loop with the End button. */
+  const [autoLoop, setAutoLoop] = useState(true);
+  const autoLoopRef = useRef(true);
+  useEffect(() => { autoLoopRef.current = autoLoop; }, [autoLoop]);
+
   const ensureCtx = async () => {
     if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
     if (audioCtxRef.current.state === "suspended") {
@@ -83,15 +89,54 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     };
   }, []);
 
-  /* Run an analyser loop until cancelled. */
-  const runAnalyserLoop = (analyser: AnalyserNode) => {
+  /* Run an analyser loop until cancelled.
+     vadStop, when provided, watches average volume and triggers when
+     the speaker has been active and then quiet for ~1.2s. */
+  const runAnalyserLoop = (
+    analyser: AnalyserNode,
+    vadStop?: () => void
+  ) => {
     const data = new Uint8Array(analyser.frequencyBinCount);
+
+    /* Voice activity detection state. */
+    let hasSpoken = false;
+    let lastVoiceAt = performance.now();
+    const SPEAK_THRESHOLD = 0.12;   // avg level above this counts as speech
+    const SILENCE_HANG_MS = 1300;   // ms of silence after speech before stop
+    const MIN_SPEAK_MS = 250;       // ignore brief blips
+    let speakStartedAt = 0;
+    let vadFired = false;
+
     const tick = () => {
       analyser.getByteFrequencyData(data);
       const step = Math.floor(data.length / BAR_COUNT) || 1;
       const next: number[] = [];
-      for (let i = 0; i < BAR_COUNT; i++) next.push(data[i * step] / 255);
+      let sum = 0;
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const v = data[i * step] / 255;
+        next.push(v);
+        sum += v;
+      }
+      const avg = sum / BAR_COUNT;
       setLevels(next);
+
+      if (vadStop && !vadFired) {
+        const now = performance.now();
+        if (avg > SPEAK_THRESHOLD) {
+          if (!hasSpoken) speakStartedAt = now;
+          hasSpoken = true;
+          lastVoiceAt = now;
+        }
+        if (
+          hasSpoken &&
+          now - speakStartedAt > MIN_SPEAK_MS &&
+          now - lastVoiceAt > SILENCE_HANG_MS
+        ) {
+          vadFired = true;
+          vadStop();
+        }
+      }
+
       rafRef.current = requestAnimationFrame(tick);
     };
     tick();
@@ -157,6 +202,10 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     setLine({ speaker: "agent", text: GREETING });
     await speak(GREETING);
     setStage("ready");
+    /* Hands-free: auto-open the mic right after the agent finishes. */
+    if (autoLoopRef.current) {
+      window.setTimeout(() => startRecording(), 350);
+    }
   };
 
   const stopAgent = () => {
@@ -198,7 +247,10 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
       analyser.connect(muted);
       muted.connect(ctx.destination);
       recAnalyserRef.current = analyser;
-      runAnalyserLoop(analyser);
+      runAnalyserLoop(analyser, () => {
+        /* VAD fired: user stopped talking. Auto-send. */
+        stopRecording();
+      });
 
       const mime = MediaRecorder.isTypeSupported("audio/webm")
         ? "audio/webm"
@@ -235,6 +287,10 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
         setStage("agent-reply");
         await speak(answer);
         setStage("ready");
+        /* Hands-free: re-open mic for the next turn. */
+        if (autoLoopRef.current) {
+          window.setTimeout(() => startRecording(), 350);
+        }
       };
       recorderRef.current = rec;
       rec.start();
@@ -275,8 +331,8 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
     switch (stage) {
       case "idle": return "Press play to start";
       case "agent-speak": return "Agent · speaking";
-      case "ready": return "Click the mic to speak";
-      case "recording": return "You · recording · click stop when done";
+      case "ready": return autoLoop ? "Listening…" : "Click the mic to speak";
+      case "recording": return autoLoop ? "Speak · I'll stop on silence" : "You · recording · click stop";
       case "processing": return "Thinking…";
       case "agent-reply": return "Agent · speaking";
     }
@@ -321,6 +377,20 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
       <div className="va-status">
         <span className={`va-status-dot va-status-${stage}`} />
         {status}
+        {stage !== "idle" && (
+          <button
+            type="button"
+            className="va-loop-toggle"
+            onClick={() => {
+              const next = !autoLoop;
+              setAutoLoop(next);
+              if (!next && stage === "recording") stopRecording();
+            }}
+            title={autoLoop ? "Switch to push-to-talk" : "Switch to hands-free"}
+          >
+            {autoLoop ? "Hands-free" : "Push-to-talk"}
+          </button>
+        )}
       </div>
 
       <div
@@ -395,6 +465,15 @@ const styles = `
     width: 6px; height: 6px; border-radius: 50%; background: var(--line);
     transition: background .3s;
   }
+  .va-loop-toggle {
+    margin-left: auto;
+    font: inherit; color: var(--ink-2);
+    background: var(--bg); border: 1px solid var(--line);
+    padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    font-size: 9px; letter-spacing: .14em;
+    transition: border-color .25s, color .25s, background .25s;
+  }
+  .va-loop-toggle:hover { border-color: var(--ink); color: var(--ink); }
   .va-status-idle .va-status-dot,
   .va-status-dot.va-status-idle { background: var(--line); }
   .va-status-ready { background: #2a9b6f; box-shadow: 0 0 6px #2a9b6f; }
