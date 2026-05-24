@@ -17,6 +17,7 @@ import {
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
+import { VoiceAnalyzer } from "../../Chat/VoiceAnalyzer";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -131,9 +132,9 @@ const Home: React.FC = () => {
           </div>
 
           <div className="hero-strip">
-            {(["currently", "recent", "stack"] as const).map((key) => (
+            {(["currently", "stack"] as const).map((key) => (
               <div className="col" key={key}>
-                <h5>{key === "currently" ? "Currently" : key === "recent" ? "Recent" : "Stack"}</h5>
+                <h5>{key === "currently" ? "Currently" : "Stack"}</h5>
                 <ul>
                   {heroStrip[key].map((item, i) => (
                     <li key={i}>
@@ -144,6 +145,9 @@ const Home: React.FC = () => {
                 </ul>
               </div>
             ))}
+            <div className="col">
+              <VoiceAnalyzer />
+            </div>
           </div>
         </div>
 
