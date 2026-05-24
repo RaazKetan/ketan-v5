@@ -24,13 +24,16 @@ export const DesignNav: React.FC<{ mark?: string; available?: boolean }> = ({
     mark ?? `KR  /  ${pageLabel}  /  2026`;
 
   useEffect(() => {
-    const tick = () => {
-      const d = new Date();
-      const hh = String(d.getUTCHours()).padStart(2, "0");
-      const mm = String(d.getUTCMinutes()).padStart(2, "0");
-      const ss = String(d.getUTCSeconds()).padStart(2, "0");
-      setClock(`${hh}:${mm}:${ss} UTC`);
-    };
+    /* Format Asia/Kolkata time (IST = UTC+5:30). Intl handles DST + locale
+       quirks correctly without needing a date library. */
+    const fmt = new Intl.DateTimeFormat("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Kolkata",
+    });
+    const tick = () => setClock(`${fmt.format(new Date())} IST`);
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
