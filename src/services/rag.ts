@@ -1,8 +1,9 @@
-/* Lightweight RAG over Ketan's portfolio data.
-   No vector store - uses keyword scoring against PersonalDataContext +
-   experience + projects. Good enough for a portfolio Q&A bot. */
+/* Lightweight RAG over the curated agent knowledge document.
+   No vector store — keyword scoring over AGENT_KNOWLEDGE (work-only data,
+   not the personal PersonalDataContext). Contact-intent queries are
+   handled separately to avoid leaking personal info. */
 
-import type { PersonalData } from "../context/PersonalDataContext";
+import { AGENT_KNOWLEDGE, isContactIntent, type AgentDoc } from "../data/agent-knowledge";
 
 export type RagChunk = {
   id: string;
@@ -11,51 +12,16 @@ export type RagChunk = {
   source: string;
 };
 
-export function buildKnowledgeBase(data: PersonalData): RagChunk[] {
-  const chunks: RagChunk[] = [];
-
-  const { heroTitle, bentoData, contactInfo, experience, projects } = data;
-
-  chunks.push({
-    id: "bio",
-    title: "Bio",
-    body: `${heroTitle.name} is a ${heroTitle.title} at ${heroTitle.company}, based in ${heroTitle.location}. ${heroTitle.aboutP1} ${heroTitle.aboutP2}`,
-    source: "Bio",
-  });
-
-  chunks.push({
-    id: "philosophy",
-    title: "Philosophy",
-    body: `${bentoData.statement} ${bentoData.statementBody} ${bentoData.philosophyTagline.replace(/<[^>]+>/g, "")} ${bentoData.philosophyBody}`,
-    source: "About",
-  });
-
-  chunks.push({
-    id: "contact",
-    title: "Contact",
-    body: `Reach Ketan at ${contactInfo.email}, on GitHub ${contactInfo.github}, Medium ${contactInfo.medium}, LinkedIn ${contactInfo.linkedin}, or book a 30-minute Topmate call at ${contactInfo.topmate}. Based in ${contactInfo.locationLong}, timezone ${contactInfo.timezone}.`,
-    source: "Contact",
-  });
-
-  experience.forEach((e) => {
-    chunks.push({
-      id: `exp-${e.slug}`,
-      title: `${e.role} at ${e.company}`,
-      body: `${e.role} at ${e.company} (${e.yearStart} - ${e.yearEnd}) in ${e.location}. ${e.summary} ${e.bullets.join(" ")} Stack: ${e.stack.join(", ")}.`,
-      source: `Experience · ${e.company}`,
-    });
-  });
-
-  projects.forEach((p) => {
-    chunks.push({
-      id: `proj-${p.slug}`,
-      title: p.name,
-      body: `${p.name} (${p.yearRange}) - ${p.short} ${p.long} Role: ${p.role} at ${p.org}. Tech: ${p.tech.join(", ")}.${p.live ? ` Live: ${p.live}.` : ""} Repo: ${p.repo}.`,
-      source: `Project · ${p.name}`,
-    });
-  });
-
-  return chunks;
+/* Build the agent's KB from the curated work-only document.
+   Signature kept compatible (data arg ignored) so existing callers don't
+   need to change. */
+export function buildKnowledgeBase(_data?: unknown): RagChunk[] {
+  return AGENT_KNOWLEDGE.map((d: AgentDoc) => ({
+    id: d.id,
+    title: d.topic,
+    body: d.body + (d.aliases?.length ? "\n\nKeywords: " + d.aliases.join(", ") : ""),
+    source: d.topic,
+  }));
 }
 
 /* Tokenize + score chunks by overlap with the query terms. */
@@ -71,13 +37,10 @@ const STOPWORDS = new Set([
   "the", "and", "for", "with", "what", "who", "how", "when", "where", "why",
   "did", "does", "your", "you", "are", "was", "were", "has", "have",
   "this", "that", "from", "about", "tell", "more", "give", "show", "any",
+  "can", "could", "would", "should", "his", "him", "her",
 ]);
 
-export function retrieve(
-  query: string,
-  kb: RagChunk[],
-  k = 4
-): RagChunk[] {
+export function retrieve(query: string, kb: RagChunk[], k = 3): RagChunk[] {
   const qTokens = tokenize(query).filter((t) => !STOPWORDS.has(t));
   if (!qTokens.length) return kb.slice(0, k);
 
@@ -100,18 +63,30 @@ export function retrieve(
     .map((s) => s.chunk);
 }
 
-/* Compose a short answer from the retrieved chunks. Keeps it deterministic
-   (no LLM needed) - quotes from the source chunks directly. */
-export function composeAnswer(_query: string, chunks: RagChunk[]): string {
-  if (!chunks.length) {
-    return "I don't have that detail on hand - try asking about Ketan's experience at Google or Clear, his projects (Origin, Imagine, Reublic), or how to get in touch.";
+/* Compose a short answer from the retrieved chunks. Includes a hard
+   redirect when the query is asking for contact info — the agent never
+   leaks email / phone / DMs, only points to /contact. */
+export function composeAnswer(query: string, chunks: RagChunk[]): string {
+  /* Contact-intent short-circuit. Always wins over generic retrieval. */
+  if (isContactIntent(query)) {
+    const contactChunk = chunks.find((c) => c.id === "contact-policy");
+    if (contactChunk) return contactChunk.body;
+    return (
+      "Head to the Contact page on this site — that's the right way to reach " +
+      "Ketan. I won't share personal contact details in this chat."
+    );
   }
-  const lead = chunks[0];
-  // Take the first 2 sentences of the top chunk
-  const sentences = lead.body.split(/(?<=[.!?])\s+/).slice(0, 3);
-  const main = sentences.join(" ");
 
-  if (chunks.length === 1) return main;
-  const others = chunks.slice(1, 3).map((c) => c.title).join(", ");
-  return `${main} (See also: ${others}.)`;
+  if (!chunks.length) {
+    return (
+      "I don't have that on hand. Try asking about Ketan's work at Google or " +
+      "Emergent, his projects (Origin, Reublic, Imagine), his stack, or his " +
+      "writing on Medium."
+    );
+  }
+
+  /* Take the first 2-3 sentences of the top chunk. */
+  const lead = chunks[0];
+  const sentences = lead.body.split(/(?<=[.!?])\s+/).slice(0, 3);
+  return sentences.join(" ");
 }

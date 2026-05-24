@@ -26,7 +26,7 @@ type Speaker = "agent" | "user";
 type Line = { speaker: Speaker; text: string };
 
 const GREETING =
-  "Hi, I'm Ketan. I build AI agents at Emergent, previously at Google. Press the mic icon and ask me anything about the work.";
+  "Hi, I'm Ketan's assistant. I know his work - Emergent, ex-Google, the projects, the stack, the writing. Press the mic icon and ask me anything about that. For anything personal, head to the Contact page.";
 
 export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   variant = "compact",
@@ -550,6 +550,7 @@ const styles = `
   .va-wrap.va-feature .va-bar { max-width: 4px; }
   .va-wrap.va-feature .va-status {
     font-size: 11px;
+    flex-wrap: wrap;
   }
   .va-wrap.va-feature .va-transcript {
     font-size: clamp(20px, 2.2vw, 30px);
@@ -561,5 +562,32 @@ const styles = `
   .va-wrap.va-feature .va-speaker {
     display: block; margin: 0 0 12px 0;
     font-size: 11px;
+  }
+
+  /* Mobile — feature variant has to shrink to fit narrow viewports. */
+  @media (max-width: 700px) {
+    .va-wrap.va-feature { gap: 20px; }
+    .va-wrap.va-feature .va-row {
+      gap: 14px; min-height: 56px; padding: 0 4px;
+    }
+    .va-wrap.va-feature .va-play {
+      width: 44px; height: 44px;
+    }
+    .va-wrap.va-feature .va-bars {
+      height: 56px; gap: 2px;
+    }
+    .va-wrap.va-feature .va-bar { max-width: 3px; min-width: 1px; }
+    .va-wrap.va-feature .va-status {
+      font-size: 10px; gap: 6px;
+    }
+    .va-wrap.va-feature .va-transcript {
+      font-size: 17px; line-height: 1.4;
+      padding: 0 4px;
+    }
+    .va-wrap.va-feature .va-speaker { font-size: 10px; margin-bottom: 8px; }
+    .va-loop-toggle {
+      font-size: 8px; padding: 3px 8px;
+      margin-left: 0;
+    }
   }
 `;

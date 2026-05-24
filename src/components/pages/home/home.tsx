@@ -79,6 +79,28 @@ const Home: React.FC = () => {
           </span>
         </div>
 
+        <a
+          href="#voice-feature"
+          className="hero-agent-cta"
+          onClick={(e) => {
+            e.preventDefault();
+            document
+              .getElementById("voice-feature")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          data-magnet="0.1"
+        >
+          <span className="agent-cta-beam" aria-hidden />
+          <span className="agent-cta-inner">
+            <span className="agent-cta-dot" />
+            <span className="agent-cta-text">
+              <span className="agent-cta-pulse">NEW</span>
+              <span>Talk to my AI agent</span>
+            </span>
+            <span className="agent-cta-arrow">↓</span>
+          </span>
+        </a>
+
         <h1 className="hero-name" aria-label={heroTitle.name}>
           <div className="row">
             <Word>{first}</Word>
@@ -145,23 +167,6 @@ const Home: React.FC = () => {
             ))}
           </div>
 
-          <a
-            href="#voice-feature"
-            className="hero-agent-hint"
-            onClick={(e) => {
-              e.preventDefault();
-              document
-                .getElementById("voice-feature")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-            data-magnet="0.08"
-          >
-            <span className="hero-agent-led" />
-            <span>
-              Talk to my AI agent <em>below</em>
-            </span>
-            <span className="hero-agent-arrow">↓</span>
-          </a>
         </div>
 
       </section>
@@ -180,15 +185,15 @@ const Home: React.FC = () => {
       />
 
       <section className="feature-section voice-section" id="voice-feature">
-        <SectionTag>Index · 02 / Voice</SectionTag>
+        <SectionTag>Index · 02 / Agent</SectionTag>
 
         <div className="feature-head">
           <h2 data-split>
-            <Word>Hear</Word> <Word em>from</Word> <Word>me.</Word>
+            <Word>Meet</Word> <Word em>Ketan's</Word> <Word>assistant.</Word>
           </h2>
           <div className="feature-head-aside">
-            Press play - Sarvam streams the voice, the bars run on a real
-            AnalyserNode, transcript fades with the audio.
+            An AI agent trained on Ketan's work - roles, projects, stack, writing.
+            Voice or text. Anything personal, it sends you to /contact.
           </div>
         </div>
 
@@ -337,38 +342,69 @@ const styles = `
     flex-shrink: 0; white-space: nowrap;
   }
 
-  /* "Talk to my AI agent below" hint sitting under the hero strip. */
-  .hero-agent-hint {
+  /* "Talk to my AI agent" attention CTA sitting just below the eyebrow.
+     Magic UI-style: spinning conic-gradient border beam + breathing
+     accent pill + pulsing NEW badge + bobbing down arrow. */
+  .hero-agent-cta {
+    display: inline-block; position: relative; isolation: isolate;
+    margin-top: 18px; padding: 1.5px; border-radius: 999px;
+    text-decoration: none; cursor: pointer;
+    --beam: conic-gradient(
+      from var(--angle, 0deg),
+      transparent 0%,
+      var(--accent) 10%,
+      transparent 22%,
+      transparent 50%,
+      var(--accent) 60%,
+      transparent 72%
+    );
+    background: var(--beam);
+    animation: beam-spin 3.6s linear infinite;
+    transition: transform .35s var(--ease), filter .35s var(--ease);
+  }
+  .hero-agent-cta:hover {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 6px 18px color-mix(in oklab, var(--accent) 35%, transparent));
+  }
+  .agent-cta-beam {
+    position: absolute; inset: 0; border-radius: inherit;
+    background: var(--beam);
+    filter: blur(8px); opacity: .55; z-index: -1;
+    animation: beam-spin 3.6s linear infinite;
+  }
+  .agent-cta-inner {
     display: inline-flex; align-items: center; gap: 12px;
-    margin-top: 28px; padding: 12px 18px;
-    border: 1px solid var(--line); border-radius: 999px;
+    padding: 11px 18px 11px 14px; border-radius: 999px;
     background: var(--bg);
-    font-family: var(--mono); font-size: 11px;
-    text-transform: uppercase; letter-spacing: .14em;
-    color: var(--ink-2); text-decoration: none;
-    width: fit-content; cursor: pointer;
-    transition: border-color .35s var(--ease), color .35s var(--ease),
-                background .35s var(--ease), transform .35s var(--ease);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink);
   }
-  .hero-agent-hint:hover {
-    border-color: var(--ink); color: var(--ink); transform: translateY(-2px);
+  .agent-cta-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent);
+    animation: pulse 1.8s infinite ease-in-out;
   }
-  .hero-agent-hint em {
-    font-family: var(--serif); font-style: italic; text-transform: none;
-    color: var(--accent); letter-spacing: 0; padding: 0 3px;
+  .agent-cta-text {
+    display: inline-flex; align-items: center; gap: 10px;
   }
-  .hero-agent-led {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
-    animation: pulse 2s infinite ease-in-out;
+  .agent-cta-pulse {
+    padding: 3px 7px; border-radius: 4px;
+    background: var(--ink); color: var(--bg);
+    font-size: 9px; letter-spacing: .18em;
+    animation: cta-flash 2.4s ease-in-out infinite;
   }
-  .hero-agent-arrow {
+  @keyframes cta-flash {
+    0%, 100% { background: var(--ink); }
+    50%      { background: var(--accent); }
+  }
+  .agent-cta-arrow {
     font-family: var(--serif); font-size: 16px; letter-spacing: 0;
-    animation: bob 1.8s ease-in-out infinite;
+    color: var(--accent);
+    animation: bob 1.6s ease-in-out infinite;
   }
   @keyframes bob {
     0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(3px); }
+    50%      { transform: translateY(4px); }
   }
 
   .feature-section { padding: 160px 56px 120px; max-width: var(--maxw); margin: 0 auto; }
@@ -452,6 +488,17 @@ const styles = `
   }
   @media (max-width: 600px) {
     .hero-section { padding: 140px 18px 40px; }
+    .hero-agent-cta { margin-top: 14px; }
+    .agent-cta-inner {
+      padding: 9px 14px 9px 12px; gap: 10px;
+      font-size: 9px; letter-spacing: .12em;
+    }
+    .agent-cta-dot { width: 6px; height: 6px; }
+    .agent-cta-text { gap: 8px; }
+    .agent-cta-pulse { font-size: 8px; padding: 2px 6px; letter-spacing: .14em; }
+    .agent-cta-arrow { font-size: 14px; }
+    .voice-section .feature-head h2 { font-size: clamp(36px, 11vw, 64px); }
+    .voice-section .feature-head-aside { font-size: 12px; }
     .hero-name { font-size: clamp(54px, 14vw, 96px); letter-spacing: -0.03em; }
     .hero-name .row { gap: 12px; }
     .hero-eyebrow { font-size: 9px; gap: 8px; flex-wrap: wrap; }
