@@ -1,11 +1,15 @@
-/* Sarvam AI API client — streaming TTS (bulbul:v3 voice "varun") + STT (saarika).
-   API key is read from VITE_SARVAM_API_KEY (set it in .env.local). */
+/* Client for the Sarvam proxy at /api/sarvam/*.
+   The API key NEVER leaves the server — see api/sarvam/tts.ts and stt.ts.
+   This module only talks to our own origin, so abuse is gated by the
+   serverless functions' rate limit, origin check, and payload caps. */
 
-const SARVAM_KEY = import.meta.env.VITE_SARVAM_API_KEY as string | undefined;
-const TTS_STREAM_URL = "https://api.sarvam.ai/text-to-speech/stream";
-const STT_URL = "https://api.sarvam.ai/speech-to-text";
+const TTS_URL = "/api/sarvam/tts";
+const STT_URL = "/api/sarvam/stt";
 
-export const sarvamConfigured = () => Boolean(SARVAM_KEY);
+/* Voice features are always "configured" client-side now — the server
+   decides whether it can actually proxy (checks SARVAM_API_KEY). The
+   client just attempts and degrades gracefully on 503. */
+export const sarvamConfigured = () => true;
 
 /* Streams the TTS response and starts playback as bytes arrive — much
    lower perceived latency than waiting for the full mp3.
@@ -18,33 +22,23 @@ export const sarvamConfigured = () => Boolean(SARVAM_KEY);
    Returns the Audio element so the caller can pause/cancel it. */
 export async function sarvamSpeak(
   text: string,
-  opts: { speaker?: string; pace?: number } = {}
+  opts: { speaker?: string } = {}
 ): Promise<HTMLAudioElement | null> {
-  if (!SARVAM_KEY) {
-    console.warn("Sarvam: VITE_SARVAM_API_KEY not set");
-    return null;
-  }
-  if (!text.trim()) return null;
+  const trimmed = text.trim();
+  if (!trimmed) return null;
 
-  const res = await fetch(TTS_STREAM_URL, {
+  const res = await fetch(TTS_URL, {
     method: "POST",
-    headers: {
-      "api-subscription-key": SARVAM_KEY,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      text: text.slice(0, 500),
-      target_language_code: "en-IN",
-      speaker: opts.speaker ?? "shubh",
-      model: "bulbul:v3",
-      pace: opts.pace ?? 0.97,
-      speech_sample_rate: 48000,
-      output_audio_codec: "mp3",
-      enable_preprocessing: true,
+      text: trimmed.slice(0, 500),
+      speaker: opts.speaker,
     }),
   });
   if (!res.ok || !res.body) {
-    console.error("Sarvam TTS failed", res.status, await res.text());
+    if (res.status !== 503) {
+      console.warn("Sarvam TTS proxy failed", res.status);
+    }
     return null;
   }
 
@@ -105,30 +99,23 @@ export async function sarvamSpeak(
   return audio;
 }
 
-type STTResponse = { transcript: string; language_code?: string };
-
-/* Speech-to-text. Accepts a Blob (e.g. from MediaRecorder) and returns
-   the transcribed string. Uses the saarika:v2 model with en-IN. */
+/* Speech-to-text via the proxy. Returns the transcript string or empty
+   on any failure. Server enforces a 5MB cap and audio MIME allow-list. */
 export async function sarvamTranscribe(audioBlob: Blob): Promise<string> {
-  if (!SARVAM_KEY) {
-    console.warn("Sarvam: VITE_SARVAM_API_KEY not set");
+  if (audioBlob.size > 5 * 1024 * 1024) {
+    console.warn("Sarvam STT: audio over 5MB, skipping");
     return "";
   }
   const form = new FormData();
   form.append("file", audioBlob, "audio.webm");
-  form.append("model", "saarika:v2");
-  form.append("language_code", "en-IN");
-  form.append("with_timestamps", "false");
 
-  const res = await fetch(STT_URL, {
-    method: "POST",
-    headers: { "api-subscription-key": SARVAM_KEY },
-    body: form,
-  });
+  const res = await fetch(STT_URL, { method: "POST", body: form });
   if (!res.ok) {
-    console.error("Sarvam STT failed", res.status, await res.text());
+    if (res.status !== 503) {
+      console.warn("Sarvam STT proxy failed", res.status);
+    }
     return "";
   }
-  const data = (await res.json()) as STTResponse;
-  return data.transcript ?? "";
+  const data = (await res.json()) as { transcript?: string };
+  return data.transcript || "";
 }

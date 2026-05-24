@@ -41,26 +41,35 @@ export const Projects: React.FC = () => {
       .from(".p-meta > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.12 }, 1.2);
   });
 
-  // Horizontal pinned scroll (desktop only).
+  // Horizontal scroll via sticky-inner-viewport (no ScrollTrigger pin).
+  // ScrollTrigger.pin wrapped the section in a pinSpacer div React didn't know
+  // about, causing "Failed to execute 'removeChild'" crashes on route change.
+  // Sticky positioning gives the same UX with no extra DOM wrappers.
   useEffect(() => {
     const section = hscrollRef.current;
     const track = trackRef.current;
     if (!section || !track) return;
     if (window.matchMedia("(max-width: 900px)").matches) return;
 
+    /* Size the section so total vertical scroll equals the track's horizontal
+       overflow, plus one viewport for the initial pinned-feel. */
+    const sizeSection = () => {
+      const dist = Math.max(0, track.scrollWidth - window.innerWidth);
+      section.style.height = `${dist + window.innerHeight}px`;
+    };
+    sizeSection();
+    window.addEventListener("resize", sizeSection);
+
     const ctx = gsap.context(() => {
-      const getDist = () => Math.max(0, track.scrollWidth - section.clientWidth);
       gsap.to(track, {
-        x: () => -getDist(),
+        x: () => -(track.scrollWidth - window.innerWidth),
         ease: "none",
         scrollTrigger: {
           trigger: section,
-          pin: true,
           start: "top top",
-          end: () => `+=${getDist()}`,
+          end: "bottom bottom",
           scrub: 0.6,
           invalidateOnRefresh: true,
-          anticipatePin: 1,
           onUpdate: (self) => {
             const n = PROJECTS.length;
             const i = Math.min(n - 1, Math.floor(self.progress * n));
@@ -69,7 +78,11 @@ export const Projects: React.FC = () => {
         },
       });
     }, section);
-    return () => ctx.revert();
+    return () => {
+      window.removeEventListener("resize", sizeSection);
+      section.style.height = "";
+      ctx.revert();
+    };
   }, []);
 
   // Scroll-triggered split-reveal for below-the-fold data-split elements.
@@ -122,8 +135,10 @@ export const Projects: React.FC = () => {
         </div>
       </section>
 
-      {/* HORIZONTAL SHOWCASE */}
+      {/* HORIZONTAL SHOWCASE — sticky inner viewport, no ScrollTrigger pin
+          (avoids the pinSpacer wrapper that confused React's commitDeletion). */}
       <section className="hscroll-section" ref={hscrollRef}>
+        <div className="hscroll-sticky">
         <div className="hscroll-track" ref={trackRef}>
           <div className="hs-title">
             <div className="hs-tag">Section · 01</div>
@@ -179,6 +194,7 @@ export const Projects: React.FC = () => {
               <span>→</span>
             </Btn>
           </div>
+        </div>
         </div>
 
         <div className="hs-indicator">
@@ -324,10 +340,15 @@ const styles = `
     text-transform: none; letter-spacing: 0; max-width: 42ch;
   }
 
-  /* Horizontal scroll */
+  /* Horizontal scroll — sticky inner viewport (no ScrollTrigger pin) */
   .hscroll-section {
-    height: 100vh; width: 100vw; overflow: hidden;
+    width: 100%;
     position: relative; background: var(--bg);
+  }
+  .hscroll-sticky {
+    position: sticky; top: 0;
+    height: 100vh; width: 100%;
+    overflow: hidden;
   }
   .hscroll-track {
     display: flex; height: 100%; align-items: center;
@@ -408,7 +429,7 @@ const styles = `
   .hs-end h3 em { font-style: italic; color: var(--accent); }
 
   .hs-indicator {
-    position: absolute; right: 56px; bottom: 56px; z-index: 5;
+    position: fixed; right: 56px; bottom: 56px; z-index: 5;
     display: flex; gap: 6px; align-items: center;
     font-family: var(--mono); font-size: 11px; color: var(--muted);
     text-transform: uppercase; letter-spacing: .14em;
@@ -527,7 +548,8 @@ const styles = `
     .stack-item .vis { aspect-ratio: 16/10; border-right: none; border-bottom: 1px solid var(--line); }
     .stack-item .txt { padding: 28px; gap: 24px; }
     .stack-item .txt h3 { font-size: clamp(28px, 6vw, 44px); }
-    .hscroll-section { height: auto; }
+    .hscroll-section { height: auto !important; }
+    .hscroll-sticky { position: static; height: auto; }
     .hscroll-track { flex-direction: column; padding: 0 24px; gap: 24px; }
     .hs-title, .hs-end, .panel { width: 100%; height: auto; }
     .hs-title h2 { font-size: clamp(48px, 12vw, 96px); }
