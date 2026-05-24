@@ -1,17 +1,21 @@
-/* Sarvam AI API client — TTS (bulbul:v3 voice "varun") + STT (saarika).
+/* Sarvam AI API client — streaming TTS (bulbul:v3 voice "varun") + STT (saarika).
    API key is read from VITE_SARVAM_API_KEY (set it in .env.local). */
 
 const SARVAM_KEY = import.meta.env.VITE_SARVAM_API_KEY as string | undefined;
-const TTS_URL = "https://api.sarvam.ai/text-to-speech";
+const TTS_STREAM_URL = "https://api.sarvam.ai/text-to-speech/stream";
 const STT_URL = "https://api.sarvam.ai/speech-to-text";
 
 export const sarvamConfigured = () => Boolean(SARVAM_KEY);
 
-type TTSResponse = { audios: string[] };
+/* Streams the TTS response and starts playback as bytes arrive — much
+   lower perceived latency than waiting for the full mp3.
 
-/* Returns a playable Audio element. Sarvam returns base64-encoded
-   audio chunks in the `audios` array — we decode and stitch them
-   into a single Blob for playback. */
+   Strategy:
+   - If MediaSource supports `audio/mpeg`, attach a SourceBuffer and
+     append each fetched chunk; playback begins after the first few KB.
+   - Fallback: collect all chunks, build a Blob, then play.
+
+   Returns the Audio element so the caller can pause/cancel it. */
 export async function sarvamSpeak(
   text: string,
   opts: { speaker?: string; pace?: number } = {}
@@ -22,47 +26,82 @@ export async function sarvamSpeak(
   }
   if (!text.trim()) return null;
 
-  const res = await fetch(TTS_URL, {
+  const res = await fetch(TTS_STREAM_URL, {
     method: "POST",
     headers: {
       "api-subscription-key": SARVAM_KEY,
-      "content-type": "application/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       text: text.slice(0, 500),
       target_language_code: "en-IN",
       speaker: opts.speaker ?? "varun",
+      model: "bulbul:v3",
       pace: opts.pace ?? 0.97,
       speech_sample_rate: 48000,
+      output_audio_codec: "mp3",
       enable_preprocessing: true,
-      model: "bulbul:v3",
     }),
   });
-  if (!res.ok) {
+  if (!res.ok || !res.body) {
     console.error("Sarvam TTS failed", res.status, await res.text());
     return null;
   }
-  const data = (await res.json()) as TTSResponse;
-  if (!data.audios?.length) return null;
 
-  // Decode base64 -> Uint8Array -> Blob -> object URL.
-  const audioBytes = data.audios
-    .map((b64) => {
-      const bin = atob(b64);
-      const arr = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-      return arr;
-    })
-    .reduce((acc, chunk) => {
-      const merged = new Uint8Array(acc.length + chunk.length);
-      merged.set(acc);
-      merged.set(chunk, acc.length);
-      return merged;
-    }, new Uint8Array());
-  const blob = new Blob([new Uint8Array(audioBytes)], { type: "audio/wav" });
+  const reader = res.body.getReader();
+
+  if (
+    typeof MediaSource !== "undefined" &&
+    MediaSource.isTypeSupported("audio/mpeg")
+  ) {
+    const mediaSource = new MediaSource();
+    const url = URL.createObjectURL(mediaSource);
+    const audio = new Audio(url);
+    audio.addEventListener("ended", () => URL.revokeObjectURL(url), { once: true });
+
+    mediaSource.addEventListener("sourceopen", async () => {
+      const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
+      const awaitUpdate = () =>
+        new Promise<void>((resolve) => {
+          if (!sourceBuffer.updating) return resolve();
+          sourceBuffer.addEventListener("updateend", () => resolve(), { once: true });
+        });
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            await awaitUpdate();
+            if (mediaSource.readyState === "open") mediaSource.endOfStream();
+            break;
+          }
+          await awaitUpdate();
+          sourceBuffer.appendBuffer(value);
+        }
+      } catch (e) {
+        console.warn("Sarvam stream error", e);
+        try {
+          mediaSource.endOfStream("decode");
+        } catch {
+          /* noop */
+        }
+      }
+    });
+
+    return audio;
+  }
+
+  /* Fallback: buffer the whole stream then play. */
+  const chunks: Uint8Array[] = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (value) chunks.push(value);
+  }
+  const blob = new Blob(chunks as BlobPart[], { type: "audio/mpeg" });
   const url = URL.createObjectURL(blob);
   const audio = new Audio(url);
-  audio.addEventListener("ended", () => URL.revokeObjectURL(url));
+  audio.addEventListener("ended", () => URL.revokeObjectURL(url), { once: true });
   return audio;
 }
 
