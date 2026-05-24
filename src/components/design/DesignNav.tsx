@@ -84,7 +84,7 @@ export const DesignNav: React.FC<{ mark?: string; available?: boolean }> = ({
         <span className="time">{clock}</span>
         {available && (
           <span className="avail">
-            <span className="led" /> Open to new work
+            <span className="led led-current" /> SWE Emergent (YC24)
           </span>
         )}
       </div>

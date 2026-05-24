@@ -106,15 +106,15 @@ const Home: React.FC = () => {
               <span className="v">{heroTitle.location || "India"}</span>
             </div>
             <div>
-              <span className="k">Focus</span>
-              <span className="v">{heroStrip.focus}</span>
-            </div>
-            <div>
-              <span className="k">Available</span>
+              <span className="k">Currently</span>
               <span className="v">
                 <span className="led-inline" />
-                {heroStrip.available}
+                SWE @ Emergent (YC24)
               </span>
+            </div>
+            <div>
+              <span className="k">Focus</span>
+              <span className="v">{heroStrip.focus}</span>
             </div>
           </div>
 
@@ -139,14 +139,14 @@ const Home: React.FC = () => {
 
       <Marquee
         items={[
-          "Agent systems",
-          "Distributed backends",
-          "Type-driven design",
-          "Performance",
-          "Local-first",
-          "Automation",
-          "Quiet interfaces",
-          "Slow productivity",
+          "AI agents",
+          "Agentic loops",
+          "LLM orchestration",
+          "RAG · Vector search",
+          "Vertex AI · Google ADK",
+          "Production backends",
+          "Human-in-the-loop",
+          "Tooling that ships",
         ]}
       />
 

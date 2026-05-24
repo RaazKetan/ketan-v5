@@ -122,7 +122,7 @@ export type FooterInfo = {
 export type BentoBook = { title: string; author: string; year: string };
 export type BentoSoundtrack = { title: string; meta: string };
 export type BentoGear = { name: string; ds: string };
-export type BentoStack = { name: string; pct: string };
+export type BentoStack = { name: string; pct?: string };
 
 export type BentoData = {
   statement: string;
@@ -186,23 +186,23 @@ const defaultData: PersonalData = {
   heroStrip: {
     taglineNum: "01",
     taglineBody:
-      "Building <em>quiet systems</em> &amp; intelligent agents for teams who care about the second order of effects.",
-    focus: "Systems · Agents · Backend",
-    available: "Q2 2026",
+      "Building <em>AI agents</em> &amp; intelligent backends — agentic loops that ship to real users and survive production.",
+    focus: "AI agents · LLM systems · Backends",
+    available: "",
     currently: [
-      { label: "SWE @ Emergent", meta: "'26—" },
-      { label: "Agent systems · backends", meta: "now" },
-      { label: "Origin — agentic hiring", meta: "building" },
+      { label: "SWE @ Emergent (YC24)", meta: "'26—" },
+      { label: "Agentic AI · production loops", meta: "now" },
+      { label: "Origin — agentic hiring platform", meta: "building" },
     ],
     recent: [
-      { label: "ex-Google · SWE", meta: "'25" },
-      { label: "ADK workshops · 200+ eng.", meta: "'25" },
-      { label: "Imagine — AI image SaaS", meta: "'24" },
+      { label: "ex-Google · 18+ AI agents shipped", meta: "'25" },
+      { label: "Google ADK workshops · 200+ eng.", meta: "'25" },
+      { label: "Vertex AI · RAG · LLM orchestration", meta: "'25" },
     ],
     stack: [
-      { label: "Python · Go · TypeScript", meta: "—" },
-      { label: "FastAPI · Angular · React", meta: "—" },
-      { label: "K8s · Vertex AI · Terraform", meta: "—" },
+      { label: "Python · TypeScript · Go", meta: "—" },
+      { label: "Google ADK · Vertex AI · LangChain", meta: "—" },
+      { label: "FastAPI · Postgres · Kubernetes", meta: "—" },
     ],
   },
   contactInfo: {
@@ -218,14 +218,14 @@ const defaultData: PersonalData = {
     availability: "Available · Q3 2026",
   },
   footerInfo: {
-    status: "Available · Q3 2026",
-    craft: "Designed & engineered, in Bengaluru · v6.0",
+    status: "SWE @ Emergent (YC24)",
+    craft: "Designed & engineered in Bengaluru · v6.0",
     copyright: "© 2026 Ketan Raj",
   },
   bentoData: {
-    statement: "I build software that <em>disappears</em>",
+    statement: "I build <em>AI agents</em> that ship.",
     statementBody:
-      "I grew up helping run a small family business — learned early that constraints create creativity. Today I apply the same thinking to software: limited time, limited compute, limited attention. Build clean systems within constraints.",
+      "Agentic loops with planning, tool use, structured memory, and human-in-the-loop safeguards — the boring infrastructure that lets agents actually run in production. Shipped 18+ at Google, now building Emergent's product surface and Origin (agentic hiring).",
     philosophyTagline:
       "Software is mostly <em>typography</em> and time.<br/>Latency is a feature. The best abstraction is the one you delete.",
     philosophyBody:
@@ -259,12 +259,12 @@ const defaultData: PersonalData = {
       { title: "Slow Productivity", author: "Newport", year: "'24" },
     ],
     stack: [
-      { name: "TypeScript", pct: "89%" },
-      { name: "Python", pct: "62%" },
-      { name: "Go", pct: "34%" },
-      { name: "Postgres", pct: "71%" },
-      { name: "Java / Spring", pct: "44%" },
-      { name: "LLM tooling", pct: "31%" },
+      { name: "Python" },
+      { name: "TypeScript" },
+      { name: "Go" },
+      { name: "Google ADK · Vertex AI" },
+      { name: "FastAPI · LangChain" },
+      { name: "Postgres · Kubernetes" },
     ],
     soundtrack: [
       { title: "Sostre — Quietude", meta: "Ambient · 2024" },

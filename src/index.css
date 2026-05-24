@@ -97,6 +97,14 @@ body.loading { cursor: none !important; overflow: hidden; }
 .ds-nav .meta .avail .led {
   width: 6px; height: 6px; border-radius: 50%; background: #2a9b6f; box-shadow: 0 0 8px #2a9b6f;
 }
+.ds-nav .meta .avail .led-current {
+  background: #e0432c; box-shadow: 0 0 8px #e0432c;
+  animation: pulse-led 1.8s infinite ease-in-out;
+}
+@keyframes pulse-led {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
 
 /* ============ Section base ============ */
 .ds-section {

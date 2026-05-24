@@ -331,7 +331,7 @@ export const About: React.FC = () => {
               {STACK.map((s) => (
                 <li key={s.name}>
                   <span>{s.name}</span>
-                  <span>{s.pct}</span>
+                  {s.pct && <span>{s.pct}</span>}
                 </li>
               ))}
             </ul>
