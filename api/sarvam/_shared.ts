@@ -83,6 +83,32 @@ export function json(body: unknown, status = 200, extra: HeadersInit = {}): Resp
   });
 }
 
+let warnedNoKey = false;
+let warnedLegacyPrefix = false;
 export function getSarvamKey(): string | null {
-  return process.env.SARVAM_API_KEY || null;
+  /* SARVAM_API_KEY is the canonical name (server-only).
+     VITE_SARVAM_API_KEY is supported as a fallback BUT is a leak risk:
+     anything with the VITE_ prefix is inlined into client bundles by Vite,
+     so the key would be visible to anyone who opens devtools. Warn loudly. */
+  const canonical = process.env.SARVAM_API_KEY;
+  const legacy = process.env.VITE_SARVAM_API_KEY;
+
+  if (legacy && !canonical && !warnedLegacyPrefix) {
+    warnedLegacyPrefix = true;
+    console.warn(
+      "[sarvam proxy] SECURITY: Found VITE_SARVAM_API_KEY in env. " +
+        "The VITE_ prefix exposes secrets to the client bundle. " +
+        "Rename it to SARVAM_API_KEY (no prefix) in .env / .env.local."
+    );
+  }
+
+  const key = canonical || legacy || null;
+  if (!key && !warnedNoKey) {
+    warnedNoKey = true;
+    console.warn(
+      "[sarvam proxy] SARVAM_API_KEY not set. " +
+        "Add SARVAM_API_KEY=... to .env.local (or Vercel project env)."
+    );
+  }
+  return key;
 }
