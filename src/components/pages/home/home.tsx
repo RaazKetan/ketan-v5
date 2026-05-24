@@ -90,15 +90,10 @@ const Home: React.FC = () => {
           }}
           data-magnet="0.1"
         >
-          <span className="agent-cta-beam" aria-hidden />
-          <span className="agent-cta-inner">
-            <span className="agent-cta-dot" />
-            <span className="agent-cta-text">
-              <span className="agent-cta-pulse">NEW</span>
-              <span>Talk to my AI agent</span>
-            </span>
-            <span className="agent-cta-arrow">↓</span>
-          </span>
+          <span className="agent-cta-dot" />
+          <span className="agent-cta-pulse">NEW</span>
+          <span>Talk to my AI agent</span>
+          <span className="agent-cta-arrow">↓</span>
         </a>
 
         <h1 className="hero-name" aria-label={heroTitle.name}>
@@ -342,50 +337,33 @@ const styles = `
     flex-shrink: 0; white-space: nowrap;
   }
 
-  /* "Talk to my AI agent" attention CTA sitting just below the eyebrow.
-     Magic UI-style: spinning conic-gradient border beam + breathing
-     accent pill + pulsing NEW badge + bobbing down arrow. */
+  /* "Talk to my AI agent" attention CTA — clean outlined pill with a
+     pulsing accent dot + flashing NEW badge + bobbing arrow.
+     Dropped the conic-gradient border beam (it bled through as a weird
+     bowtie/funnel shape on the page background). */
   .hero-agent-cta {
-    display: inline-block; position: relative; isolation: isolate;
-    margin-top: 18px; padding: 1.5px; border-radius: 999px;
-    text-decoration: none; cursor: pointer;
-    --beam: conic-gradient(
-      from var(--angle, 0deg),
-      transparent 0%,
-      var(--accent) 10%,
-      transparent 22%,
-      transparent 50%,
-      var(--accent) 60%,
-      transparent 72%
-    );
-    background: var(--beam);
-    animation: beam-spin 3.6s linear infinite;
-    transition: transform .35s var(--ease), filter .35s var(--ease);
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-top: 18px; padding: 10px 18px 10px 14px;
+    border: 1px solid var(--ink); border-radius: 999px;
+    background: var(--bg); color: var(--ink); text-decoration: none;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; cursor: pointer;
+    transition: transform .35s var(--ease),
+                box-shadow .35s var(--ease),
+                background .35s var(--ease);
+    box-shadow: 0 4px 0 0 color-mix(in oklab, var(--accent) 16%, transparent);
   }
   .hero-agent-cta:hover {
     transform: translateY(-2px);
-    filter: drop-shadow(0 6px 18px color-mix(in oklab, var(--accent) 35%, transparent));
-  }
-  .agent-cta-beam {
-    position: absolute; inset: 0; border-radius: inherit;
-    background: var(--beam);
-    filter: blur(8px); opacity: .55; z-index: -1;
-    animation: beam-spin 3.6s linear infinite;
-  }
-  .agent-cta-inner {
-    display: inline-flex; align-items: center; gap: 12px;
-    padding: 11px 18px 11px 14px; border-radius: 999px;
-    background: var(--bg);
-    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--ink);
+    background: color-mix(in oklab, var(--accent) 6%, var(--bg));
+    box-shadow: 0 6px 0 0 color-mix(in oklab, var(--accent) 28%, transparent),
+                0 12px 28px color-mix(in oklab, var(--accent) 18%, transparent);
   }
   .agent-cta-dot {
     width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent);
     animation: pulse 1.8s infinite ease-in-out;
-  }
-  .agent-cta-text {
-    display: inline-flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
   }
   .agent-cta-pulse {
     padding: 3px 7px; border-radius: 4px;
@@ -488,13 +466,11 @@ const styles = `
   }
   @media (max-width: 600px) {
     .hero-section { padding: 140px 18px 40px; }
-    .hero-agent-cta { margin-top: 14px; }
-    .agent-cta-inner {
-      padding: 9px 14px 9px 12px; gap: 10px;
+    .hero-agent-cta {
+      margin-top: 14px; padding: 8px 14px 8px 12px; gap: 10px;
       font-size: 9px; letter-spacing: .12em;
     }
     .agent-cta-dot { width: 6px; height: 6px; }
-    .agent-cta-text { gap: 8px; }
     .agent-cta-pulse { font-size: 8px; padding: 2px 6px; letter-spacing: .14em; }
     .agent-cta-arrow { font-size: 14px; }
     .voice-section .feature-head h2 { font-size: clamp(36px, 11vw, 64px); }
