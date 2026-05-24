@@ -119,12 +119,12 @@ const defaultData: PersonalData = {
       { number: "03", label: "Agent Office" },
       { number: "04", label: "Experience" },
       { number: "05", label: "Contact" },
-      { number: "", label: "© 2025" },
+      { number: "", label: "© 2026" },
     ],
   },
   TopBarData: {
     topBarNickname: "Raaz",
-    topBarFolioVersion: "Folio v.5",
+    topBarFolioVersion: "Folio v.6.0",
   },
   AboutPageData: {
     positioning: {
@@ -155,7 +155,7 @@ const defaultData: PersonalData = {
     },
     background: {
       heading: "Background",
-      narrative: "I grew up helping run a small family business. During peak seasons, I learned early that constraints create creativity. Today, I apply the same thinking to software — limited time, limited compute, limited attention. Build clean systems within constraints.",
+      narrative: "I grew up helping run a small family business. During peak seasons, I learned early that constraints create creativity. Today, I apply the same thinking to software - limited time, limited compute, limited attention. Build clean systems within constraints.",
       videos: [
         { src: "src/assets/BC.jpeg", caption: "Hackathon Win" },
         { src: "src/assets/HC1.jpeg", caption: "Badminton Tournament" },

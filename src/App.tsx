@@ -11,11 +11,13 @@ import { Contact } from './components/pages/contact';
 gsap.registerPlugin(ScrollTrigger);
 
 /* On every route change:
-   1. Kill all ScrollTriggers from the previous page (avoid stale pins/triggers).
-   2. Scroll back to top so the new page lands at the hero.
-   3. Refresh ScrollTrigger after the new DOM mounts.
-   Also handles browser back/forward (popstate) since React Router still fires
-   a navigation event and useLocation updates. */
+   1. Scroll back to top so the new page lands at the hero.
+   2. Refresh ScrollTrigger once the new DOM has settled so the new page's
+      triggers re-measure against the new layout.
+   We do NOT kill ScrollTriggers here — each page's useEffect cleanup runs
+   ctx.revert() on unmount, which handles its own teardown. Killing here
+   would race with the new page's mount and wipe its just-created triggers,
+   leaving from-state elements hidden. */
 const RouteEffects: React.FC = () => {
   const { pathname } = useLocation();
 
@@ -23,9 +25,8 @@ const RouteEffects: React.FC = () => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
-    ScrollTrigger.getAll().forEach((t) => t.kill());
     window.scrollTo(0, 0);
-    const id = window.setTimeout(() => ScrollTrigger.refresh(), 80);
+    const id = window.setTimeout(() => ScrollTrigger.refresh(), 120);
     return () => window.clearTimeout(id);
   }, [pathname]);
 

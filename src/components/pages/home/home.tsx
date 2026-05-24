@@ -12,7 +12,6 @@ import {
   Word,
   Reveal,
   BlurFade,
-  ScrollHint,
   DesignLayout,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
@@ -34,8 +33,7 @@ const Home: React.FC = () => {
         .from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 1.1 }, 0.2)
         .from(".hero-name .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
         .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.4)
-        .from(".hero-bottom > *", { autoAlpha: 0, duration: 1.4, stagger: 0.12, clearProps: "transform" }, 1.8)
-        .from(".scroll-hint", { autoAlpha: 0, duration: 0.9 }, 2.2);
+        .from(".hero-bottom > *", { autoAlpha: 0, duration: 1.4, stagger: 0.12, clearProps: "transform" }, 1.8);
     }, heroRef);
     return () => ctx.revert();
   }, []);
@@ -180,7 +178,6 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <ScrollHint label="Scroll · 01/04" />
       </section>
 
       <Marquee
