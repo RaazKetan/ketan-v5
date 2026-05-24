@@ -18,6 +18,7 @@ import BCImage from "../../../assets/BC.jpeg";
 import HC1Image from "../../../assets/HC1.jpeg";
 import HC2Image from "../../../assets/HC2.jpeg";
 import meVideo from "../../../assets/me.mp4";
+import { RouteSEO } from "../../seo/RouteSEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -119,6 +120,11 @@ export const About: React.FC = () => {
 
   return (
     <DesignLayout>
+      <RouteSEO
+        title="About - Ketan Raj"
+        description="Engineer at Emergent (YC-backed), ex-Google. Notes on how I work, what I'm building, and the stack I reach for."
+        path="/about"
+      />
       {/* HERO */}
       <section className="a-hero">
         <div className="a-hero-bg">

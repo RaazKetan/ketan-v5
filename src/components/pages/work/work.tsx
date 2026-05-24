@@ -15,6 +15,7 @@ import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
 import { GoogleMark } from "../../design/GoogleMark";
 import type { Experience } from "../../../data/experience";
+import { RouteSEO } from "../../seo/RouteSEO";
 
 /* Render company name with the Google wordmark when the company is Google,
    otherwise as plain italic. Keeps the brand color treatment consistent. */
@@ -60,6 +61,11 @@ export const Work: React.FC = () => {
 
   return (
     <DesignLayout>
+      <RouteSEO
+        title="Work - Ketan Raj"
+        description="Where Ketan has shipped: roles at Emergent and Google, what he's built, and the systems he focuses on now."
+        path="/work"
+      />
       <div ref={pageRef}>
       <section className="w-hero">
         <div className="w-hero-bg">

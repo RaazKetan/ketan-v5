@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePersonalData } from "../../context/PersonalDataContext";
 import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
-import { sarvamSpeak, sarvamTranscribe } from "../../services/sarvam";
+import { sarvamSpeak, sarvamTranscribe, SarvamError } from "../../services/sarvam";
 import { useChatHistory } from "../../context/ChatHistoryContext";
 import {
   ChatIcon,
@@ -28,6 +28,27 @@ export const ChatWidget: React.FC = () => {
   const [recording, setRecording] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
   const [speakingId, setSpeakingId] = useState<number | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  /* Convert a SarvamError into a friendly one-liner. Voice is a best-effort
+     feature — surface a short disclaimer so users know it's degraded but
+     can still use the text chat. */
+  const explain = (e: unknown, action: "speak" | "transcribe"): string => {
+    if (e instanceof SarvamError) {
+      if (e.kind === "unavailable") return "Voice is offline right now. You can still chat in text.";
+      if (e.kind === "rate-limited") return "Voice limit reached for now. Try again in a minute.";
+      if (e.kind === "network") return "Couldn't reach voice service. Check your connection.";
+      return action === "speak" ? "Voice playback failed." : "Voice transcription failed.";
+    }
+    return action === "speak" ? "Voice playback failed." : "Voice transcription failed.";
+  };
+
+  /* Auto-clear the notice so it doesn't linger once the user has moved on. */
+  useEffect(() => {
+    if (!notice) return;
+    const t = window.setTimeout(() => setNotice(null), 6000);
+    return () => window.clearTimeout(t);
+  }, [notice]);
 
   /* Seed the shared history with the greeting the first time anyone
      opens the chat / triggers the voice agent. Re-renders won't add
@@ -82,10 +103,14 @@ export const ChatWidget: React.FC = () => {
           audioRef.current = null;
         }
       });
-      audio.addEventListener("error", () => setSpeakingId(null));
+      audio.addEventListener("error", () => {
+        setSpeakingId(null);
+        setNotice("Voice playback failed mid-stream. Try again.");
+      });
       await audio.play().catch(() => setSpeakingId(null));
-    } catch {
+    } catch (e) {
       setSpeakingId(null);
+      setNotice(explain(e, "speak"));
     }
   };
 
@@ -125,16 +150,21 @@ export const ChatWidget: React.FC = () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: mime });
         setBusy(true);
-        const transcript = await sarvamTranscribe(blob);
-        setBusy(false);
-        if (transcript) {
-          await send(transcript, true);
-        } else {
-          addMessage(
-            "agent",
-            "Didn't catch that - try typing instead, or check your mic.",
-            "text"
-          );
+        try {
+          const transcript = await sarvamTranscribe(blob);
+          setBusy(false);
+          if (transcript) {
+            await send(transcript, true);
+          } else {
+            addMessage(
+              "agent",
+              "Didn't catch that - try typing instead, or check your mic.",
+              "text"
+            );
+          }
+        } catch (e) {
+          setBusy(false);
+          setNotice(explain(e, "transcribe"));
         }
       };
       recorderRef.current = rec;
@@ -142,6 +172,7 @@ export const ChatWidget: React.FC = () => {
       setRecording(true);
     } catch (e) {
       console.warn("Microphone access failed", e);
+      setNotice("Microphone blocked. Allow mic access in your browser settings.");
     }
   };
 
@@ -201,6 +232,20 @@ export const ChatWidget: React.FC = () => {
               </button>
             </div>
           </header>
+
+          {notice && (
+            <div className="chat-notice" role="status">
+              <span>{notice}</span>
+              <button
+                type="button"
+                className="chat-notice-x"
+                onClick={() => setNotice(null)}
+                aria-label="Dismiss notice"
+              >
+                ×
+              </button>
+            </div>
+          )}
 
           <div className="chat-scroll" ref={scrollRef}>
             {messages.map((m) => {
@@ -322,7 +367,7 @@ const styles = `
     width: min(420px, calc(100vw - 32px));
     max-height: min(640px, calc(100vh - 140px));
     background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
-    display: grid; grid-template-rows: auto 1fr auto auto;
+    display: flex; flex-direction: column;
     overflow: hidden;
     box-shadow: 0 24px 60px rgba(22, 21, 19, 0.18);
     animation: chat-rise .35s var(--ease);
@@ -364,11 +409,33 @@ const styles = `
   .chat-icon-btn:hover { background: var(--bg-deep); color: var(--ink); }
   .chat-icon-btn.is-on { border-color: var(--accent); color: var(--accent); }
 
+  /* Inline disclaimer when voice/agent service is having a moment */
+  .chat-notice {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    background: color-mix(in oklab, var(--accent) 8%, var(--bg));
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .04em; color: var(--ink-2);
+    animation: notice-in .3s var(--ease);
+  }
+  .chat-notice > span { flex: 1; line-height: 1.4; }
+  .chat-notice-x {
+    background: transparent; border: 0; cursor: pointer;
+    font-size: 18px; line-height: 1; color: var(--muted);
+    padding: 0 4px;
+  }
+  .chat-notice-x:hover { color: var(--ink); }
+  @keyframes notice-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* Scroll area */
   .chat-scroll {
+    flex: 1; min-height: 0;
     overflow-y: auto; padding: 16px;
     display: flex; flex-direction: column; gap: 10px;
-    min-height: 200px;
   }
   .chat-scroll::-webkit-scrollbar { width: 4px; }
   .chat-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }

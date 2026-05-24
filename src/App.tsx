@@ -8,6 +8,7 @@ import { About } from './components/pages/about';
 import { Projects } from './components/pages/projects';
 import { Work } from './components/pages/work';
 import { Contact } from './components/pages/contact';
+import { NotFound } from './components/pages/notfound';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -99,6 +100,7 @@ const App: React.FC = () => {
           <Route path="/projects" element={<Projects />} />
           <Route path="/work" element={<Work />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </SmoothScroll>
     </Router>

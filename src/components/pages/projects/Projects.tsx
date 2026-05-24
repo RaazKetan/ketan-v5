@@ -13,6 +13,7 @@ import {
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { PROJECTS, BLOGS } from "../../../data/projects";
+import { RouteSEO } from "../../seo/RouteSEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -108,6 +109,11 @@ export const Projects: React.FC = () => {
 
   return (
     <DesignLayout>
+      <RouteSEO
+        title="Projects & Writing - Ketan Raj"
+        description="Shipped products, side projects, and essays on agentic AI, LLM tooling, and engineering at scale. Built by Ketan Raj."
+        path="/projects"
+      />
       {/* HERO */}
       <section className="p-hero">
         <div className="p-hero-bg">

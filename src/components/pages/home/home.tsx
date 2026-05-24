@@ -17,6 +17,7 @@ import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
 import { VoiceAnalyzer } from "../../Chat/VoiceAnalyzer";
 import { useLenis } from "../../../App";
+import { RouteSEO } from "../../seo/RouteSEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -75,6 +76,11 @@ const Home: React.FC = () => {
 
   return (
     <DesignLayout>
+      <RouteSEO
+        title="Ketan Raj - Software Engineer | Emergent, ex-Google"
+        description="Ketan Raj is a software engineer at Emergent (YC-backed) and ex-Google. Building agentic AI, intelligent backends, and developer-facing systems."
+        path="/"
+      />
       <section className="hero-section" ref={heroRef}>
         <div className="hero-grid-bg">
           <GridBg count={3} />

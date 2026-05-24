@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { sarvamSpeak, sarvamTranscribe } from "../../services/sarvam";
+import { sarvamSpeak, sarvamTranscribe, SarvamError } from "../../services/sarvam";
 import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
 import { usePersonalData } from "../../context/PersonalDataContext";
 import { useChatHistory } from "../../context/ChatHistoryContext";
@@ -41,6 +41,22 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   const [stage, setStage] = useState<Stage>("idle");
   const [line, setLine] = useState<Line | null>(null);
   const [levels, setLevels] = useState<number[]>(() => Array(BAR_COUNT).fill(0));
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const explainSarvam = (e: unknown, action: "speak" | "listen"): string => {
+    if (e instanceof SarvamError) {
+      if (e.kind === "unavailable") return "Voice is offline right now. Try the chat widget instead.";
+      if (e.kind === "rate-limited") return "Voice limit reached. Try again in a minute.";
+      if (e.kind === "network") return "Couldn't reach the voice service. Check your connection.";
+    }
+    return action === "speak" ? "Voice playback failed." : "Voice transcription failed.";
+  };
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = window.setTimeout(() => setNotice(null), 6000);
+    return () => window.clearTimeout(t);
+  }, [notice]);
 
   /* Refs for the WebAudio graph + RAF. */
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -150,7 +166,12 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   /* Speak any text via Sarvam, drive bars from its audio. Returns a
      promise that resolves when playback ends (or fails). */
   const speak = async (text: string): Promise<void> => {
-    const audio = await sarvamSpeak(text);
+    let audio: HTMLAudioElement | null = null;
+    try {
+      audio = await sarvamSpeak(text);
+    } catch (e) {
+      setNotice(explainSarvam(e, "speak"));
+    }
     if (!audio) {
       /* Fallback: sine-wave fake bars for 2s so UI isn't dead. */
       let t = 0;
@@ -281,7 +302,14 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
         const blob = new Blob(recChunksRef.current, { type: mime });
 
         setStage("processing");
-        const transcript = await sarvamTranscribe(blob);
+        let transcript = "";
+        try {
+          transcript = await sarvamTranscribe(blob);
+        } catch (e) {
+          setNotice(explainSarvam(e, "listen"));
+          setStage("ready");
+          return;
+        }
         if (!transcript.trim()) {
           const msg = "Didn't catch that. Try again?";
           setLine({ speaker: "agent", text: msg });
@@ -316,7 +344,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
       setStage("recording");
     } catch (e) {
       console.warn("Mic permission failed", e);
-      setLine({ speaker: "agent", text: "Mic blocked. Allow microphone and retry." });
+      setNotice("Microphone blocked. Allow mic access in your browser to talk.");
       setStage("ready");
     }
   };
@@ -422,6 +450,21 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
         )}
         {transcriptText}
       </div>
+
+      {notice && (
+        <div className="va-notice" role="status">
+          <span className="va-notice-dot" />
+          <span>{notice}</span>
+          <button
+            type="button"
+            className="va-notice-x"
+            onClick={() => setNotice(null)}
+            aria-label="Dismiss"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <style>{styles}</style>
     </div>
@@ -533,6 +576,30 @@ const styles = `
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* Failure disclaimer banner */
+  .va-notice {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px;
+    background: color-mix(in oklab, var(--accent) 10%, var(--bg));
+    border: 1px solid color-mix(in oklab, var(--accent) 28%, var(--line));
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .04em; color: var(--ink-2);
+    animation: va-fade .35s var(--ease);
+  }
+  .va-notice > span:nth-child(2) { flex: 1; line-height: 1.4; }
+  .va-notice-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 25%, transparent);
+    flex-shrink: 0;
+  }
+  .va-notice-x {
+    background: transparent; border: 0; cursor: pointer;
+    font-size: 18px; line-height: 1; color: var(--muted);
+    padding: 0 4px;
+  }
+  .va-notice-x:hover { color: var(--ink); }
 
   /* Featured (large) variant */
   .va-wrap.va-feature {

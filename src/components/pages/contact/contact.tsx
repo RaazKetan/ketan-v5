@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { DesignLayout, GridBg, Word } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
+import { RouteSEO } from "../../seo/RouteSEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,11 +50,48 @@ export const Contact: React.FC = () => {
     });
   };
 
+  /* Hand the message off to the visitor's email client. No backend means
+     no PII ever hits a server we don't own (and no spam-bot honeypot to
+     maintain). The browser caps mailto bodies at ~2000 chars, so we
+     truncate textarea + name to safe lengths. */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = formRef.current;
     const success = successRef.current;
-    if (!form || !success) return;
+    if (!form) return;
+
+    const fd = new FormData(form);
+    const name = String(fd.get("name") || "").slice(0, 80).trim();
+    const fromEmail = String(fd.get("email") || "").slice(0, 120).trim();
+    const message = String(fd.get("message") || "").slice(0, 1400).trim();
+    const interests = Array.from(topics).join(", ");
+
+    /* Build a plain-text body. encodeURIComponent handles newlines + special
+       chars so the mailto link can't be hijacked by control characters in
+       user input. */
+    const subject = `Portfolio · ${name || "new note"}`;
+    const lines = [
+      `From: ${name || "(no name)"} <${fromEmail || "no email"}>`,
+      interests ? `Interests: ${interests}` : "",
+      "",
+      message || "(no message)",
+    ].filter(Boolean);
+    const mailto =
+      `mailto:${contactInfo.email}` +
+      `?subject=${encodeURIComponent(subject)}` +
+      `&body=${encodeURIComponent(lines.join("\n"))}`;
+
+    /* Use a transient anchor — direct window.location assignment in some
+       browsers (Safari iOS) gets blocked when triggered outside the click
+       event tick; an in-DOM <a> click stays inside the user gesture. */
+    const a = document.createElement("a");
+    a.href = mailto;
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    if (!success) return;
     gsap.to(form, {
       autoAlpha: 0,
       y: -10,
@@ -77,6 +115,11 @@ export const Contact: React.FC = () => {
 
   return (
     <DesignLayout>
+      <RouteSEO
+        title="Contact - Ketan Raj"
+        description="Reach Ketan Raj for collaborations, advisory, speaking, or hiring. Email, Topmate, LinkedIn, and a quick contact form."
+        path="/contact"
+      />
       <section className="c-hero">
         <div>
           <div className="c-label">05 / Contact</div>
@@ -131,11 +174,11 @@ export const Contact: React.FC = () => {
             <form ref={formRef} onSubmit={handleSubmit}>
               <div className="field">
                 <label>Your name</label>
-                <input type="text" placeholder="What should I call you?" required />
+                <input name="name" type="text" placeholder="What should I call you?" required maxLength={80} autoComplete="name" />
               </div>
               <div className="field">
                 <label>Email</label>
-                <input type="email" placeholder="where I can reach you" required />
+                <input name="email" type="email" placeholder="where I can reach you" required maxLength={120} autoComplete="email" />
               </div>
               <div className="field">
                 <label>I'm thinking about</label>
@@ -155,12 +198,14 @@ export const Contact: React.FC = () => {
               <div className="field">
                 <label>Tell me about it</label>
                 <textarea
+                  name="message"
                   placeholder="What are you building, who is it for, and where are you stuck?"
                   rows={5}
+                  maxLength={1400}
                 />
               </div>
               <div className="submit-row">
-                <div className="note">By submitting you'll get a reply, not a newsletter.</div>
+                <div className="note">Submitting opens your email client with the note prefilled - hit send there.</div>
                 <button type="submit" className="submit-btn" data-magnet="">
                   <span>Send the note</span>
                   <span>↗</span>

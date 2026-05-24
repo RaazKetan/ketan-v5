@@ -6,6 +6,32 @@
 const TTS_URL = "/api/sarvam/tts";
 const STT_URL = "/api/sarvam/stt";
 
+/* Typed failure surface so callers can show specific disclaimers
+   ("voice unavailable" vs "rate limit" vs "transcription empty"). */
+export type SarvamErrorKind =
+  | "unavailable"     // server returned 503 (no key configured / upstream down)
+  | "rate-limited"    // 429
+  | "network"         // fetch threw / opaque failure
+  | "client";         // 4xx that isn't 429
+
+export class SarvamError extends Error {
+  readonly kind: SarvamErrorKind;
+  readonly status?: number;
+  constructor(kind: SarvamErrorKind, message: string, status?: number) {
+    super(message);
+    this.name = "SarvamError";
+    this.kind = kind;
+    this.status = status;
+  }
+}
+
+function classify(status: number): SarvamErrorKind {
+  if (status === 503) return "unavailable";
+  if (status === 429) return "rate-limited";
+  if (status >= 400 && status < 500) return "client";
+  return "network";
+}
+
 /* Voice features are always "configured" client-side now - the server
    decides whether it can actually proxy (checks SARVAM_API_KEY). The
    client just attempts and degrades gracefully on 503. */
@@ -27,19 +53,24 @@ export async function sarvamSpeak(
   const trimmed = text.trim();
   if (!trimmed) return null;
 
-  const res = await fetch(TTS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      text: trimmed.slice(0, 500),
-      speaker: opts.speaker,
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(TTS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: trimmed.slice(0, 500),
+        speaker: opts.speaker,
+      }),
+    });
+  } catch (e) {
+    throw new SarvamError("network", "TTS proxy unreachable: " + (e as Error).message);
+  }
   if (!res.ok || !res.body) {
     if (res.status !== 503) {
       console.warn("Sarvam TTS proxy failed", res.status);
     }
-    return null;
+    throw new SarvamError(classify(res.status), `TTS proxy returned ${res.status}`, res.status);
   }
 
   const reader = res.body.getReader();
@@ -115,7 +146,12 @@ export async function sarvamTranscribe(audioBlob: Blob): Promise<string> {
   const form = new FormData();
   form.append("file", audioBlob, `audio.${ext}`);
 
-  const res = await fetch(STT_URL, { method: "POST", body: form });
+  let res: Response;
+  try {
+    res = await fetch(STT_URL, { method: "POST", body: form });
+  } catch (e) {
+    throw new SarvamError("network", "STT proxy unreachable: " + (e as Error).message);
+  }
   if (!res.ok) {
     /* Show the upstream detail to make debugging the 502 actually possible. */
     let detail = "";
@@ -128,7 +164,7 @@ export async function sarvamTranscribe(audioBlob: Blob): Promise<string> {
     if (res.status !== 503) {
       console.warn(`Sarvam STT proxy failed (${res.status})`, detail);
     }
-    return "";
+    throw new SarvamError(classify(res.status), `STT proxy returned ${res.status}: ${detail}`, res.status);
   }
   const data = (await res.json()) as { transcript?: string };
   return data.transcript || "";

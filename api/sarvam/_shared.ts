@@ -8,8 +8,7 @@ declare const process: { env: Record<string, string | undefined> };
    Set ALLOWED_ORIGINS in Vercel env as a comma-separated list to override. */
 const DEFAULT_ORIGINS = [
   "https://ketan-v5.vercel.app",
-  "https://ketanraj.dev",
-  "https://www.ketanraj.dev",
+  "https://ketanraj.vercel.app",
 ];
 const DEV_ORIGINS = [
   "http://localhost:5173",
@@ -80,6 +79,11 @@ export function clientIp(req: Request): string {
   );
 }
 
+/* Vercel preview deploys get URLs like ketan-v5-git-<branch>-<user>.vercel.app.
+   Allow them so previews work without per-deploy env config, but only when
+   the host clearly belongs to this project + ends in .vercel.app. */
+const VERCEL_PREVIEW = /^https:\/\/ketan(?:-v5|raj)?-[a-z0-9-]+\.vercel\.app$/i;
+
 /* Single guard called at the top of every handler. Returns null if the
    request is allowed, or a Response to return immediately if blocked. */
 export function guard(req: Request, method = "POST"): Response | null {
@@ -88,7 +92,12 @@ export function guard(req: Request, method = "POST"): Response | null {
   }
   const allowed = getAllowedOrigins();
   const origin = req.headers.get("origin");
-  if (origin && !allowed.has(origin)) {
+  /* Reject same-origin requests with no Origin header in production to
+     block cURL-style abuse. Browsers always send Origin on POST. */
+  if (process.env.NODE_ENV === "production" && !origin) {
+    return json({ error: "Missing origin" }, 403);
+  }
+  if (origin && !allowed.has(origin) && !VERCEL_PREVIEW.test(origin)) {
     return json({ error: "Forbidden origin" }, 403);
   }
   const ip = clientIp(req);
