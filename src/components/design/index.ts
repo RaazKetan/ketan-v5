@@ -14,3 +14,4 @@ export { Word } from "./Word";
 export { DesignNav } from "./DesignNav";
 export { DesignFooter } from "./DesignFooter";
 export { DesignLayout } from "./DesignLayout";
+export { GoogleMark } from "./GoogleMark";

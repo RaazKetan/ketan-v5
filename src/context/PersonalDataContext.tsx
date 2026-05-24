@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from "react";
 import { EXPERIENCE, type Experience } from "../data/experience";
 import { PROJECTS, ARCHIVE, FEATURED, type Project as PortfolioProject } from "../data/projects";
+import { GoogleMark } from "../components/design/GoogleMark";
 
 export type HeroTitleProps = {
   name: string;
@@ -88,7 +89,7 @@ export type ProjectsPageProps = {
 
 /* New centralized data shapes - every page reads from these. */
 
-export type StripItem = { label: string; meta: string };
+export type StripItem = { label: React.ReactNode; meta: string };
 export type HeroStripData = {
   taglineNum: string;
   taglineBody: string;       // serif italic body, supports raw HTML for <em>
@@ -195,8 +196,15 @@ const defaultData: PersonalData = {
       { label: "Origin - agentic hiring platform", meta: "building" },
     ],
     recent: [
-      { label: "ex-Google · 18+ AI agents shipped", meta: "'25" },
-      { label: "Google ADK workshops · 200+ eng.", meta: "'25" },
+      {
+        label: (
+          <>
+            SWE <GoogleMark />
+          </>
+        ),
+        meta: "'25",
+      },
+      { label: "ADK workshops · 200+ engineers", meta: "'25" },
       { label: "Vertex AI · RAG · LLM orchestration", meta: "'25" },
     ],
     stack: [
