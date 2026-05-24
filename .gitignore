@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
 
 # Local environment files — NEVER commit these.
 # .env.example is allowed (no secrets).
