@@ -39,45 +39,46 @@ export const About: React.FC = () => {
     });
   });
 
-  // Pinned scaling prologue. Lerped scrub so fast scrolls smooth out.
-  useEffect(() => {
-    const el = prologueRef.current;
-    if (!el) return;
-    const stage = el.querySelector<HTMLElement>(".stage");
-    if (!stage) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        stage,
-        { scale: 0.82, autoAlpha: 0, y: 40, filter: "blur(6px)" },
-        {
-          scale: 1,
-          autoAlpha: 1,
-          y: 0,
-          filter: "blur(0px)",
-          ease: "none",
-          scrollTrigger: {
-            trigger: el,
-            start: "top top",
-            end: "+=80%",
-            scrub: 1.6,
-          },
-        }
-      );
-      gsap.to(stage, {
-        scale: 1.06,
-        autoAlpha: 0,
-        filter: "blur(8px)",
-        ease: "none",
+  /* Prologue scaling — ONE timeline scrubbed across the whole prologue
+     section. The two-trigger version (entrance + exit) was getting confused
+     by fast scrolls and reversals: each trigger lerped independently and
+     they'd fight each other in the overlap region, sometimes leaving the
+     text invisible. Single timeline = one progress value = no fight. */
+  useGSAP(
+    () => {
+      const el = prologueRef.current;
+      if (!el) return;
+      const stage = el.querySelector<HTMLElement>(".stage");
+      if (!stage) return;
+
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
         scrollTrigger: {
           trigger: el,
-          start: "top -70%",
+          start: "top top",
           end: "bottom top",
-          scrub: 1.6,
+          scrub: 1,            // slight lerp; small enough to track fast scrolls
+          invalidateOnRefresh: true,
         },
       });
-    });
-    return () => ctx.revert();
-  }, []);
+
+      tl.fromTo(
+        stage,
+        { scale: 0.82, autoAlpha: 0, filter: "blur(6px)" },
+        { scale: 1, autoAlpha: 1, filter: "blur(0px)", duration: 0.35 }
+      )
+        // Hold at full scale + visible for the middle of the section.
+        .to(stage, { scale: 1, autoAlpha: 1, duration: 0.30 })
+        // Exit: scale up slightly + fade + blur out.
+        .to(stage, {
+          scale: 1.06,
+          autoAlpha: 0,
+          filter: "blur(8px)",
+          duration: 0.35,
+        });
+    },
+    { scope: prologueRef }
+  );
 
   // Bento + pullquote split-reveal.
   useEffect(() => {
