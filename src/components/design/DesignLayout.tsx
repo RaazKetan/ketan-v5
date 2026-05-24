@@ -1,6 +1,7 @@
 import React from "react";
 import { DesignNav } from "./DesignNav";
 import { DesignFooter } from "./DesignFooter";
+import { ChatWidget } from "../Chat/ChatWidget";
 
 export const DesignLayout: React.FC<{
   children: React.ReactNode;
@@ -13,5 +14,6 @@ export const DesignLayout: React.FC<{
     <DesignNav />
     {children}
     {!hideFooter && <DesignFooter />}
+    <ChatWidget />
   </>
 );

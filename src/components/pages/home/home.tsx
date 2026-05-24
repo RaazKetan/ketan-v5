@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import {
   Btn,
   Chip,
@@ -24,23 +25,18 @@ const Home: React.FC = () => {
   const heroRef = useRef<HTMLElement>(null);
   useDesignAnimations();
 
-  // Hero entrance timeline.
-  useEffect(() => {
-    const ctx = gsap.context(() => {
+  // Hero entrance timeline — scoped via useGSAP so StrictMode + remounts
+  // never leave elements stuck in the from state.
+  useGSAP(
+    () => {
       const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
-      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 1.1 }, 0)
-        .from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 1.1 }, 0.2)
-        .from(".hero-name .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
-        .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.4)
-        .from(".hero-bottom > *", { autoAlpha: 0, duration: 1.4, stagger: 0.12, clearProps: "transform" }, 1.8);
-    }, heroRef);
-    return () => ctx.revert();
-  }, []);
+      tl.from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 1.1 }, 0)
+        .from(".hero-name .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.2)
+        .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.2)
+        .from(".hero-bottom > *", { autoAlpha: 0, duration: 1.4, stagger: 0.12, clearProps: "transform" }, 1.6);
 
-  // Split-reveal for the "A few recent things" header.
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      document.querySelectorAll<HTMLElement>("[data-split]").forEach((el) => {
+      // Below-the-fold word reveals
+      gsap.utils.toArray<HTMLElement>("[data-split]").forEach((el) => {
         const inners = el.querySelectorAll(".word > span");
         gsap.from(inners, {
           yPercent: 110,
@@ -50,9 +46,9 @@ const Home: React.FC = () => {
           scrollTrigger: { trigger: el, start: "top 85%", once: true },
         });
       });
-    });
-    return () => ctx.revert();
-  }, []);
+    },
+    { scope: heroRef }
+  );
 
   const [first, ...rest] = heroTitle.name.split(" ");
   const lastName = rest.length ? rest.join(" ") : "";

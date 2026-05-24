@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 const NAV_ITEMS: Array<{ to: string; label: string }> = [
   { to: "/", label: "Home" },
@@ -15,6 +17,23 @@ export const DesignNav: React.FC<{ mark?: string; available?: boolean }> = ({
 }) => {
   const { pathname } = useLocation();
   const [clock, setClock] = useState("— : —");
+  const navRef = useRef<HTMLElement>(null);
+
+  /* Nav owns its own entrance — pages no longer try to animate .ds-nav,
+     which removes the "GSAP target .ds-nav not found" warning and the
+     race where the new page's timeline hides nav before its tween plays. */
+  useGSAP(
+    () => {
+      gsap.from(navRef.current, {
+        autoAlpha: 0,
+        y: -16,
+        duration: 1.1,
+        ease: "power3.out",
+        delay: 0.05,
+      });
+    },
+    { scope: navRef }
+  );
 
   const pageLabel =
     pathname === "/"
@@ -40,7 +59,7 @@ export const DesignNav: React.FC<{ mark?: string; available?: boolean }> = ({
   }, []);
 
   return (
-    <nav className="ds-nav">
+    <nav className="ds-nav" ref={navRef}>
       <div className="mark">
         <span className="dot" />
         <span>{displayedMark}</span>

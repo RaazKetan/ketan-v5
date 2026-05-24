@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import {
   DesignLayout,
   Marquee,
@@ -32,17 +33,13 @@ export const Projects: React.FC = () => {
   const [activeTick, setActiveTick] = useState(0);
   useDesignAnimations();
 
-  // Hero entrance.
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
-      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 1.1 }, 0)
-        .from(".p-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0.2)
-        .from(".p-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
-        .from(".p-meta > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.12 }, 1.4);
-    });
-    return () => ctx.revert();
-  }, []);
+  // Hero entrance — scoped to hscrollRef so StrictMode handles cleanup.
+  useGSAP(() => {
+    const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
+    tl.from(".p-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0)
+      .from(".p-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.2)
+      .from(".p-meta > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.12 }, 1.2);
+  });
 
   // Horizontal pinned scroll (desktop only).
   useEffect(() => {
@@ -75,24 +72,21 @@ export const Projects: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
-  // Scroll-triggered split-reveal for below-the-fold data-split elements (interlude h2, cta h2).
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      document
-        .querySelectorAll<HTMLElement>(".interlude [data-split], .p-cta [data-split]")
-        .forEach((el) => {
-          const inners = el.querySelectorAll(".word > span");
-          gsap.from(inners, {
-            yPercent: 110,
-            duration: 1.6,
-            ease: "power3.out",
-            stagger: 0.1,
-            scrollTrigger: { trigger: el, start: "top 85%", once: true },
-          });
+  // Scroll-triggered split-reveal for below-the-fold data-split elements.
+  useGSAP(() => {
+    document
+      .querySelectorAll<HTMLElement>(".interlude [data-split], .p-cta [data-split]")
+      .forEach((el) => {
+        const inners = el.querySelectorAll(".word > span");
+        gsap.from(inners, {
+          yPercent: 110,
+          duration: 1.6,
+          ease: "power3.out",
+          stagger: 0.1,
+          scrollTrigger: { trigger: el, start: "top 85%", once: true },
         });
-    });
-    return () => ctx.revert();
-  }, []);
+      });
+  });
 
   return (
     <DesignLayout>

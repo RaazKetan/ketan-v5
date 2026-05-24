@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { DesignLayout, GridBg, Word } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
@@ -40,16 +41,12 @@ export const Contact: React.FC = () => {
     { label: "Topmate", value: "Book 30 min", href: contactInfo.topmate },
   ];
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
-      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 1.1 }, 0)
-        .from(".c-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0.2)
-        .from(".c-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
-        .from(".c-sub", { autoAlpha: 0, y: 18, duration: 1.2 }, 1.4);
-    });
-    return () => ctx.revert();
-  }, []);
+  useGSAP(() => {
+    const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
+    tl.from(".c-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0)
+      .from(".c-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.2)
+      .from(".c-sub", { autoAlpha: 0, y: 18, duration: 1.2 }, 1.2);
+  });
 
   const toggleTopic = (t: string) => {
     setTopics((cur) => {

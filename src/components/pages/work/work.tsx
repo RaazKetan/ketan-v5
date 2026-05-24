@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import {
   DesignLayout,
   GridBg,
@@ -24,15 +25,15 @@ const NUMBER_WORDS: Record<number, string> = {
 export const Work: React.FC = () => {
   const { experience: EXPERIENCE, workInfo } = usePersonalData();
   const [openSlug, setOpenSlug] = useState<string | null>(EXPERIENCE[0]?.slug ?? null);
+  const pageRef = useRef<HTMLDivElement>(null);
   useDesignAnimations();
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
+  useGSAP(
+    () => {
       const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
-      tl.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 1.1 }, 0)
-        .from(".w-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0.2)
-        .from(".w-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.4)
-        .from(".w-lede > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.4);
+      tl.from(".w-label", { autoAlpha: 0, y: 18, duration: 1.1 }, 0)
+        .from(".w-hero h1 .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.2)
+        .from(".w-lede > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.2);
 
       gsap.from(".w-stats .stat", {
         autoAlpha: 0,
@@ -49,15 +50,16 @@ export const Work: React.FC = () => {
         ease: "power3.out",
         scrollTrigger: { trigger: ".w-experience", start: "top 80%" },
       });
-    });
-    return () => ctx.revert();
-  }, []);
+    },
+    { scope: pageRef }
+  );
 
   /* Years of shipping — driven by workInfo.shippingStartYear in PersonalDataContext. */
   const totalYears = new Date().getFullYear() - workInfo.shippingStartYear;
 
   return (
     <DesignLayout>
+      <div ref={pageRef}>
       <section className="w-hero">
         <div className="w-hero-bg">
           <GridBg count={3} />
@@ -146,6 +148,7 @@ export const Work: React.FC = () => {
         </div>
       </section>
 
+      </div>
       <style>{styles}</style>
     </DesignLayout>
   );

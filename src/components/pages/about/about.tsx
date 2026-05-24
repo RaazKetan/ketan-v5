@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import {
   DesignLayout,
   Marquee,
@@ -27,21 +28,16 @@ export const About: React.FC = () => {
   const [playing, setPlaying] = useState(false);
   useDesignAnimations();
 
-  // Hero entrance.
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".a-hero > div > *", {
-        autoAlpha: 0,
-        y: 24,
-        duration: 1,
-        stagger: 0.1,
-        ease: "power3.out",
-        delay: 0.1,
-      });
-      gsap.from(".ds-nav", { autoAlpha: 0, y: -16, duration: 0.8, ease: "power3.out" });
+  useGSAP(() => {
+    gsap.from(".a-hero > div > *", {
+      autoAlpha: 0,
+      y: 24,
+      duration: 1.2,
+      stagger: 0.12,
+      ease: "power3.out",
+      delay: 0.15,
     });
-    return () => ctx.revert();
-  }, []);
+  });
 
   // Pinned scaling prologue. Lerped scrub so fast scrolls smooth out.
   useEffect(() => {
