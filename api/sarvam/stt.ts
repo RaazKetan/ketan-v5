@@ -31,22 +31,30 @@ export default async function handler(req: Request): Promise<Response> {
   const key = getSarvamKey();
   if (!key) return json({ error: "Server not configured" }, 503);
 
-  const sarvamForm = new FormData();
-  sarvamForm.append("file", file);
-  sarvamForm.append("model", "saarika:v2");
-  sarvamForm.append("language_code", "en-IN");
-  sarvamForm.append("with_timestamps", "false");
+  /* Try saarika:v2.5 first (Sarvam's current flagship STT for Indian
+     languages); fall back to saarika:v2 if Sarvam returns a model error. */
+  const tryModel = async (model: string) => {
+    const f = new FormData();
+    f.append("file", file);
+    f.append("model", model);
+    f.append("language_code", "en-IN");
+    return fetch("https://api.sarvam.ai/speech-to-text", {
+      method: "POST",
+      headers: { "api-subscription-key": key },
+      body: f,
+    });
+  };
 
-  const upstream = await fetch("https://api.sarvam.ai/speech-to-text", {
-    method: "POST",
-    headers: { "api-subscription-key": key },
-    body: sarvamForm,
-  });
+  let upstream = await tryModel("saarika:v2.5");
+  if (!upstream.ok && upstream.status === 400) {
+    upstream = await tryModel("saarika:v2");
+  }
 
   if (!upstream.ok) {
     const errText = await upstream.text().catch(() => "");
+    console.error("[sarvam stt] upstream", upstream.status, errText.slice(0, 500));
     return json(
-      { error: "Upstream failure", status: upstream.status, detail: errText.slice(0, 200) },
+      { error: "Upstream failure", status: upstream.status, detail: errText.slice(0, 400) },
       502
     );
   }

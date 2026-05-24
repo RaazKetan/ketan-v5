@@ -106,13 +106,27 @@ export async function sarvamTranscribe(audioBlob: Blob): Promise<string> {
     console.warn("Sarvam STT: audio over 5MB, skipping");
     return "";
   }
+  /* Name the file by its real MIME so Sarvam picks the right decoder.
+     MediaRecorder gives audio/webm by default; some browsers give mp4. */
+  const ext =
+    audioBlob.type.includes("mp4") ? "m4a" :
+    audioBlob.type.includes("ogg") ? "ogg" :
+    audioBlob.type.includes("wav") ? "wav" : "webm";
   const form = new FormData();
-  form.append("file", audioBlob, "audio.webm");
+  form.append("file", audioBlob, `audio.${ext}`);
 
   const res = await fetch(STT_URL, { method: "POST", body: form });
   if (!res.ok) {
+    /* Show the upstream detail to make debugging the 502 actually possible. */
+    let detail = "";
+    try {
+      const body = await res.json();
+      detail = body?.detail || body?.error || JSON.stringify(body);
+    } catch {
+      /* not json */
+    }
     if (res.status !== 503) {
-      console.warn("Sarvam STT proxy failed", res.status);
+      console.warn(`Sarvam STT proxy failed (${res.status})`, detail);
     }
     return "";
   }
