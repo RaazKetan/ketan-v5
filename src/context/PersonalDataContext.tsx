@@ -292,8 +292,8 @@ const defaultData: PersonalData = {
     ],
   },
   workInfo: {
-    shippingStartYear: 2021,
-    ledeShort: "Selected · 2021 - Now",
+    shippingStartYear: 2024,
+    ledeShort: "Selected · 2024 - Now",
     ledeLong:
       "Roles, internships, and independent stints - what I've worked on, with whom, and what I shipped. Tap any row for the bullet-point version.",
     ctaHeadline: ["Currently", "booking", "Q3."],

@@ -23,11 +23,6 @@ const CompanyName: React.FC<{ name: string }> = ({ name }) =>
 
 gsap.registerPlugin(ScrollTrigger);
 
-const NUMBER_WORDS: Record<number, string> = {
-  1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five",
-  6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten",
-};
-
 export const Work: React.FC = () => {
   const { experience: EXPERIENCE, workInfo } = usePersonalData();
   const [openSlug, setOpenSlug] = useState<string | null>(EXPERIENCE[0]?.slug ?? null);
@@ -73,7 +68,7 @@ export const Work: React.FC = () => {
         <div>
           <div className="w-label">03 / Work · experience</div>
           <h1 data-split>
-            <Word>{NUMBER_WORDS[totalYears] ?? String(totalYears)}</Word>{" "}
+            <Word>{`${totalYears}+`}</Word>{" "}
             <Word em>years</Word> <Word>of</Word> <Word>shipping.</Word>
           </h1>
           <div className="w-lede">
@@ -87,7 +82,7 @@ export const Work: React.FC = () => {
         <div className="stat">
           <div className="num">
             <NumberTicker value={totalYears} />
-            <span className="suffix">yrs</span>
+            <span className="suffix">+ yrs</span>
           </div>
           <div className="lbl">Years shipping software</div>
         </div>
