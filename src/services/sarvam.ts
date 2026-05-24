@@ -35,7 +35,7 @@ export async function sarvamSpeak(
     body: JSON.stringify({
       text: text.slice(0, 500),
       target_language_code: "en-IN",
-      speaker: opts.speaker ?? "varun",
+      speaker: opts.speaker ?? "shubh",
       model: "bulbul:v3",
       pace: opts.pace ?? 0.97,
       speech_sample_rate: 48000,
