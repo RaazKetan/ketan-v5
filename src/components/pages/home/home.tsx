@@ -66,6 +66,18 @@ const Home: React.FC = () => {
           <span>{heroTitle.title || "Software Engineer"}</span>
           <span className="ey-divider" />
           <span>{heroTitle.location || "India"} · IST</span>
+          <span className="ey-divider" />
+          <span className="ey-google">
+            ex&nbsp;
+            <span className="g-mark" aria-label="Google">
+              <span style={{ color: "#4285F4" }}>G</span>
+              <span style={{ color: "#EA4335" }}>o</span>
+              <span style={{ color: "#FBBC04" }}>o</span>
+              <span style={{ color: "#4285F4" }}>g</span>
+              <span style={{ color: "#34A853" }}>l</span>
+              <span style={{ color: "#EA4335" }}>e</span>
+            </span>
+          </span>
         </div>
 
         <h1 className="hero-name" aria-label={heroTitle.name}>
@@ -251,6 +263,17 @@ const styles = `
   }
   .hero-eyebrow .ey-tag { color: var(--ink); }
   .hero-eyebrow .ey-divider { width: 24px; height: 1px; background: var(--line); }
+  .hero-eyebrow .ey-google {
+    display: inline-flex; align-items: center; gap: 1px;
+    text-transform: none; letter-spacing: 0;
+  }
+  .hero-eyebrow .ey-google .g-mark {
+    font-family: "Product Sans", "Google Sans", var(--sans);
+    font-weight: 500; font-size: 13px; letter-spacing: -0.01em;
+    text-transform: none;
+    display: inline-flex; align-items: baseline;
+  }
+  .hero-eyebrow .ey-google .g-mark > span { display: inline-block; }
 
   .hero-name {
     margin: auto 0;
