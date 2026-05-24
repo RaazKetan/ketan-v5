@@ -290,7 +290,11 @@ const styles = `
     font-family: var(--serif); font-weight: 400;
     font-size: clamp(96px, 19vw, 320px);
     line-height: 0.9; letter-spacing: -0.04em;
-    position: relative; z-index: 2;
+    position: relative; z-index: 1;
+    /* Crop the giant glyph spill so it can't visually crawl over the
+       CTA above it — the cap-height of a 320px clamp font with
+       line-height: 0.9 overshoots the box by ~32px without this. */
+    padding-top: 0.05em;
   }
   .hero-name .row { display: flex; align-items: baseline; gap: clamp(20px, 4vw, 64px); flex-wrap: wrap; }
   .hero-name em { font-style: italic; color: var(--accent); }
@@ -365,7 +369,10 @@ const styles = `
   /* "Talk to my AI agent" attention CTA — outlined pill with a rotating
      animated-gradient list (Magic UI animated-list + animated-gradient-
      text combined). Pill is justify-self: start + width: fit-content
-     so the hero grid doesn't stretch it across the whole row. */
+     so the hero grid doesn't stretch it across the whole row.
+     position: relative + z-index above the hero h1 (z:2) because the
+     h1's line-height: 0.9 lets its giant glyphs visually spill up into
+     the CTA's grid cell, stealing clicks from the hit-test. */
   .hero-agent-cta {
     display: inline-flex; align-items: center; gap: 12px;
     width: fit-content; justify-self: start;
@@ -374,6 +381,7 @@ const styles = `
     background: var(--bg); color: var(--ink); text-decoration: none;
     font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
     text-transform: uppercase; cursor: pointer;
+    position: relative; z-index: 6;
     transition: transform .35s var(--ease),
                 box-shadow .35s var(--ease),
                 background .35s var(--ease);
