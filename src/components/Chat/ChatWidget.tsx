@@ -1,13 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePersonalData } from "../../context/PersonalDataContext";
 import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
+import { sarvamSpeak, sarvamTranscribe } from "../../services/sarvam";
 import {
-  sarvamSpeak,
-  sarvamTranscribe,
-  sarvamConfigured,
-} from "../../services/sarvam";
+  ChatIcon,
+  CloseIcon,
+  SendIcon,
+  MicIcon,
+  StopIcon,
+  SpeakerOn,
+  SpeakerOff,
+  PlayIcon,
+  WaveIcon,
+} from "./icons";
 
-type Msg = { id: number; role: "user" | "assistant"; text: string };
+type Msg = {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+  voice?: boolean; // true if the user sent this via voice input
+};
 
 export const ChatWidget: React.FC = () => {
   const data = usePersonalData();
@@ -18,13 +30,14 @@ export const ChatWidget: React.FC = () => {
     {
       id: 0,
       role: "assistant",
-      text: "Hi, I'm Ketan's portfolio agent. Ask me anything — work, projects, how to get in touch.",
+      text: "Hi, I'm Ketan's portfolio agent. Ask me about projects, work, or how to get in touch — chat or voice both work.",
     },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [recording, setRecording] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
+  const [speakingId, setSpeakingId] = useState<number | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -39,36 +52,64 @@ export const ChatWidget: React.FC = () => {
     });
   }, [messages, open]);
 
-  const send = async (raw: string) => {
+  /* Cancel any in-flight playback. */
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    setSpeakingId(null);
+  };
+
+  /* Play a message via Sarvam. Used both for auto-play after a new reply
+     and for the per-message replay button. */
+  const playMessage = async (msgId: number, text: string) => {
+    stopAudio();
+    setSpeakingId(msgId);
+    try {
+      const audio = await sarvamSpeak(text);
+      if (!audio) {
+        setSpeakingId(null);
+        return;
+      }
+      audioRef.current = audio;
+      audio.addEventListener("ended", () => {
+        if (audioRef.current === audio) {
+          setSpeakingId(null);
+          audioRef.current = null;
+        }
+      });
+      audio.addEventListener("error", () => setSpeakingId(null));
+      await audio.play().catch(() => setSpeakingId(null));
+    } catch {
+      setSpeakingId(null);
+    }
+  };
+
+  const send = async (raw: string, viaVoice = false) => {
     const q = raw.trim();
     if (!q || busy) return;
     setBusy(true);
     setInput("");
 
-    const userMsg: Msg = { id: idRef.current++, role: "user", text: q };
+    const userMsg: Msg = {
+      id: idRef.current++,
+      role: "user",
+      text: q,
+      voice: viaVoice,
+    };
     setMessages((m) => [...m, userMsg]);
 
-    /* Local RAG over Ketan's data — instant, deterministic. */
+    /* RAG over Ketan's data — instant, deterministic. */
     const chunks = retrieve(q, kb);
     const answer = composeAnswer(q, chunks);
-    const botMsg: Msg = { id: idRef.current++, role: "assistant", text: answer };
+    const botId = idRef.current++;
+    const botMsg: Msg = { id: botId, role: "assistant", text: answer };
     setMessages((m) => [...m, botMsg]);
 
-    /* Speak via Sarvam if configured + toggle on. */
-    if (voiceOn && sarvamConfigured()) {
-      try {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current = null;
-        }
-        const audio = await sarvamSpeak(answer);
-        if (audio) {
-          audioRef.current = audio;
-          audio.play().catch(() => {});
-        }
-      } catch (e) {
-        console.warn("Sarvam TTS error", e);
-      }
+    if (voiceOn) {
+      playMessage(botId, answer);
     }
 
     setBusy(false);
@@ -89,18 +130,18 @@ export const ChatWidget: React.FC = () => {
       rec.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: mime });
-        if (sarvamConfigured()) {
-          setBusy(true);
-          const transcript = await sarvamTranscribe(blob);
-          setBusy(false);
-          if (transcript) await send(transcript);
+        setBusy(true);
+        const transcript = await sarvamTranscribe(blob);
+        setBusy(false);
+        if (transcript) {
+          await send(transcript, true);
         } else {
           setMessages((m) => [
             ...m,
             {
               id: idRef.current++,
               role: "assistant",
-              text: "Voice transcription needs VITE_SARVAM_API_KEY in your .env.local.",
+              text: "Didn't catch that — try typing instead, or check your mic.",
             },
           ]);
         }
@@ -119,6 +160,11 @@ export const ChatWidget: React.FC = () => {
     setRecording(false);
   };
 
+  const toggleVoice = () => {
+    if (voiceOn) stopAudio();
+    setVoiceOn((v) => !v);
+  };
+
   return (
     <>
       <button
@@ -128,7 +174,9 @@ export const ChatWidget: React.FC = () => {
         aria-label={open ? "Close chat" : "Open chat"}
         data-magnet="0.2"
       >
-        <span className="chat-fab-dot" />
+        <span className="chat-fab-icon">
+          {open ? <CloseIcon size={14} /> : <ChatIcon size={14} />}
+        </span>
         <span className="chat-fab-label">{open ? "Close" : "Ask Ketan"}</span>
       </button>
 
@@ -136,39 +184,65 @@ export const ChatWidget: React.FC = () => {
         <div className="chat-panel" role="dialog" aria-label="Chat with Ketan's portfolio">
           <header className="chat-head">
             <div className="chat-head-left">
-              <span className="dot" />
+              <span className="led" />
               <div>
                 <strong>Ketan's agent</strong>
-                <span className="chat-sub">RAG + Sarvam voice · en-IN</span>
+                <span className="chat-sub">RAG · Sarvam voice · en-IN</span>
               </div>
             </div>
             <div className="chat-head-right">
               <button
                 type="button"
-                className={`chat-toggle${voiceOn ? " is-on" : ""}`}
-                onClick={() => setVoiceOn((v) => !v)}
-                title={voiceOn ? "Mute voice" : "Enable voice"}
+                className={`chat-icon-btn${voiceOn ? " is-on" : ""}`}
+                onClick={toggleVoice}
+                title={voiceOn ? "Mute auto-voice" : "Enable auto-voice"}
+                aria-pressed={voiceOn}
               >
-                {voiceOn ? "🔊" : "🔇"}
+                {voiceOn ? <SpeakerOn size={14} /> : <SpeakerOff size={14} />}
               </button>
               <button
                 type="button"
-                className="chat-close"
+                className="chat-icon-btn"
                 onClick={() => setOpen(false)}
-                aria-label="Close"
+                aria-label="Close chat"
               >
-                ×
+                <CloseIcon size={14} />
               </button>
             </div>
           </header>
 
           <div className="chat-scroll" ref={scrollRef}>
             {messages.map((m) => (
-              <div key={m.id} className={`chat-msg ${m.role}`}>
-                {m.text}
+              <div key={m.id} className={`chat-row ${m.role}`}>
+                {m.role === "user" && m.voice && (
+                  <span className="voice-tag" title="Sent via voice">
+                    <MicIcon size={11} />
+                  </span>
+                )}
+                <div className={`chat-msg ${m.role}`}>{m.text}</div>
+                {m.role === "assistant" && (
+                  <button
+                    type="button"
+                    className={`chat-replay${speakingId === m.id ? " is-speaking" : ""}`}
+                    onClick={() =>
+                      speakingId === m.id ? stopAudio() : playMessage(m.id, m.text)
+                    }
+                    aria-label={
+                      speakingId === m.id ? "Stop playback" : "Play message"
+                    }
+                  >
+                    {speakingId === m.id ? <WaveIcon size={12} /> : <PlayIcon size={11} />}
+                  </button>
+                )}
               </div>
             ))}
-            {busy && <div className="chat-msg assistant typing">…</div>}
+            {busy && (
+              <div className="chat-row assistant">
+                <div className="chat-msg assistant typing">
+                  <span /><span /><span />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="chat-suggest">
@@ -201,8 +275,8 @@ export const ChatWidget: React.FC = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about projects, work, or anything..."
-              disabled={busy}
+              placeholder={recording ? "Listening…" : "Ask about projects, work, anything"}
+              disabled={busy && !recording}
             />
             <button
               type="button"
@@ -211,10 +285,15 @@ export const ChatWidget: React.FC = () => {
               aria-label={recording ? "Stop recording" : "Start voice input"}
               disabled={busy && !recording}
             >
-              {recording ? "■" : "🎙"}
+              {recording ? <StopIcon size={14} /> : <MicIcon size={14} />}
             </button>
-            <button type="submit" className="chat-send" disabled={busy || !input.trim()}>
-              ↗
+            <button
+              type="submit"
+              className="chat-send"
+              disabled={busy || !input.trim()}
+              aria-label="Send"
+            >
+              <SendIcon size={14} />
             </button>
           </form>
         </div>
@@ -226,6 +305,7 @@ export const ChatWidget: React.FC = () => {
 };
 
 const styles = `
+  /* FAB */
   .chat-fab {
     position: fixed; right: 28px; bottom: 28px; z-index: 95;
     display: inline-flex; align-items: center; gap: 10px;
@@ -234,16 +314,14 @@ const styles = `
     font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
     text-transform: uppercase; cursor: pointer;
     box-shadow: 0 12px 32px rgba(22, 21, 19, 0.18);
-    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease),
+                background .35s var(--ease);
   }
   .chat-fab:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(22, 21, 19, 0.22); }
   .chat-fab.is-open { background: var(--accent); }
-  .chat-fab-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--bg);
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--bg) 30%, transparent);
-    animation: pulse 2.4s infinite ease-in-out;
-  }
+  .chat-fab-icon { display: inline-flex; }
 
+  /* Panel */
   .chat-panel {
     position: fixed; right: 28px; bottom: 92px; z-index: 95;
     width: min(420px, calc(100vw - 32px));
@@ -259,15 +337,17 @@ const styles = `
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* Header */
   .chat-head {
     display: flex; justify-content: space-between; align-items: center;
     padding: 14px 16px; border-bottom: 1px solid var(--line);
     background: var(--bg-deep);
   }
   .chat-head-left { display: flex; align-items: center; gap: 10px; }
-  .chat-head-left .dot {
+  .chat-head-left .led {
     width: 8px; height: 8px; border-radius: 50%; background: #2a9b6f;
-    box-shadow: 0 0 8px #2a9b6f;
+    box-shadow: 0 0 0 4px color-mix(in oklab, #2a9b6f 18%, transparent);
+    animation: pulse 2.4s infinite ease-in-out;
   }
   .chat-head-left strong {
     font-family: var(--serif); font-size: 17px; font-weight: 400;
@@ -278,18 +358,18 @@ const styles = `
     font-family: var(--mono); font-size: 9px; color: var(--muted);
     letter-spacing: .14em; text-transform: uppercase;
   }
-  .chat-head-right { display: flex; gap: 8px; align-items: center; }
-  .chat-toggle, .chat-close {
+  .chat-head-right { display: flex; gap: 6px; align-items: center; }
+  .chat-icon-btn {
     width: 32px; height: 32px; border-radius: 50%;
     background: var(--bg); border: 1px solid var(--line);
-    font-size: 14px; cursor: pointer; line-height: 1;
+    cursor: pointer; line-height: 1; color: var(--ink-2);
     display: inline-flex; align-items: center; justify-content: center;
-    transition: border-color .3s, background .3s;
+    transition: border-color .3s, background .3s, color .3s;
   }
-  .chat-toggle.is-on { border-color: var(--accent); color: var(--accent); }
-  .chat-close { font-size: 20px; }
-  .chat-toggle:hover, .chat-close:hover { background: var(--bg-deep); }
+  .chat-icon-btn:hover { background: var(--bg-deep); color: var(--ink); }
+  .chat-icon-btn.is-on { border-color: var(--accent); color: var(--accent); }
 
+  /* Scroll area */
   .chat-scroll {
     overflow-y: auto; padding: 16px;
     display: flex; flex-direction: column; gap: 10px;
@@ -298,21 +378,77 @@ const styles = `
   .chat-scroll::-webkit-scrollbar { width: 4px; }
   .chat-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
 
+  /* Message rows */
+  .chat-row {
+    display: flex; align-items: flex-end; gap: 6px;
+    max-width: 100%;
+  }
+  .chat-row.user { justify-content: flex-end; }
+  .chat-row.assistant { justify-content: flex-start; }
+
   .chat-msg {
-    max-width: 85%; padding: 10px 14px; border-radius: 14px;
+    max-width: 78%; padding: 10px 14px; border-radius: 14px;
     font-size: 14px; line-height: 1.5;
     word-wrap: break-word;
   }
   .chat-msg.user {
-    background: var(--ink); color: var(--bg); align-self: flex-end;
+    background: var(--ink); color: var(--bg);
     border-bottom-right-radius: 4px;
   }
   .chat-msg.assistant {
-    background: var(--bg-deep); color: var(--ink); align-self: flex-start;
+    background: var(--bg-deep); color: var(--ink);
     border-bottom-left-radius: 4px;
   }
-  .chat-msg.typing { letter-spacing: 3px; color: var(--muted); }
 
+  /* Voice tag on user messages */
+  .voice-tag {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--ink); color: var(--bg);
+    flex-shrink: 0;
+  }
+
+  /* Per-assistant-message replay button */
+  .chat-replay {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--bg);
+    color: var(--ink-2); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: border-color .3s, color .3s, background .3s, transform .3s;
+  }
+  .chat-replay:hover { border-color: var(--ink); color: var(--ink); }
+  .chat-replay.is-speaking {
+    border-color: var(--accent); color: var(--accent); background: var(--bg);
+  }
+
+  /* Wave bars for the speaking indicator */
+  .wave-bar { transform-origin: center; }
+  .chat-replay.is-speaking .wave-bar-1 { animation: wave 1s ease-in-out infinite; }
+  .chat-replay.is-speaking .wave-bar-2 { animation: wave 1s ease-in-out infinite .15s; }
+  .chat-replay.is-speaking .wave-bar-3 { animation: wave 1s ease-in-out infinite .3s; }
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.5); }
+    50%      { transform: scaleY(1); }
+  }
+
+  /* Typing indicator (3 dots) */
+  .chat-msg.typing {
+    display: inline-flex; gap: 4px; padding: 12px 14px;
+  }
+  .chat-msg.typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted); display: inline-block;
+    animation: typing 1.2s ease-in-out infinite;
+  }
+  .chat-msg.typing span:nth-child(2) { animation-delay: .15s; }
+  .chat-msg.typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes typing {
+    0%, 100% { opacity: 0.3; transform: translateY(0); }
+    50%      { opacity: 1; transform: translateY(-3px); }
+  }
+
+  /* Suggested prompts */
   .chat-suggest {
     display: flex; flex-wrap: wrap; gap: 6px;
     padding: 0 16px 12px;
@@ -330,6 +466,7 @@ const styles = `
   }
   .chat-chip:disabled { opacity: 0.4; cursor: not-allowed; }
 
+  /* Input row */
   .chat-input {
     display: flex; align-items: center; gap: 8px;
     padding: 12px 16px 16px;
@@ -351,13 +488,15 @@ const styles = `
     background: var(--ink); color: var(--bg); border: 0;
     cursor: pointer; flex-shrink: 0;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 14px;
     transition: transform .25s var(--ease), background .25s;
   }
   .chat-mic:hover:not(:disabled), .chat-send:hover:not(:disabled) {
     transform: scale(1.05);
   }
-  .chat-mic.is-recording { background: var(--accent); animation: pulse-rec 1.2s infinite; }
+  .chat-mic.is-recording {
+    background: var(--accent);
+    animation: pulse-rec 1.2s infinite;
+  }
   .chat-mic:disabled, .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
   @keyframes pulse-rec {
     0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 50%, transparent); }

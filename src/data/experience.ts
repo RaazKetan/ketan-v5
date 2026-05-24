@@ -17,15 +17,32 @@ export type Experience = {
 
 export const EXPERIENCE: Experience[] = [
   {
-    slug: "google",
+    slug: "emergent",
     role: "Software Engineer",
-    company: "Google",
+    company: "Emergent",
     location: "Bengaluru, IN",
-    year: "2025 — Now",
-    yearStart: "Apr 2025",
+    year: "2026 — Now",
+    yearStart: "2026",
     yearEnd: "Present",
     summary:
-      "Building agent systems and secure-access infrastructure for production debugging.",
+      "Building agent-first systems and intelligent backends — pushing the same agentic loops I shipped at Google into the next product surface.",
+    bullets: [
+      "Owning agent orchestration and backend systems for the core product.",
+      "Designing end-to-end agentic loops — planning, tool use, structured memory — that ship to real users.",
+      "Carrying lessons forward from Google ADK production work: human-in-the-loop safeguards, observability, deterministic recovery.",
+    ],
+    stack: ["Python", "TypeScript", "LLMs", "Agents", "Postgres"],
+  },
+  {
+    slug: "google",
+    role: "Software Engineer (ex-Google)",
+    company: "Google",
+    location: "Bengaluru, IN",
+    year: "2025",
+    yearStart: "Apr 2025",
+    yearEnd: "2026",
+    summary:
+      "Built agent systems and secure-access infrastructure for production debugging at scale.",
     bullets: [
       "Designed and deployed a secure browser-based VM access platform that lets engineers debug production infrastructure without direct SSH.",
       "Architected a Go WebSocket relay on Kubernetes that bridges browser WSS traffic to TCP VNC servers for scalable remote console access.",

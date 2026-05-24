@@ -176,12 +176,12 @@ const defaultData: PersonalData = {
   heroTitle: {
     name: "Ketan Raj",
     title: "SWE",
-    company: "Google",
+    company: "Emergent",
     location: "Bengaluru, India",
     aboutP1:
-      "Ketan Raj (He/Him) AKA Raaz is a Software Engineer based in Bengaluru, India.",
+      "Ketan Raj (He/Him) AKA Raaz is a Software Engineer at Emergent, based in Bengaluru, India.",
     aboutP2:
-      "Passionate about building innovative solutions and solving complex problems.",
+      "Previously at Google. Building agent systems, intelligent backends, and tools that disappear.",
   },
   heroStrip: {
     taglineNum: "01",
@@ -190,14 +190,14 @@ const defaultData: PersonalData = {
     focus: "Systems · Agents · Backend",
     available: "Q2 2026",
     currently: [
-      { label: "SWE @ Google", meta: "'25—" },
-      { label: "AI agents on Google ADK", meta: "now" },
-      { label: "Browser-based VM access", meta: "shipped" },
+      { label: "SWE @ Emergent", meta: "'26—" },
+      { label: "Agent systems · backends", meta: "now" },
+      { label: "Origin — agentic hiring", meta: "building" },
     ],
     recent: [
-      { label: "SDE @ Clear (ClearTax)", meta: "'24" },
-      { label: "Imagine — AI image SaaS", meta: "'24" },
+      { label: "ex-Google · SWE", meta: "'25" },
       { label: "ADK workshops · 200+ eng.", meta: "'25" },
+      { label: "Imagine — AI image SaaS", meta: "'24" },
     ],
     stack: [
       { label: "Python · Go · TypeScript", meta: "—" },
