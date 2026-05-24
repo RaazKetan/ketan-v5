@@ -12,9 +12,11 @@ import { Contact } from './components/pages/contact';
 gsap.registerPlugin(ScrollTrigger);
 
 /* Lenis instance is shared via context so RouteEffects can reset scroll
-   through Lenis (window.scrollTo is hijacked when Lenis owns scrolling). */
-const LenisContext = createContext<Lenis | null>(null);
-const useLenis = () => useContext(LenisContext);
+   through Lenis (window.scrollTo is hijacked when Lenis owns scrolling).
+   Exported so any component can lenis.scrollTo(target) — native
+   element.scrollIntoView() fights Lenis and ends up doing nothing. */
+export const LenisContext = createContext<Lenis | null>(null);
+export const useLenis = () => useContext(LenisContext);
 
 const SmoothScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const lenisRef = useRef<Lenis | null>(null);

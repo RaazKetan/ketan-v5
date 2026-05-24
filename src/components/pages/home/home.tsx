@@ -16,13 +16,28 @@ import {
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
 import { VoiceAnalyzer } from "../../Chat/VoiceAnalyzer";
+import { useLenis } from "../../../App";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Home: React.FC = () => {
   const { heroTitle, heroStrip } = usePersonalData();
   const heroRef = useRef<HTMLElement>(null);
+  const lenis = useLenis();
   useDesignAnimations();
+
+  /* Scroll to a target id using Lenis if available; falls back to
+     native scrollIntoView. Lenis owns window.scrollY so calling the
+     native API directly silently no-ops. */
+  const scrollToTarget = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (lenis) {
+      lenis.scrollTo(el, { offset: -40, duration: 1.2 });
+    } else {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   // Hero entrance timeline - scoped via useGSAP so StrictMode + remounts
   // never leave elements stuck in the from state.
@@ -84,9 +99,7 @@ const Home: React.FC = () => {
           className="hero-agent-cta"
           onClick={(e) => {
             e.preventDefault();
-            document
-              .getElementById("voice-feature")
-              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            scrollToTarget("voice-feature");
           }}
           data-magnet="0.1"
         >
