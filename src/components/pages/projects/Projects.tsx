@@ -12,7 +12,7 @@ import {
   Word,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { PROJECTS } from "../../../data/projects";
+import { PROJECTS, BLOGS } from "../../../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,11 +21,16 @@ const PANELS = PROJECTS.map((p, i) => ({
   num: `${String(i + 1).padStart(2, "0")} / ${String(PROJECTS.length).padStart(2, "0")}`,
 }));
 
-/* Top 3 projects get full case-study treatment in the stacked section. */
-const STACKS = PROJECTS.slice(0, 3).map((p, i) => ({
+/* All projects get the full case-study treatment in the stacked section. */
+const STACKS = PROJECTS.map((p, i) => ({
   ...p,
   case: `Case study · ${String.fromCharCode(65 + i)}`,
 }));
+
+const NUMBER_WORDS: Record<number, string> = {
+  1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+};
+const wordFor = (n: number) => NUMBER_WORDS[n] ?? String(n);
 
 export const Projects: React.FC = () => {
   const hscrollRef = useRef<HTMLElement>(null);
@@ -109,23 +114,26 @@ export const Projects: React.FC = () => {
           <GridBg count={2} />
         </div>
         <div>
-          <div className="p-label">02 / Projects · case studies</div>
+          <div className="p-label">02 / Projects · case studies + writing</div>
           <h1 data-split>
-            <Word>Six</Word> <Word>things,</Word> <Word>in</Word>{" "}
-            <Word em>depth.</Word>
+            <Word>{wordFor(PROJECTS.length).charAt(0).toUpperCase() + wordFor(PROJECTS.length).slice(1)}</Word>{" "}
+            <Word>projects,</Word>{" "}
+            <Word>{wordFor(BLOGS.length)}</Word>{" "}
+            <Word em>essays.</Word>
           </h1>
           <div className="p-meta">
             <div className="lede">
-              Each one a small bet on what software could feel like - built
-              slowly, tested in production, written down honestly.
+              A few bets on what software could feel like - built slowly, tested
+              in production, written down honestly. Plus three essays on the
+              engineering ideas worth sharing.
             </div>
             <div>
-              <span className="k">Case studies</span>
+              <span className="k">Projects</span>
               <span className="v">{String(PROJECTS.length).padStart(2, "0")}</span>
             </div>
             <div>
-              <span className="k">Span</span>
-              <span className="v">2024 - Now</span>
+              <span className="k">Essays</span>
+              <span className="v">{String(BLOGS.length).padStart(2, "0")}</span>
             </div>
             <div>
               <span className="k">Scroll</span>
@@ -146,7 +154,8 @@ export const Projects: React.FC = () => {
               <em>Recent</em> work, slid sideways.
             </h2>
             <p className="hs-sub">
-              Scroll vertically - the panels slide. Six selected case studies.
+              Scroll vertically - the panels slide. {wordFor(PROJECTS.length).charAt(0).toUpperCase() + wordFor(PROJECTS.length).slice(1)}{" "}
+              selected case studies.
             </p>
           </div>
 
@@ -187,10 +196,10 @@ export const Projects: React.FC = () => {
           <div className="hs-end">
             <div className="hs-tag">End of reel</div>
             <h3>
-              That's the <em>{PROJECTS.length === 6 ? "six" : PROJECTS.length}.</em>
+              That's the <em>{wordFor(PROJECTS.length)}.</em>
             </h3>
             <Btn to="/work">
-              <span>See the full archive</span>
+              <span>See the experience</span>
               <span>→</span>
             </Btn>
           </div>
@@ -268,6 +277,49 @@ export const Projects: React.FC = () => {
             </div>
           </article>
         ))}
+      </section>
+
+      {/* WRITING / BLOG */}
+      <section className="writing-section">
+        <div className="writing-head">
+          <div className="writing-tag">04 / Writing</div>
+          <h2>
+            <em>Essays</em> &amp; deep dives.
+          </h2>
+          <p className="writing-sub">
+            Notes from the agent build, an algorithmic curveball, and a peek
+            inside Google's mono-repo. Published on Medium.
+          </p>
+        </div>
+        <div className="writing-grid">
+          {BLOGS.map((b) => (
+            <a
+              key={b.slug}
+              className="blog-card"
+              href={b.url}
+              target="_blank"
+              rel="noreferrer"
+              data-magnet="0.06"
+            >
+              <div className="blog-meta">
+                <span>{b.publication}</span>
+                <span>
+                  {b.date} · {b.readTime}
+                </span>
+              </div>
+              <h3>
+                {b.titleHead} <em>{b.titleEm}</em> {b.titleTail}
+              </h3>
+              <p>{b.summary}</p>
+              <div className="blog-tags">
+                {b.tags.map((t) => (
+                  <Chip key={t}>{t}</Chip>
+                ))}
+              </div>
+              <span className="blog-cta">Read on Medium ↗</span>
+            </a>
+          ))}
+        </div>
       </section>
 
       {/* CTA */}
@@ -535,6 +587,8 @@ const styles = `
     .hs-end { width: 60vw; }
   }
   @media (max-width: 900px) {
+    .writing-section { padding: 0 24px 60px; }
+    .writing-grid { grid-template-columns: 1fr; }
     .p-hero { padding: 130px 24px 60px; }
     .p-hero h1 { font-size: clamp(48px, 11vw, 96px); }
     .p-meta { grid-template-columns: 1fr 1fr; gap: 20px; }

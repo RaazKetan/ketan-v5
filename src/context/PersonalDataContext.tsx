@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from "react";
 import { EXPERIENCE, type Experience } from "../data/experience";
-import { PROJECTS, ARCHIVE, FEATURED, type Project as PortfolioProject } from "../data/projects";
+import { PROJECTS, ARCHIVE, FEATURED, BLOGS, type Project as PortfolioProject, type BlogPost } from "../data/projects";
 import { GoogleMark } from "../components/design/GoogleMark";
 
 export type HeroTitleProps = {
@@ -164,6 +164,7 @@ export type PersonalData = {
   projects: PortfolioProject[];
   archive: PortfolioProject[];
   featured: PortfolioProject[];
+  blogs: BlogPost[];
   /* Legacy fields preserved for backwards compatibility with older components. */
   footerData: FooterProps;
   LoaderData: LoaderProps;
@@ -301,6 +302,7 @@ const defaultData: PersonalData = {
   projects: PROJECTS,
   archive: ARCHIVE,
   featured: FEATURED,
+  blogs: BLOGS,
   footerData: {
     tagline: "Just an ordinary Developer",
     footerNote: "From India with pride",

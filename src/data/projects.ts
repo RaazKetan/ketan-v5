@@ -1,6 +1,4 @@
-/* Curated portfolio projects sourced from github.com/RaazKetan.
-   Each entry maps a GitHub repo to a portfolio-friendly title, tagline,
-   role, tech list, year, and external links. */
+/* Curated portfolio projects + blog posts. */
 
 export type ProjectKind = "Agent" | "AI" | "Full-stack" | "Tooling" | "Creative";
 
@@ -58,48 +56,14 @@ export const PROJECTS: Project[] = [
     repo: "https://github.com/RaazKetan/Reublic-The-Revolution-AI-Agent",
   },
   {
-    slug: "resume-agent",
-    name: "Resume Sortlist Agent",
-    titleHead: "Resume Sortlist - an",
-    titleEm: "AI",
-    titleTail: "screening agent.",
-    short:
-      "AI agent that screens and ranks resumes against a job spec - explainable and fast.",
-    long: "Hiring managers waste hours on resume screening; the agent turns that into seconds. It reads a JD, parses incoming resumes, and ranks candidates with a justification trail. Built so the agent's reasoning is the product, not a hidden black box.",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "AI",
-    tech: ["Python", "LLM", "NLP"],
-    year: "2025",
-    yearRange: "2025",
-    repo: "https://github.com/RaazKetan/ai-agent-resume-sortlist",
-  },
-  {
-    slug: "adk-voice",
-    name: "ADK Voice Agent",
-    titleHead: "Voice Agent - built on",
-    titleEm: "Google",
-    titleTail: "ADK.",
-    short:
-      "Voice-driven assistant built on Google's Agent Development Kit.",
-    long: "A real-time voice agent built on Google's ADK - speech in, tool-using reasoning, structured output. The interesting part is the latency budget: every hop has to fit inside a conversational rhythm. Built as a reference for what voice-native agents feel like.",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Agent",
-    tech: ["Python", "Google ADK", "Speech"],
-    year: "2025",
-    yearRange: "2025",
-    repo: "https://github.com/RaazKetan/Google_ADK_Voice_Agent",
-  },
-  {
     slug: "imagine",
     name: "Imagine",
     titleHead: "Imagine - an",
     titleEm: "AI",
     titleTail: "image studio.",
     short:
-      "AI image generation studio - Next.js, Clerk, Cloudinary, Stripe.",
-    long: "Imagine is an end-to-end AI image studio: prompt → generation → gallery, with credits and billing wired in. Full-stack Next.js with Clerk for auth, Cloudinary for media, and Stripe for payments - the kind of project that exercises every layer.",
+      "AI image generation studio - Next.js, Clerk, Cloudinary, Stripe. 2000+ daily transformations.",
+    long: "Imagine is an end-to-end AI image studio: prompt -> generation -> gallery, with credits and billing wired in. Full-stack Next.js with Clerk for auth, Cloudinary for media, and Stripe for payments - the kind of project that exercises every layer at 99.9% uptime.",
     role: "Author · Solo",
     org: "Open source",
     kind: "Full-stack",
@@ -109,241 +73,75 @@ export const PROJECTS: Project[] = [
     repo: "https://github.com/RaazKetan/imagine",
     live: "https://imagine-alpha.vercel.app",
   },
-  {
-    slug: "taskmaster",
-    name: "TaskMaster",
-    titleHead: "TaskMaster - a",
-    titleEm: "collaborative",
-    titleTail: "task workspace.",
-    short:
-      "Real-time collaborative task management with team workspaces and analytics.",
-    long: "TaskMaster is a clean take on shared task lists - multi-user workspaces, real-time updates, and just enough analytics to keep teams honest. Built to be the lightest possible tool that still feels serious.",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Full-stack",
-    tech: ["JavaScript", "React", "Node.js", "WebSocket"],
-    year: "2025",
-    yearRange: "2025",
-    repo: "https://github.com/RaazKetan/TaskMaster_2",
-  },
 ];
 
-/* Archive: longer list used on /work, includes the 6 case studies plus
-   additional shipped work. */
-export const ARCHIVE: Project[] = [
-  ...PROJECTS,
+/* Featured projects: surface on the home page. */
+export const FEATURED: Project[] = PROJECTS;
+
+/* Archive kept as an alias so any legacy import doesn't break. */
+export const ARCHIVE: Project[] = PROJECTS;
+
+/* ============ Blog posts (Medium) ============ */
+
+export type BlogPost = {
+  slug: string;
+  title: string;
+  titleHead: string;  // first chunk
+  titleEm: string;    // emphasised italic word
+  titleTail: string;  // remainder
+  summary: string;
+  url: string;
+  publication: string;
+  date: string;       // "Aug 21, 2025"
+  year: string;       // "2025"
+  readTime: string;   // "4 min"
+  tags: string[];
+};
+
+export const BLOGS: BlogPost[] = [
   {
-    slug: "tata-cliq-agent",
-    name: "Tata Cliq Agent",
-    titleHead: "Tata Cliq Agent - a",
-    titleEm: "browsing",
-    titleTail: "automation.",
-    short:
-      "Agent that automates discovery and checkout flows on Tata Cliq.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Agent",
-    tech: ["HTML", "JS", "Agent"],
-    year: "2026",
-    yearRange: "2026",
-    repo: "https://github.com/RaazKetan/Tata_Cliq_Agent",
-  },
-  {
-    slug: "linkedin-post-agent",
-    name: "LinkedIn Post Agent",
-    titleHead: "LinkedIn Agent - a",
-    titleEm: "drafting",
-    titleTail: "agent.",
-    short:
-      "Agent that drafts LinkedIn posts in your voice from a short prompt.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Agent",
-    tech: ["Python", "LLM"],
+    slug: "google-adk-streamlit",
+    title: "Build your Agent: A Deep Dive into Google ADK and Streamlit Integration",
+    titleHead: "Build your",
+    titleEm: "Agent",
+    titleTail: "- ADK + Streamlit, end to end.",
+    summary:
+      "A practical walk-through of wiring Google ADK agents into a Streamlit UI - state, tool calls, and the smallest viable agentic chatbot you can ship in an afternoon.",
+    url: "https://medium.com/@ketanraaz/build-your-agent-a-deep-dive-into-google-adk-and-streamlit-integration-cee9d79164e4",
+    publication: "Medium",
+    date: "2025",
     year: "2025",
-    yearRange: "2025",
-    repo: "https://github.com/RaazKetan/linkedin-post-gen-agent",
+    readTime: "6 min",
+    tags: ["Google ADK", "Streamlit", "Agents", "Python"],
   },
   {
-    slug: "adk-postgres",
-    name: "ADK + Postgres",
-    titleHead: "ADK Postgres - an",
-    titleEm: "agent",
-    titleTail: "memory.",
-    short:
-      "Google ADK agent wired to Postgres - agentic queries with structured memory.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Agent",
-    tech: ["Python", "Google ADK", "Postgres"],
+    slug: "dijkstra-dethroned",
+    title: "The 60-Year-Old Algorithm We Thought Was Unbeatable Just Got Dethroned",
+    titleHead: "The 60-year-old",
+    titleEm: "algorithm",
+    titleTail: "just got dethroned.",
+    summary:
+      "Dijkstra has held the shortest-path crown since 1956. A new algorithm from 2025 beats it on bounds we thought were optimal. What changed, and what it means for graphs at scale.",
+    url: "https://medium.com/@ketanraaz/the-60-year-old-algorithm-we-thought-was-unbeatable-just-got-dethroned-388486641238",
+    publication: "Medium",
+    date: "Aug 21, 2025",
     year: "2025",
-    yearRange: "2025",
-    repo: "https://github.com/RaazKetan/Google_adk_postgres",
+    readTime: "4 min",
+    tags: ["Algorithms", "Graphs", "Research"],
   },
   {
-    slug: "adk-streamlit",
-    name: "ADK on Streamlit",
-    titleHead: "ADK Streamlit - a",
-    titleEm: "live",
-    titleTail: "agent UI.",
-    short:
-      "Streamlit interface for live-debugging Google ADK agents in development.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Tooling",
-    tech: ["Python", "Streamlit", "Google ADK"],
+    slug: "google-monorepo",
+    title: "Why Google Put Its Billions of Lines of Code Into One",
+    titleHead: "Why",
+    titleEm: "Google",
+    titleTail: "put billions of lines into one repo.",
+    summary:
+      "Mono-repo vs. polyrepo isn't just a tooling decision - it shapes how teams collaborate, how fast you refactor, and how painful cross-project changes get. Notes from the inside.",
+    url: "https://medium.com/@ketanraaz/why-google-put-its-billions-of-lines-of-code-into-one-0a0241ac60b3",
+    publication: "Medium",
+    date: "Sep 8, 2025",
     year: "2025",
-    yearRange: "2025",
-    repo: "https://github.com/RaazKetan/Google-ADK-Streamlit",
-  },
-  {
-    slug: "readme-editor",
-    name: "README Editor",
-    titleHead: "ReadmeEditor - a",
-    titleEm: "live",
-    titleTail: "markdown editor.",
-    short:
-      "Live README editor with preview, custom themes, and Figma-style controls.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Tooling",
-    tech: ["React", "Tailwind", "Markdown"],
-    year: "2024",
-    yearRange: "2024",
-    repo: "https://github.com/RaazKetan/ReadmeEditor",
-    live: "https://readme-editor-isr265x91-ketan-rajs-projects.vercel.app/",
-  },
-  {
-    slug: "perkpass",
-    name: "PerkPass",
-    titleHead: "PerkPass - a",
-    titleEm: "perks",
-    titleTail: "aggregator.",
-    short:
-      "Discover and stack consumer perks in one place - built on Next.js.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Full-stack",
-    tech: ["Next.js", "TypeScript"],
-    year: "2024",
-    yearRange: "2024",
-    repo: "https://github.com/RaazKetan/PerkPass",
-    live: "https://perk-pass.vercel.app",
-  },
-  {
-    slug: "luxelenses",
-    name: "LuxeLenses",
-    titleHead: "LuxeLenses - a",
-    titleEm: "premium",
-    titleTail: "eyewear store.",
-    short:
-      "E-commerce for premium eyewear - Firebase auth, Firestore, Redux.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Full-stack",
-    tech: ["React", "Firebase", "Redux", "SCSS"],
-    year: "2024",
-    yearRange: "2024",
-    repo: "https://github.com/RaazKetan/LuxeLenses",
-    live: "https://luxe-lenses.vercel.app/",
-  },
-  {
-    slug: "portfolio-v4",
-    name: "Portfolio v4",
-    titleHead: "Folio v4 - the",
-    titleEm: "previous",
-    titleTail: "portfolio.",
-    short:
-      "Previous portfolio iteration - minimal, scroll-driven, with Three.js scenes.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Creative",
-    tech: ["TypeScript", "React", "Three.js"],
-    year: "2024",
-    yearRange: "2024",
-    repo: "https://github.com/RaazKetan/ketan-v4",
-    live: "https://ketanraaz.vercel.app",
-  },
-  {
-    slug: "social-extension",
-    name: "Social Extension",
-    titleHead: "Social Extension - a",
-    titleEm: "browser",
-    titleTail: "companion.",
-    short:
-      "Chrome extension that streamlines cross-network social activity.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Tooling",
-    tech: ["JavaScript", "Chrome Extension"],
-    year: "2024",
-    yearRange: "2024",
-    repo: "https://github.com/RaazKetan/Social_Extension",
-  },
-  {
-    slug: "chatgpt-clone",
-    name: "ChatGPT Clone",
-    titleHead: "ChatGPT clone - a",
-    titleEm: "streaming",
-    titleTail: "playground.",
-    short:
-      "Conversational AI playground with streaming responses and chat history.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "AI",
-    tech: ["Next.js", "TypeScript", "OpenAI"],
-    year: "2024",
-    yearRange: "2024",
-    repo: "https://github.com/RaazKetan/chatgpt_clone",
-    live: "https://chatgpt-clone-flame.vercel.app",
-  },
-  {
-    slug: "brewnation",
-    name: "Brewnation",
-    titleHead: "Brewnation - a",
-    titleEm: "coffee",
-    titleTail: "landing.",
-    short:
-      "Coffee roastery landing with hand-crafted CSS animations.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Creative",
-    tech: ["HTML", "CSS"],
-    year: "2023",
-    yearRange: "2023",
-    repo: "https://github.com/RaazKetan/Brewnation",
-    live: "https://brewnation-1-7f6u2ta0l-raazketan.vercel.app/",
-  },
-  {
-    slug: "3dmania",
-    name: "3D Mania",
-    titleHead: "3D Mania - a",
-    titleEm: "WebGL",
-    titleTail: "playground.",
-    short:
-      "Interactive WebGL playground - Three.js shader explorations.",
-    long: "",
-    role: "Author · Solo",
-    org: "Open source",
-    kind: "Creative",
-    tech: ["JavaScript", "Three.js", "GLSL"],
-    year: "2023",
-    yearRange: "2023",
-    repo: "https://github.com/RaazKetan/3dMania",
-    live: "https://3dmania.vercel.app",
+    readTime: "3 min",
+    tags: ["Monorepo", "Engineering", "Tooling"],
   },
 ];
-
-/* Featured projects: surface 4 on the home page. */
-export const FEATURED: Project[] = PROJECTS.slice(0, 4);
