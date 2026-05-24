@@ -11,7 +11,8 @@ import {
   Word,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { EXPERIENCE } from "../../../data/experience";
+import { usePersonalData } from "../../../context/PersonalDataContext";
+import type { Experience } from "../../../data/experience";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,6 +22,7 @@ const NUMBER_WORDS: Record<number, string> = {
 };
 
 export const Work: React.FC = () => {
+  const { experience: EXPERIENCE, workInfo } = usePersonalData();
   const [openSlug, setOpenSlug] = useState<string | null>(EXPERIENCE[0]?.slug ?? null);
   useDesignAnimations();
 
@@ -51,10 +53,8 @@ export const Work: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
-  /* Years of shipping — counts from the first project year (2021), not when
-     I started university. Update SHIPPING_START_YEAR if the narrative changes. */
-  const SHIPPING_START_YEAR = 2021;
-  const totalYears = new Date().getFullYear() - SHIPPING_START_YEAR;
+  /* Years of shipping — driven by workInfo.shippingStartYear in PersonalDataContext. */
+  const totalYears = new Date().getFullYear() - workInfo.shippingStartYear;
 
   return (
     <DesignLayout>
@@ -69,12 +69,8 @@ export const Work: React.FC = () => {
             <Word em>years</Word> <Word>of</Word> <Word>shipping.</Word>
           </h1>
           <div className="w-lede">
-            <div className="l">Selected · 2021 — Now</div>
-            <div className="r">
-              Roles, internships, and independent stints — what I've worked on,
-              with whom, and what I shipped. Tap any row for the bullet-point
-              version.
-            </div>
+            <div className="l">{workInfo.ledeShort}</div>
+            <div className="r">{workInfo.ledeLong}</div>
           </div>
         </div>
       </section>
@@ -137,8 +133,9 @@ export const Work: React.FC = () => {
           <GridBg count={3} />
         </div>
         <h2>
-          <Word>Currently</Word> <Word em>booking</Word>{" "}
-          <Word>Q3.</Word>
+          <Word>{workInfo.ctaHeadline[0]}</Word>{" "}
+          <Word em>{workInfo.ctaHeadline[1]}</Word>{" "}
+          <Word>{workInfo.ctaHeadline[2]}</Word>
         </h2>
         <div className="w-cta-actions">
           <ShimmerBtn to="/contact">Start a project ↗</ShimmerBtn>
@@ -155,7 +152,7 @@ export const Work: React.FC = () => {
 };
 
 const ExperienceRow: React.FC<{
-  exp: (typeof EXPERIENCE)[number];
+  exp: Experience;
   index: number;
   isOpen: boolean;
   onToggle: () => void;

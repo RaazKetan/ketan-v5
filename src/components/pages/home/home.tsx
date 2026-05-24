@@ -16,12 +16,11 @@ import {
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
-import { FEATURED } from "../../../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Home: React.FC = () => {
-  const { heroTitle } = usePersonalData();
+  const { heroTitle, heroStrip, featured } = usePersonalData();
   const heroRef = useRef<HTMLElement>(null);
   useDesignAnimations();
 
@@ -82,11 +81,11 @@ const Home: React.FC = () => {
 
         <div className="hero-tagline">
           <div className="tag-line">
-            <span className="t-num">01</span>
-            <span className="t-body">
-              Building <em>quiet systems</em> &amp; intelligent agents for teams who care about
-              the second order of effects.
-            </span>
+            <span className="t-num">{heroStrip.taglineNum}</span>
+            <span
+              className="t-body"
+              dangerouslySetInnerHTML={{ __html: heroStrip.taglineBody }}
+            />
           </div>
           <div className="tag-actions">
             <Btn to="/projects" primary>
@@ -112,69 +111,31 @@ const Home: React.FC = () => {
             </div>
             <div>
               <span className="k">Focus</span>
-              <span className="v">Systems · Agents · Backend</span>
+              <span className="v">{heroStrip.focus}</span>
             </div>
             <div>
               <span className="k">Available</span>
               <span className="v">
                 <span className="led-inline" />
-                Q2 2026
+                {heroStrip.available}
               </span>
             </div>
           </div>
 
           <div className="hero-strip">
-            <div className="col">
-              <h5>Currently</h5>
-              <ul>
-                <li>
-                  <span>SWE @ Google</span>
-                  <span>'25—</span>
-                </li>
-                <li>
-                  <span>AI agents on Google ADK</span>
-                  <span>now</span>
-                </li>
-                <li>
-                  <span>Browser-based VM access</span>
-                  <span>shipped</span>
-                </li>
-              </ul>
-            </div>
-            <div className="col">
-              <h5>Recent</h5>
-              <ul>
-                <li>
-                  <span>SDE @ Clear (ClearTax)</span>
-                  <span>'24</span>
-                </li>
-                <li>
-                  <span>Imagine — AI image SaaS</span>
-                  <span>'24</span>
-                </li>
-                <li>
-                  <span>ADK workshops · 200+ eng.</span>
-                  <span>'25</span>
-                </li>
-              </ul>
-            </div>
-            <div className="col">
-              <h5>Stack</h5>
-              <ul>
-                <li>
-                  <span>Python · Go · TypeScript</span>
-                  <span>—</span>
-                </li>
-                <li>
-                  <span>FastAPI · Angular · React</span>
-                  <span>—</span>
-                </li>
-                <li>
-                  <span>K8s · Vertex AI · Terraform</span>
-                  <span>—</span>
-                </li>
-              </ul>
-            </div>
+            {(["currently", "recent", "stack"] as const).map((key) => (
+              <div className="col" key={key}>
+                <h5>{key === "currently" ? "Currently" : key === "recent" ? "Recent" : "Stack"}</h5>
+                <ul>
+                  {heroStrip[key].map((item, i) => (
+                    <li key={i}>
+                      <span>{item.label}</span>
+                      <span>{item.meta}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -207,7 +168,7 @@ const Home: React.FC = () => {
         </div>
 
         <div className="feature-grid">
-          {FEATURED.map((p, i) => (
+          {featured.map((p, i) => (
             <BlurFade key={p.slug} delay={i * 0.08} className="feature-card-wrap">
               <a
                 href={p.live || p.repo}

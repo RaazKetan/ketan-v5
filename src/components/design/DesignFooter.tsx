@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
+import { usePersonalData } from "../../context/PersonalDataContext";
 
 const PAGE_INDEX: Record<string, string> = {
   "/": "01 / 05 · Home",
@@ -13,21 +14,18 @@ export const DesignFooter: React.FC<{
   status?: string;
   copyright?: string;
   index?: string;
-}> = ({
-  status = "Available · Q2 2026",
-  copyright = "© 2026 Ketan Raj",
-  index,
-}) => {
+}> = ({ status, copyright, index }) => {
   const { pathname } = useLocation();
-  const idx = index ?? PAGE_INDEX[pathname] ?? "Portfolio · v5";
+  const { footerInfo } = usePersonalData();
+  const idx = index ?? PAGE_INDEX[pathname] ?? footerInfo.craft;
   return (
     <footer className="ds-footer">
       <div className="left">
         <span className="led" />
-        <span>{status}</span>
+        <span>{status ?? footerInfo.status}</span>
       </div>
       <div>{idx}</div>
-      <div>{copyright}</div>
+      <div>{copyright ?? footerInfo.copyright}</div>
     </footer>
   );
 };

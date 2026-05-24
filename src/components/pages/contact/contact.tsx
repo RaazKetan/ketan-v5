@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { DesignLayout, GridBg, Word } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
+import { usePersonalData } from "../../../context/PersonalDataContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,20 +24,21 @@ const BUDGETS = [
   "Equity / retainer",
 ];
 
-const CHANNELS = [
-  { label: "Email", value: "21ketanraaz@gmail.com", icon: "↗", href: "mailto:21ketanraaz@gmail.com" },
-  { label: "GitHub", value: "@RaazKetan", icon: "↗", href: "https://github.com/RaazKetan" },
-  { label: "Medium", value: "@ketanraaz", icon: "↗", href: "https://medium.com/@ketanraaz" },
-  { label: "Topmate", value: "Book 30 min", icon: "↗", href: "https://topmate.io/ketan_raj" },
-];
-
 export const Contact: React.FC = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
   const [topics, setTopics] = useState<Set<string>>(new Set());
   const [budget, setBudget] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const { contactInfo } = usePersonalData();
   useDesignAnimations();
+
+  const channels = [
+    { label: "Email", value: contactInfo.email, href: `mailto:${contactInfo.email}` },
+    { label: "GitHub", value: "@" + contactInfo.github.split("/").pop(), href: contactInfo.github },
+    { label: "Medium", value: contactInfo.medium.split("@").pop() ? "@" + contactInfo.medium.split("@").pop() : "Medium", href: contactInfo.medium },
+    { label: "Topmate", value: "Book 30 min", href: contactInfo.topmate },
+  ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -104,34 +106,34 @@ export const Contact: React.FC = () => {
         <aside className="form-side">
           <div className="item">
             <h6>Email</h6>
-            <a className="v" href="mailto:21ketanraaz@gmail.com">
-              21ketanraaz@gmail.com
+            <a className="v" href={`mailto:${contactInfo.email}`}>
+              {contactInfo.email}
             </a>
             <div className="small">Direct line · usually within 24h</div>
           </div>
           <div className="item">
             <h6>Topmate</h6>
-            <a className="v" href="https://topmate.io/ketan_raj" target="_blank" rel="noreferrer">
+            <a className="v" href={contactInfo.topmate} target="_blank" rel="noreferrer">
               Book 30 min ↗
             </a>
             <div className="small">1:1 chats · paid sessions</div>
           </div>
           <div className="item">
             <h6>Elsewhere</h6>
-            <a className="v" href="https://github.com/RaazKetan" target="_blank" rel="noreferrer">
+            <a className="v" href={contactInfo.github} target="_blank" rel="noreferrer">
               GitHub ↗
             </a>
-            <a className="v" href="https://medium.com/@ketanraaz" target="_blank" rel="noreferrer">
+            <a className="v" href={contactInfo.medium} target="_blank" rel="noreferrer">
               Medium ↗
             </a>
-            <a className="v" href="https://www.linkedin.com/in/ketanraj" target="_blank" rel="noreferrer">
+            <a className="v" href={contactInfo.linkedin} target="_blank" rel="noreferrer">
               LinkedIn ↗
             </a>
           </div>
           <div className="item">
             <h6>Location</h6>
-            <span className="v">Bengaluru, India</span>
-            <div className="small">IST · UTC+5:30 · 12.97° N</div>
+            <span className="v">{contactInfo.locationLong}</span>
+            <div className="small">{contactInfo.timezone}</div>
           </div>
         </aside>
 
@@ -220,7 +222,7 @@ export const Contact: React.FC = () => {
         </div>
 
         <div className="channels">
-          {CHANNELS.map((c) => (
+          {channels.map((c) => (
             <a
               key={c.label}
               className="channel"
@@ -232,7 +234,7 @@ export const Contact: React.FC = () => {
               <h6>{c.label}</h6>
               <div className="v">
                 <span>{c.value}</span>
-                <span>{c.icon}</span>
+                <span>↗</span>
               </div>
             </a>
           ))}

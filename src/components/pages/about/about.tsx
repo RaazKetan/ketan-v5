@@ -11,6 +11,7 @@ import {
   Word,
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
+import { usePersonalData } from "../../../context/PersonalDataContext";
 import BCImage from "../../../assets/BC.jpeg";
 import HC1Image from "../../../assets/HC1.jpeg";
 import HC2Image from "../../../assets/HC2.jpeg";
@@ -18,40 +19,9 @@ import meVideo from "../../../assets/me.mp4";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const BOOKS = [
-  { title: "A Pattern Language", author: "Alexander", year: "'77" },
-  { title: "The Mythical Man-Month", author: "Brooks", year: "'75" },
-  { title: "The Order of Time", author: "Rovelli", year: "'18" },
-  { title: "Slow Productivity", author: "Newport", year: "'24" },
-];
-
-const STACK = [
-  { name: "TypeScript", pct: "89%" },
-  { name: "Python", pct: "62%" },
-  { name: "Go", pct: "34%" },
-  { name: "Postgres", pct: "71%" },
-  { name: "Java / Spring", pct: "44%" },
-  { name: "LLM tooling", pct: "31%" },
-];
-
-const SOUNDTRACK = [
-  { title: "Sostre — Quietude", meta: "Ambient · 2024" },
-  { title: "The Necks — Three", meta: "Jazz · 2020" },
-  { title: "Floating Points — Promises", meta: "Modern classical · 2021" },
-];
-
-const GEAR = [
-  { name: "MacBook Pro 14\"", ds: "M3 · daily driver" },
-  { name: "Mechanical keyboard", ds: "Keychron · Brown" },
-  { name: "External monitor", ds: "27\" 4K · matte" },
-  { name: "Filter coffee", ds: "South Indian, always" },
-  { name: "Black notebook", ds: "Dotted · always open" },
-  { name: "Wired earphones", ds: "OnePlus · 8 yrs" },
-  { name: "Whiteboard", ds: "For thinking out loud" },
-  { name: "Terminal", ds: "Warp · zsh · vim" },
-];
-
 export const About: React.FC = () => {
+  const { contactInfo, bentoData } = usePersonalData();
+  const { books: BOOKS, stack: STACK, soundtrack: SOUNDTRACK, gear: GEAR } = bentoData;
   const prologueRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -73,7 +43,7 @@ export const About: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
-  // Pinned scaling prologue.
+  // Pinned scaling prologue. Lerped scrub so fast scrolls smooth out.
   useEffect(() => {
     const el = prologueRef.current;
     if (!el) return;
@@ -92,8 +62,8 @@ export const About: React.FC = () => {
           scrollTrigger: {
             trigger: el,
             start: "top top",
-            end: "+=60%",
-            scrub: 0.8,
+            end: "+=80%",
+            scrub: 1.6,
           },
         }
       );
@@ -104,9 +74,9 @@ export const About: React.FC = () => {
         ease: "none",
         scrollTrigger: {
           trigger: el,
-          start: "top -60%",
+          start: "top -70%",
           end: "bottom top",
-          scrub: 0.8,
+          scrub: 1.6,
         },
       });
     });
@@ -170,7 +140,7 @@ export const About: React.FC = () => {
               <Word>and</Word> <Word em>on&nbsp;purpose.</Word>
               <span className="badge" data-magnet="">
                 <span className="led" />
-                Bengaluru · IST
+                {contactInfo.locationShort} · IST
               </span>
             </span>
           </h1>
@@ -247,10 +217,10 @@ export const About: React.FC = () => {
           <div className="map" />
           <div className="pin" />
           <div className="body">
-            <h6>Bengaluru, IN</h6>
-            <div className="loc-line">Karnataka · IST.</div>
+            <h6>{contactInfo.locationShort}</h6>
+            <div className="loc-line">{contactInfo.locationLong.split(", ").pop()} · IST.</div>
           </div>
-          <span className="lcoord">12.9716° N · 77.5946° E</span>
+          <span className="lcoord">{contactInfo.coords.lat} · {contactInfo.coords.lon}</span>
         </div>
 
         {/* Now */}
