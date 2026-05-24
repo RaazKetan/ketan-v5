@@ -299,6 +299,11 @@ export const Projects: React.FC = () => {
               rel="noreferrer"
               data-magnet="0.06"
             >
+              {b.cover && (
+                <div className="blog-cover">
+                  <img src={b.cover} alt="" loading="lazy" />
+                </div>
+              )}
               <div className="blog-meta">
                 <span>{b.publication}</span>
                 <span>
@@ -592,10 +597,10 @@ const styles = `
   }
   .blog-card {
     border: 1px solid var(--line); border-radius: 8px;
-    background: var(--bg); padding: 24px;
-    display: flex; flex-direction: column; gap: 14px;
+    background: var(--bg);
+    display: flex; flex-direction: column;
     text-decoration: none; color: inherit;
-    min-width: 0;
+    min-width: 0; overflow: hidden;
     transition: transform .4s var(--ease), border-color .3s var(--ease),
                 box-shadow .4s var(--ease);
   }
@@ -604,6 +609,23 @@ const styles = `
     border-color: color-mix(in oklab, var(--ink) 30%, var(--line));
     box-shadow: 0 12px 28px rgba(22, 21, 19, 0.06);
   }
+  .blog-cover {
+    position: relative; width: 100%;
+    aspect-ratio: 16 / 9; overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in oklab, var(--ink) 4%, var(--bg));
+  }
+  .blog-cover img {
+    width: 100%; height: 100%; display: block;
+    object-fit: cover; object-position: center;
+    transition: transform .6s var(--ease);
+  }
+  .blog-card:hover .blog-cover img { transform: scale(1.03); }
+  .blog-card > .blog-meta { padding: 22px 22px 0; }
+  .blog-card > h3 { padding: 0 22px; margin-top: 12px; }
+  .blog-card > p { padding: 0 22px; margin-top: 12px; }
+  .blog-card > .blog-tags { padding: 0 22px; margin-top: 14px; }
+  .blog-card > .blog-cta { margin: 14px 0 0; padding: 14px 22px 22px; }
   .blog-meta {
     display: flex; justify-content: space-between; align-items: baseline;
     gap: 12px; flex-wrap: wrap;

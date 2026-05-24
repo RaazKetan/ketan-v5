@@ -83,6 +83,10 @@ export const ARCHIVE: Project[] = PROJECTS;
 
 /* ============ Blog posts (Medium) ============ */
 
+import adkCover from "../assets/ADK.png";
+import dijCover from "../assets/Dij.png";
+import googleCover from "../assets/Google.png";
+
 export type BlogPost = {
   slug: string;
   title: string;
@@ -96,6 +100,7 @@ export type BlogPost = {
   year: string;       // "2025"
   readTime: string;   // "4 min"
   tags: string[];
+  cover?: string;     // imported image url
 };
 
 export const BLOGS: BlogPost[] = [
@@ -113,6 +118,7 @@ export const BLOGS: BlogPost[] = [
     year: "2025",
     readTime: "6 min",
     tags: ["Google ADK", "Streamlit", "Agents", "Python"],
+    cover: adkCover,
   },
   {
     slug: "dijkstra-dethroned",
@@ -128,6 +134,7 @@ export const BLOGS: BlogPost[] = [
     year: "2025",
     readTime: "4 min",
     tags: ["Algorithms", "Graphs", "Research"],
+    cover: dijCover,
   },
   {
     slug: "google-monorepo",
@@ -143,5 +150,6 @@ export const BLOGS: BlogPost[] = [
     year: "2025",
     readTime: "3 min",
     tags: ["Monorepo", "Engineering", "Tooling"],
+    cover: googleCover,
   },
 ];
