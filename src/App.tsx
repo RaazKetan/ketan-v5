@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -19,39 +19,41 @@ export const LenisContext = createContext<Lenis | null>(null);
 export const useLenis = () => useContext(LenisContext);
 
 const SmoothScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const lenisRef = useRef<Lenis | null>(null);
+  /* useState (not useRef) so context consumers re-render with the live
+     instance. Previous version used a ref + create-in-render, which broke
+     under StrictMode: cleanup destroyed Lenis and nulled the ref, but
+     since 'create in render' never re-fires after the initial render,
+     the context was left holding a dead reference. Anything calling
+     lenis.scrollTo() (the agent CTA) silently no-op'd. */
+  const [lenis, setLenis] = useState<Lenis | null>(null);
 
-  if (lenisRef.current === null && typeof window !== 'undefined') {
-    lenisRef.current = new Lenis({
+  useEffect(() => {
+    const instance = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       wheelMultiplier: 0.9,
       touchMultiplier: 1.2,
     });
-  }
+    setLenis(instance);
 
-  useEffect(() => {
-    const lenis = lenisRef.current;
-    if (!lenis) return;
-
-    const update = (time: number) => lenis.raf(time * 1000);
+    const update = (time: number) => instance.raf(time * 1000);
     gsap.ticker.add(update);
     gsap.ticker.lagSmoothing(0);
 
     const onScroll = () => ScrollTrigger.update();
-    lenis.on('scroll', onScroll);
+    instance.on('scroll', onScroll);
 
     return () => {
       gsap.ticker.remove(update);
-      lenis.off('scroll', onScroll);
-      lenis.destroy();
-      lenisRef.current = null;
+      instance.off('scroll', onScroll);
+      instance.destroy();
+      setLenis(null);
     };
   }, []);
 
   return (
-    <LenisContext.Provider value={lenisRef.current}>
+    <LenisContext.Provider value={lenis}>
       {children}
     </LenisContext.Provider>
   );

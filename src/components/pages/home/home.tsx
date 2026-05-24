@@ -26,17 +26,23 @@ const Home: React.FC = () => {
   const lenis = useLenis();
   useDesignAnimations();
 
-  /* Scroll to a target id using Lenis if available; falls back to
-     native scrollIntoView. Lenis owns window.scrollY so calling the
-     native API directly silently no-ops. */
+  /* Scroll to a target id. Tries Lenis first, then a native fallback
+     verified ~600ms later — if neither lands us inside +/-20px of the
+     target we hard-jump there so the click never feels dead. */
   const scrollToTarget = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
+    const target = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 40);
     if (lenis) {
-      lenis.scrollTo(el, { offset: -40, duration: 1.2 });
+      lenis.scrollTo(target, { duration: 1.2 });
     } else {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.scrollTo({ top: target, behavior: "smooth" });
     }
+    window.setTimeout(() => {
+      if (Math.abs(window.scrollY - target) > 24) {
+        window.scrollTo({ top: target, behavior: "smooth" });
+      }
+    }, 700);
   };
 
   // Hero entrance timeline - scoped via useGSAP so StrictMode + remounts
