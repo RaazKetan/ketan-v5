@@ -7,8 +7,9 @@ declare const process: { env: Record<string, string | undefined> };
 /* Allowed browser origins. Production: your Vercel domain + custom domain.
    Set ALLOWED_ORIGINS in Vercel env as a comma-separated list to override. */
 const DEFAULT_ORIGINS = [
-  "https://ketan-v5.vercel.app",
-  "https://ketanraj.vercel.app",
+  "https://ketanraj.com",
+  "https://www.ketanraj.com",
+  "https://ketan-v5-ketan-rajs-projects.vercel.app",
 ];
 const DEV_ORIGINS = [
   "http://localhost:5173",
@@ -82,7 +83,7 @@ export function clientIp(req: Request): string {
 /* Vercel preview deploys get URLs like ketan-v5-git-<branch>-<user>.vercel.app.
    Allow them so previews work without per-deploy env config, but only when
    the host clearly belongs to this project + ends in .vercel.app. */
-const VERCEL_PREVIEW = /^https:\/\/ketan(?:-v5|raj)?-[a-z0-9-]+\.vercel\.app$/i;
+const VERCEL_PREVIEW = /^https:\/\/ketan-v5-[a-z0-9-]+-ketan-rajs-projects\.vercel\.app$/i;
 
 /* Single guard called at the top of every handler. Returns null if the
    request is allowed, or a Response to return immediately if blocked. */

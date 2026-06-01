@@ -7,7 +7,7 @@ type Props = {
   noIndex?: boolean;    // for 404 etc.
 };
 
-const SITE = "https://ketanraj.vercel.app";
+const SITE = "https://ketanraj.com";
 
 /* Client-side SEO swap. Per-route titles + descriptions only run after
    hydration, but Googlebot executes JS, and the per-page title is still

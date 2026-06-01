@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://ketanraj.vercel.app/sitemap.xml
+Sitemap: https://ketanraj.com/sitemap.xml
