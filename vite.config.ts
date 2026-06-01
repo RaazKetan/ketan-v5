@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { apiHandlers } from './vite-plugin-api'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   /* Make ALL env vars (not just VITE_*) available to process.env in dev so
@@ -15,6 +17,6 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react(), tailwindcss(), apiHandlers()],
+    plugins: [react(), tailwindcss(), apiHandlers(), cloudflare()],
   };
 });
