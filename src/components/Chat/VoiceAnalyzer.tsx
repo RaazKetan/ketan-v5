@@ -26,7 +26,7 @@ type Speaker = "agent" | "user";
 type Line = { speaker: Speaker; text: string };
 
 const GREETING =
-  "Hi, I'm Ketan's assistant. He is currently at Emergent backed by YC, ex-Google, His focus is currently on learning and building cool stuff related to AI, Agentic Systems, and Intelligent Backends. Press the mic icon and ask me anything about that. For anything personal, head to the Contact page. Thank you! You can also check out the blogs he has written or the projects he has worked on.";
+  "Hi, I'm Ketan's assistant. He is currently at Emergent, ex-Google, His focus is currently on learning and building cool stuff related to AI, Agentic Systems, and Intelligent Backends. Press the mic icon and ask me anything about that.Thank you!";
 
 export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   variant = "compact",
