@@ -9,6 +9,7 @@ import { Projects } from './components/pages/projects';
 import { Work } from './components/pages/work';
 import { Contact } from './components/pages/contact';
 import { NotFound } from './components/pages/notfound';
+import { ErrorBoundary } from './components/error/ErrorBoundary';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -94,14 +95,16 @@ const App: React.FC = () => {
     <Router>
       <SmoothScroll>
         <RouteEffects />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/work" element={<Work />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/work" element={<Work />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ErrorBoundary>
       </SmoothScroll>
     </Router>
   );
