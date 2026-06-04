@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { sarvamSpeak, sarvamTranscribe, SarvamError } from "../../services/sarvam";
+import { trackVoice } from "../../lib/analytics";
 import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
 import { usePersonalData } from "../../context/PersonalDataContext";
 import { useChatHistory } from "../../context/ChatHistoryContext";
@@ -224,6 +225,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
 
   const playIntro = async () => {
     if (stage !== "idle") return;
+    trackVoice("play_intro", { variant });
     setStage("agent-speak");
     setLine({ speaker: "agent", text: GREETING });
     addMessage("agent", GREETING, "voice");
@@ -237,6 +239,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   };
 
   const stopAgent = () => {
+    trackVoice("stop_agent");
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -250,6 +253,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
      to drive the bars in real time. */
   const startRecording = async () => {
     if (stage !== "ready") return;
+    trackVoice("start_record", { autoLoop: autoLoopRef.current });
     try {
       /* Aggressive mic constraints: noise suppression + echo cancel +
          AGC, single-channel, 16kHz (matches Sarvam's preferred STT
@@ -306,10 +310,13 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
         try {
           transcript = await sarvamTranscribe(blob);
         } catch (e) {
+          const kind = e instanceof SarvamError ? e.kind : "unknown";
+          trackVoice("error", { stage: "transcribe", kind });
           setNotice(explainSarvam(e, "listen"));
           setStage("ready");
           return;
         }
+        trackVoice("transcript", { length: transcript.length });
         if (!transcript.trim()) {
           const msg = "Didn't catch that. Try again?";
           setLine({ speaker: "agent", text: msg });
@@ -350,6 +357,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
   };
 
   const stopRecording = () => {
+    trackVoice("stop_record");
     if (recorderRef.current && recorderRef.current.state !== "inactive") {
       recorderRef.current.stop();
     }

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePersonalData } from "../../context/PersonalDataContext";
 import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
 import { sarvamSpeak, sarvamTranscribe, SarvamError } from "../../services/sarvam";
+import { trackChat } from "../../lib/analytics";
 import { useChatHistory } from "../../context/ChatHistoryContext";
 import {
   ChatIcon,
@@ -117,6 +118,7 @@ export const ChatWidget: React.FC = () => {
   const send = async (raw: string, viaVoice = false) => {
     const q = raw.trim();
     if (!q || busy) return;
+    trackChat("send", { via_voice: viaVoice, length: q.length });
     setBusy(true);
     setInput("");
 
@@ -136,6 +138,7 @@ export const ChatWidget: React.FC = () => {
 
   const startRecording = async () => {
     if (recording) return;
+    trackChat("voice_input");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       chunksRef.current = [];
@@ -183,6 +186,7 @@ export const ChatWidget: React.FC = () => {
   };
 
   const toggleVoice = () => {
+    trackChat("voice_toggle", { now: !voiceOn });
     if (voiceOn) stopAudio();
     setVoiceOn((v) => !v);
   };
@@ -192,7 +196,7 @@ export const ChatWidget: React.FC = () => {
       <button
         type="button"
         className={`chat-fab${open ? " is-open" : ""}`}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => { trackChat(open ? "close" : "open"); setOpen((o) => !o); }}
         aria-label={open ? "Close chat" : "Open chat"}
         data-magnet="0.2"
       >
@@ -263,9 +267,10 @@ export const ChatWidget: React.FC = () => {
                     <button
                       type="button"
                       className={`chat-replay${speakingId === m.id ? " is-speaking" : ""}`}
-                      onClick={() =>
-                        speakingId === m.id ? stopAudio() : playMessage(m.id, m.text)
-                      }
+                      onClick={() => {
+                        trackChat("voice_replay", { stop: speakingId === m.id });
+                        speakingId === m.id ? stopAudio() : playMessage(m.id, m.text);
+                      }}
                       aria-label={
                         speakingId === m.id ? "Stop playback" : "Play message"
                       }

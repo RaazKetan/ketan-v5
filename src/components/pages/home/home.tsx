@@ -18,6 +18,7 @@ import { usePersonalData } from "../../../context/PersonalDataContext";
 import { VoiceAnalyzer } from "../../Chat/VoiceAnalyzer";
 import { useLenis } from "../../../App";
 import { RouteSEO } from "../../seo/RouteSEO";
+import { useSectionDwell } from "../../../Hooks/useSectionDwell";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,6 +27,7 @@ const Home: React.FC = () => {
   const heroRef = useRef<HTMLElement>(null);
   const lenis = useLenis();
   useDesignAnimations();
+  useSectionDwell("[data-section]");
 
   /* Scroll to a target id. Tries Lenis first, then a native fallback
      verified ~600ms later — if neither lands us inside +/-20px of the
@@ -81,7 +83,7 @@ const Home: React.FC = () => {
         description="Ketan Raj is a software engineer at Emergent (YC-backed) and ex-Google. Building agentic AI, intelligent backends, and developer-facing systems."
         path="/"
       />
-      <section className="hero-section" ref={heroRef}>
+      <section className="hero-section" ref={heroRef} data-section="hero">
         <div className="hero-grid-bg">
           <GridBg count={3} />
         </div>
@@ -210,7 +212,7 @@ const Home: React.FC = () => {
         ]}
       />
 
-      <section className="feature-section voice-section" id="voice-feature">
+      <section className="feature-section voice-section" id="voice-feature" data-section="voice-agent">
         <SectionTag>Index · 02 / Agent</SectionTag>
 
         <div className="feature-head">
@@ -237,7 +239,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <section className="cta-strip">
+      <section className="cta-strip" data-section="cta-strip">
         <div className="cta-strip-bg">
           <GridBg count={2} />
         </div>

@@ -6,6 +6,7 @@ import { DesignLayout, GridBg, Word } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
 import { RouteSEO } from "../../seo/RouteSEO";
+import { trackContact } from "../../../lib/analytics";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -46,6 +47,7 @@ export const Contact: React.FC = () => {
       const next = new Set(cur);
       if (next.has(t)) next.delete(t);
       else next.add(t);
+      trackContact("topic_toggle", { topic: t, now: next.has(t) });
       return next;
     });
   };
@@ -65,6 +67,13 @@ export const Contact: React.FC = () => {
     const fromEmail = String(fd.get("email") || "").slice(0, 120).trim();
     const message = String(fd.get("message") || "").slice(0, 1400).trim();
     const interests = Array.from(topics).join(", ");
+
+    trackContact("submit", {
+      topics: interests,
+      has_name: !!name,
+      has_email: !!fromEmail,
+      msg_len: message.length,
+    });
 
     /* Build a plain-text body. encodeURIComponent handles newlines + special
        chars so the mailto link can't be hijacked by control characters in

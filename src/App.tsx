@@ -10,6 +10,8 @@ import { Work } from './components/pages/work';
 import { Contact } from './components/pages/contact';
 import { NotFound } from './components/pages/notfound';
 import { ErrorBoundary } from './components/error/ErrorBoundary';
+import { useScrollDepth, usePageDwell } from './Hooks/useAnalytics';
+import { trackNav } from './lib/analytics';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -71,8 +73,20 @@ const SmoothScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 const RouteEffects: React.FC = () => {
   const { pathname } = useLocation();
   const lenis = useLenis();
+  const prevPathRef = React.useRef<string | null>(null);
+
+  useScrollDepth();
+  usePageDwell();
 
   useEffect(() => {
+    /* Skip the first call (initial mount) — page_view fires automatically
+       via @vercel/analytics on every history change. We only need to log
+       our own "nav" event with from→to context. */
+    if (prevPathRef.current !== null && prevPathRef.current !== pathname) {
+      trackNav(pathname, prevPathRef.current);
+    }
+    prevPathRef.current = pathname;
+
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
