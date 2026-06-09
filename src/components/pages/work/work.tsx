@@ -260,9 +260,8 @@ const ExperienceRow: React.FC<{
               target="_blank"
               rel="noreferrer"
               className="detail-link"
-              aria-label={`View the ${exp.company} project on GitHub`}
             >
-              View the {exp.company} project on GitHub →
+              Read more →
             </a>
           )}
         </div>

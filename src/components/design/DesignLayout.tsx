@@ -38,7 +38,7 @@ export const DesignLayout: React.FC<{
       {!hideFrame && <div className="frame" />}
       <DesignNav />
       <SocialDock />
-      <main className="ds-main" id="main-content">{children}</main>
+      {children}
       {!hideFooter && <DesignFooter />}
       {showChat && (
         <Suspense fallback={null}>

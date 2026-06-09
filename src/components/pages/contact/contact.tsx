@@ -140,17 +140,6 @@ export const Contact: React.FC = () => {
             Tell me about the work. I read every note that lands here, and reply
             within a day or two.
           </p>
-          <p className="c-intro">
-            Whether you're building an agent product, untangling a backend,
-            hiring for a hard problem, or want me to speak or advise — I'd like
-            to hear about it. The more concrete you can be about what you're
-            making, who it's for, and where you're stuck, the more useful my
-            first reply will be. I take on a small number of projects at a time
-            and care most about work where careful engineering actually moves the
-            outcome. If a live conversation is easier, you can book a 30-minute
-            session on Topmate, or reach me directly over email, GitHub,
-            LinkedIn, and Medium below.
-          </p>
         </div>
       </section>
 
@@ -307,10 +296,6 @@ const styles = `
     margin-top: 32px;
     font-family: var(--serif); font-style: italic;
     font-size: 24px; line-height: 1.4; color: var(--ink-2); max-width: 50ch;
-  }
-  .c-intro {
-    margin-top: 24px;
-    font-size: 16px; line-height: 1.7; color: var(--ink-2); max-width: 64ch;
   }
 
   /* Form */
