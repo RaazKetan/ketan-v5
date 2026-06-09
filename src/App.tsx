@@ -35,6 +35,15 @@ const SmoothScroll: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
+    /* Smooth scroll on desktop only. On touch devices Lenis intercepts native
+       scrolling and can feel laggy/stuck (a real bounce driver on mobile), and
+       it adds JS work on the slowest devices. Mobile gets native scroll; all
+       lenis?.scrollTo callers already fall back to window.scrollTo. */
+    const isDesktop =
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+    if (!isDesktop) return;
+
     const instance = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),

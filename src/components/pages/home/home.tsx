@@ -56,11 +56,14 @@ const Home: React.FC = () => {
   // never leave elements stuck in the from state.
   useGSAP(
     () => {
-      const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
-      tl.from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 1.1 }, 0)
-        .from(".hero-name .word > span", { yPercent: 110, duration: 1.6, stagger: 0.12 }, 0.2)
-        .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 1.2, stagger: 0.15 }, 1.2)
-        .from(".hero-bottom > *", { autoAlpha: 0, duration: 1.4, stagger: 0.12, clearProps: "transform" }, 1.6);
+      /* No leading delay and the headline (the LCP element) reveals first and
+         fast, so it paints ~1s sooner than before — the rest staggers in after.
+         Slow first paint was the main bounce driver. */
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(".hero-name .word > span", { yPercent: 110, duration: 0.9, stagger: 0.08 }, 0)
+        .from(".hero-eyebrow", { autoAlpha: 0, y: 12, duration: 0.7 }, 0.1)
+        .from(".hero-tagline > *", { autoAlpha: 0, y: 18, duration: 0.9, stagger: 0.1 }, 0.4)
+        .from(".hero-bottom > *", { autoAlpha: 0, duration: 1.0, stagger: 0.1, clearProps: "transform" }, 0.6);
 
       // Below-the-fold word reveals
       gsap.utils.toArray<HTMLElement>("[data-split]").forEach((el) => {
