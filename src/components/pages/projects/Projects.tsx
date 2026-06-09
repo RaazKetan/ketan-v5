@@ -231,10 +231,13 @@ export const Projects: React.FC = () => {
           </h2>
         </div>
         <p>
-          Each of these started as a one-page brief and turned into a year. I
-          keep these case studies short on purpose - full writeups
-          (architecture diagrams, decisions, post-mortems) are available on
-          request.
+          Each of these started as a one-page brief and turned into a year.
+          They span agentic AI, full-stack products, and the unglamorous
+          infrastructure underneath - planning loops, billing, auth, media
+          pipelines, and the tooling that keeps a system honest in production. I
+          keep these case studies short on purpose: full writeups - architecture
+          diagrams, the decisions and the trade-offs behind them, and the
+          post-mortems - are available on request.
         </p>
       </section>
 
@@ -270,7 +273,7 @@ export const Projects: React.FC = () => {
               </div>
               <div className="links">
                 {s.live && (
-                  <a href={s.live} target="_blank" rel="noreferrer" data-magnet="0.2">
+                  <a href={s.live} target="_blank" rel="noreferrer nofollow" data-magnet="0.2">
                     View live →
                   </a>
                 )}
@@ -302,7 +305,7 @@ export const Projects: React.FC = () => {
               className="blog-card"
               href={b.url}
               target="_blank"
-              rel="noreferrer"
+              rel="noreferrer nofollow"
               data-magnet="0.06"
             >
               {b.cover && (

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { lazy, Suspense, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -15,7 +15,11 @@ import {
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
-import { VoiceAnalyzer } from "../../Chat/VoiceAnalyzer";
+/* Below-the-fold voice/RAG feature — split into its own chunk so the hero
+   (LCP) isn't waiting on the sarvam + knowledge-base code to download. */
+const VoiceAnalyzer = lazy(() =>
+  import("../../Chat/VoiceAnalyzer").then((m) => ({ default: m.VoiceAnalyzer }))
+);
 import { useLenis } from "../../../App";
 import { RouteSEO } from "../../seo/RouteSEO";
 import { useSectionDwell } from "../../../Hooks/useSectionDwell";
@@ -212,6 +216,33 @@ const Home: React.FC = () => {
         ]}
       />
 
+      <section className="intro-section" data-section="intro" aria-labelledby="intro-heading">
+        <SectionTag>Index · 01 / Intro</SectionTag>
+        <div className="intro-grid">
+          <h2 id="intro-heading" data-split>
+            <Word>Engineer</Word> <Word>building</Word> <Word em>agentic</Word>{" "}
+            <Word>AI.</Word>
+          </h2>
+          <div className="intro-body">
+            <p>
+              I'm Ketan Raj — a software engineer at{" "}
+              <strong>Emergent (YC-backed)</strong> and previously at{" "}
+              <strong>Google</strong>, where I shipped 18+ AI agent systems on
+              Google ADK, FastAPI, and Vertex AI. I build agentic AI: planning
+              loops, tool use, structured memory, and the human-in-the-loop
+              safeguards that let agents run reliably in production.
+            </p>
+            <p>
+              These days I'm building Emergent's product surface and{" "}
+              <strong>Origin</strong>, an agentic hiring platform that reads the
+              work you've actually shipped instead of your résumé. This site
+              collects my projects, my writing on AI and engineering, and an AI
+              agent — trained on my work — that you can talk to by voice or text.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="feature-section voice-section" id="voice-feature" data-section="voice-agent">
         <SectionTag>Index · 02 / Agent</SectionTag>
 
@@ -226,7 +257,9 @@ const Home: React.FC = () => {
         </div>
 
         <div className="voice-feature">
-          <VoiceAnalyzer variant="feature" />
+          <Suspense fallback={null}>
+            <VoiceAnalyzer variant="feature" />
+          </Suspense>
         </div>
 
         <div className="more-work-cta">
@@ -468,6 +501,22 @@ const styles = `
     50%      { transform: translateY(4px); }
   }
 
+  .intro-section { padding: 120px 56px 0; max-width: var(--maxw); margin: 0 auto; }
+  .intro-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+    align-items: start; margin-top: 32px;
+  }
+  .intro-grid h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(40px, 5vw, 88px); line-height: 0.96; letter-spacing: -0.02em;
+  }
+  .intro-grid h2 em { font-style: italic; color: var(--accent); }
+  .intro-body { display: flex; flex-direction: column; gap: 20px; }
+  .intro-body p {
+    font-size: 16px; line-height: 1.7; color: var(--ink-2); max-width: 56ch;
+  }
+  .intro-body strong { color: var(--ink); font-weight: 500; }
+
   .feature-section { padding: 160px 56px 120px; max-width: var(--maxw); margin: 0 auto; }
   .feature-head {
     display: flex; align-items: flex-end; justify-content: space-between;
@@ -537,6 +586,9 @@ const styles = `
   }
   @media (max-width: 900px) {
     .hero-section { padding: 130px 24px 60px; min-height: auto; }
+    .intro-section { padding: 64px 24px 0; }
+    .intro-grid { grid-template-columns: 1fr; gap: 24px; }
+    .intro-grid h2 { font-size: clamp(32px, 9vw, 56px); }
     .feature-section { padding: 80px 24px 60px; }
     .hero-meta { grid-template-columns: 1fr 1fr; gap: 20px; }
     .hero-strip { grid-template-columns: 1fr; gap: 24px; }
