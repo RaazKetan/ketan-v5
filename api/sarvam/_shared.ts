@@ -144,3 +144,18 @@ export function getSarvamKey(): string | null {
   }
   return key;
 }
+
+let warnedNoGemini = false;
+/* GEMINI_API_KEY (server-only) powers the /api/embed proxy. Same VITE_-prefix
+   leak caveat as the Sarvam key — keep it server-side, never VITE_-prefixed. */
+export function getGeminiKey(): string | null {
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || null;
+  if (!key && !warnedNoGemini) {
+    warnedNoGemini = true;
+    console.warn(
+      "[embed proxy] GEMINI_API_KEY not set. " +
+        "Add GEMINI_API_KEY=... to .env.local (or Vercel project env)."
+    );
+  }
+  return key;
+}

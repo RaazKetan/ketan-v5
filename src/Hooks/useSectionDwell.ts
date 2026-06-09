@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { trackSection } from "../lib/analytics";
+import { trackSection } from "@/lib/analytics";
 
 /* Lightweight section-visibility tracker. Pass the same selector you
    used on the section (or a ref that the section is on) and it fires:

@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusPage } from "../status/StatusPage";
+import { StatusPage } from "@/components/pages/status/StatusPage";
 
 /* 404 page. Rendered via the catch-all <Route path="*"> in App.tsx,
    so the URL the user typed is preserved while the body shows this

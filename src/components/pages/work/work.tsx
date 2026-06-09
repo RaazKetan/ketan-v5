@@ -10,12 +10,12 @@ import {
   ShimmerBtn,
   NumberTicker,
   Word,
-} from "../../design";
-import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { usePersonalData } from "../../../context/PersonalDataContext";
-import { GoogleMark } from "../../design/GoogleMark";
-import type { Experience } from "../../../data/experience";
-import { RouteSEO } from "../../seo/RouteSEO";
+} from "@/components/design";
+import { useDesignAnimations } from "@/Hooks/useDesignAnimations";
+import { usePersonalData } from "@/context/PersonalDataContext";
+import { GoogleMark } from "@/components/design/GoogleMark";
+import type { Experience } from "@/data/experience";
+import { RouteSEO } from "@/components/seo/RouteSEO";
 
 /* Render company name with the Google wordmark when the company is Google,
    otherwise as plain italic. Keeps the brand color treatment consistent. */

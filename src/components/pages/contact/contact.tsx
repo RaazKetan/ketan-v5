@@ -2,11 +2,11 @@ import React, { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { DesignLayout, GridBg, Word } from "../../design";
-import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { usePersonalData } from "../../../context/PersonalDataContext";
-import { RouteSEO } from "../../seo/RouteSEO";
-import { trackContact } from "../../../lib/analytics";
+import { DesignLayout, GridBg, Word } from "@/components/design";
+import { useDesignAnimations } from "@/Hooks/useDesignAnimations";
+import { usePersonalData } from "@/context/PersonalDataContext";
+import { RouteSEO } from "@/components/seo/RouteSEO";
+import { trackContact } from "@/lib/analytics";
 
 gsap.registerPlugin(ScrollTrigger);
 

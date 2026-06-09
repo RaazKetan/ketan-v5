@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { trackScrollDepth, trackDwell } from "../lib/analytics";
+import { trackScrollDepth, trackDwell } from "@/lib/analytics";
 
 /* Fires scroll_depth(25/50/75/100) at most once per (path, depth)
    pair, then resets on route change. Cheap — just listens to scroll

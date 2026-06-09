@@ -1,1 +1,1 @@
-export { Projects } from './Projects';
+export { Projects } from '@/components/pages/projects/Projects';

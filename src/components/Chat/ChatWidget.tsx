@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { usePersonalData } from "../../context/PersonalDataContext";
-import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
-import { sarvamSpeak, sarvamTranscribe, SarvamError } from "../../services/sarvam";
-import { trackChat } from "../../lib/analytics";
-import { useChatHistory } from "../../context/ChatHistoryContext";
+import { usePersonalData } from "@/context/PersonalDataContext";
+import { buildKnowledgeBase } from "@/services/rag";
+import { answerQuery } from "@/services/agent";
+import { sarvamSpeak, sarvamTranscribe, SarvamError } from "@/services/sarvam";
+import { trackChat } from "@/lib/analytics";
+import { useChatHistory } from "@/context/ChatHistoryContext";
 import {
   ChatIcon,
   CloseIcon,
@@ -13,7 +14,7 @@ import {
   SpeakerOn,
   SpeakerOff,
   WaveIcon,
-} from "./icons";
+} from "@/components/Chat/icons";
 
 const GREETING_TEXT =
   "Hi, I'm Ketan's portfolio agent. Ask me about projects, work, or how to get in touch - chat or voice both work.";
@@ -122,11 +123,15 @@ export const ChatWidget: React.FC = () => {
     setBusy(true);
     setInput("");
 
+    /* Snapshot prior turns BEFORE adding the new one — the server appends the
+       question itself, so we don't want it duplicated in the history. */
+    const priorHistory = messages.map((m) => ({ role: m.role, text: m.text }));
     addMessage("user", q, viaVoice ? "voice" : "text");
 
-    /* RAG over Ketan's data - instant, deterministic. */
-    const chunks = retrieve(q, kb);
-    const answer = composeAnswer(q, chunks);
+    /* Semantic RAG retrieval + grounded LLM generation, with built-in
+       fallbacks (keyword retrieval / extractive answer) if either service
+       is unavailable. The typing indicator shows while this awaits. */
+    const answer = await answerQuery(q, kb, priorHistory);
     const bot = addMessage("agent", answer, "text");
 
     if (voiceOn) {

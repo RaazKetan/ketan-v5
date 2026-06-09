@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { trackClick } from "../../lib/analytics";
+import { trackClick } from "@/lib/analytics";
 
 type Common = {
   children: React.ReactNode;

@@ -1,14 +1,14 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { DesignNav } from "./DesignNav";
-import { DesignFooter } from "./DesignFooter";
-import { SocialDock } from "./SocialDock";
+import { DesignNav } from "@/components/design/DesignNav";
+import { DesignFooter } from "@/components/design/DesignFooter";
+import { SocialDock } from "@/components/design/SocialDock";
 
 /* The chat widget pulls the RAG + voice (sarvam) code. It's a floating
    overlay, never part of first paint, so we lazy-load its chunk and only
    mount it once the browser is idle — keeping it off the critical path on
    every page. */
 const ChatWidget = lazy(() =>
-  import("../Chat/ChatWidget").then((m) => ({ default: m.ChatWidget }))
+  import("@/components/Chat/ChatWidget").then((m) => ({ default: m.ChatWidget }))
 );
 
 export const DesignLayout: React.FC<{

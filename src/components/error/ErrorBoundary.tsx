@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusPage } from "../pages/status/StatusPage";
+import { StatusPage } from "@/components/pages/status/StatusPage";
 
 type Props = { children: React.ReactNode };
 type State = { error: Error | null };

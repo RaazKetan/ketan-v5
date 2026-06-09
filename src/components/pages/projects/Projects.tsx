@@ -10,10 +10,10 @@ import {
   ShimmerBtn,
   GridBg,
   Word,
-} from "../../design";
-import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { PROJECTS, BLOGS } from "../../../data/projects";
-import { RouteSEO } from "../../seo/RouteSEO";
+} from "@/components/design";
+import { useDesignAnimations } from "@/Hooks/useDesignAnimations";
+import { PROJECTS, BLOGS } from "@/data/projects";
+import { RouteSEO } from "@/components/seo/RouteSEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
