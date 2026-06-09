@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { lazy, Suspense, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -15,7 +15,11 @@ import {
 } from "../../design";
 import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
 import { usePersonalData } from "../../../context/PersonalDataContext";
-import { VoiceAnalyzer } from "../../Chat/VoiceAnalyzer";
+/* Below-the-fold voice/RAG feature — split into its own chunk so the hero
+   (LCP) isn't waiting on the sarvam + knowledge-base code to download. */
+const VoiceAnalyzer = lazy(() =>
+  import("../../Chat/VoiceAnalyzer").then((m) => ({ default: m.VoiceAnalyzer }))
+);
 import { useLenis } from "../../../App";
 import { RouteSEO } from "../../seo/RouteSEO";
 import { useSectionDwell } from "../../../Hooks/useSectionDwell";
@@ -226,7 +230,9 @@ const Home: React.FC = () => {
         </div>
 
         <div className="voice-feature">
-          <VoiceAnalyzer variant="feature" />
+          <Suspense fallback={null}>
+            <VoiceAnalyzer variant="feature" />
+          </Suspense>
         </div>
 
         <div className="more-work-cta">
