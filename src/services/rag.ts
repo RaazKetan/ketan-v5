@@ -3,7 +3,7 @@
    not the personal PersonalDataContext). Contact-intent queries are
    handled separately to avoid leaking personal info. */
 
-import { AGENT_KNOWLEDGE, isContactIntent, type AgentDoc } from "../data/agent-knowledge";
+import { AGENT_KNOWLEDGE, isContactIntent } from "@/data/agent-knowledge";
 
 export type RagChunk = {
   id: string;
@@ -16,10 +16,10 @@ export type RagChunk = {
    Signature kept compatible (data arg ignored) so existing callers don't
    need to change. */
 export function buildKnowledgeBase(_data?: unknown): RagChunk[] {
-  return AGENT_KNOWLEDGE.map((d: AgentDoc) => ({
+  return AGENT_KNOWLEDGE.map((d) => ({
     id: d.id,
     title: d.topic,
-    body: d.body + (d.aliases?.length ? "\n\nKeywords: " + d.aliases.join(", ") : ""),
+    body: d.body,
     source: d.topic,
   }));
 }

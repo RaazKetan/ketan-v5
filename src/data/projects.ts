@@ -83,9 +83,9 @@ export const ARCHIVE: Project[] = PROJECTS;
 
 /* ============ Blog posts (Medium) ============ */
 
-import adkCover from "../assets/ADK.png";
-import dijCover from "../assets/Dij.png";
-import googleCover from "../assets/Google.png";
+import adkCover from "@/assets/ADK.png";
+import dijCover from "@/assets/Dij.png";
+import googleCover from "@/assets/Google.png";
 
 export type BlogPost = {
   slug: string;

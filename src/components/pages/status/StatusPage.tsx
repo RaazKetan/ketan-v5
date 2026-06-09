@@ -1,6 +1,6 @@
 import React from "react";
-import { DesignLayout, GridBg, Btn, Word, Marquee } from "../../design";
-import { RouteSEO } from "../../seo/RouteSEO";
+import { DesignLayout, GridBg, Btn, Word, Marquee } from "@/components/design";
+import { RouteSEO } from "@/components/seo/RouteSEO";
 
 export type StatusAction = {
   label: string;

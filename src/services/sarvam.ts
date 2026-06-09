@@ -130,6 +130,33 @@ export async function sarvamSpeak(
   return audio;
 }
 
+/* One prior conversation turn, passed to the RAG generator for context. */
+export type ChatTurn = { role: "user" | "agent"; text: string };
+
+/* RAG generation via the /api/sarvam/chat proxy. Sends the question, the
+   retrieved knowledge-base context, and recent history; gets back a grounded
+   answer. Returns null on any failure so the caller can fall back to an
+   extractive answer. Same-origin only — no key on the client. */
+export async function sarvamChat(args: {
+  question: string;
+  context: string;
+  history?: ChatTurn[];
+}): Promise<string | null> {
+  try {
+    const res = await fetch("/api/sarvam/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(args),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { answer?: string };
+    const answer = (data.answer || "").trim();
+    return answer || null;
+  } catch {
+    return null;
+  }
+}
+
 /* Speech-to-text via the proxy. Returns the transcript string or empty
    on any failure. Server enforces a 5MB cap and audio MIME allow-list. */
 export async function sarvamTranscribe(audioBlob: Blob): Promise<string> {

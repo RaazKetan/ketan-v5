@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { usePersonalData } from "../../context/PersonalDataContext";
+import { usePersonalData } from "@/context/PersonalDataContext";
 
 const PAGE_INDEX: Record<string, string> = {
   "/": "01 / 05 · Home",

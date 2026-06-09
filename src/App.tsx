@@ -3,18 +3,18 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import Home from './components/pages/home/home';
+import Home from '@/components/pages/home/home';
 /* Home stays eager — it's the landing/LCP route, so bundling it inline avoids
    an extra chunk round-trip on first paint. Every other route is split into
    its own chunk so the initial download doesn't carry the whole site. */
-const About = lazy(() => import('./components/pages/about').then((m) => ({ default: m.About })));
-const Projects = lazy(() => import('./components/pages/projects').then((m) => ({ default: m.Projects })));
-const Work = lazy(() => import('./components/pages/work').then((m) => ({ default: m.Work })));
-const Contact = lazy(() => import('./components/pages/contact').then((m) => ({ default: m.Contact })));
-const NotFound = lazy(() => import('./components/pages/notfound').then((m) => ({ default: m.NotFound })));
-import { ErrorBoundary } from './components/error/ErrorBoundary';
-import { useScrollDepth, usePageDwell } from './Hooks/useAnalytics';
-import { trackNav } from './lib/analytics';
+const About = lazy(() => import('@/components/pages/about').then((m) => ({ default: m.About })));
+const Projects = lazy(() => import('@/components/pages/projects').then((m) => ({ default: m.Projects })));
+const Work = lazy(() => import('@/components/pages/work').then((m) => ({ default: m.Work })));
+const Contact = lazy(() => import('@/components/pages/contact').then((m) => ({ default: m.Contact })));
+const NotFound = lazy(() => import('@/components/pages/notfound').then((m) => ({ default: m.NotFound })));
+import { ErrorBoundary } from '@/components/error/ErrorBoundary';
+import { useScrollDepth, usePageDwell } from '@/Hooks/useAnalytics';
+import { trackNav } from '@/lib/analytics';
 
 gsap.registerPlugin(ScrollTrigger);
 

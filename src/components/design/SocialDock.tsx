@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { usePersonalData } from "../../context/PersonalDataContext";
-import { trackSocial } from "../../lib/analytics";
+import { usePersonalData } from "@/context/PersonalDataContext";
+import { trackSocial } from "@/lib/analytics";
 
 /* Vertical social-link dock pinned to the left edge of every page
    except /contact. Desktop only — hidden below 1024px via CSS so it

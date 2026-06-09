@@ -11,20 +11,26 @@ import {
   GridBg,
   Word,
   WithGoogleMark,
-} from "../../design";
-import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { usePersonalData } from "../../../context/PersonalDataContext";
-import BCImage from "../../../assets/BC.jpeg";
-import HC1Image from "../../../assets/HC1.jpeg";
-import HC2Image from "../../../assets/HC2.jpeg";
-import meVideo from "../../../assets/me.mp4";
-import { RouteSEO } from "../../seo/RouteSEO";
+} from "@/components/design";
+import { useDesignAnimations } from "@/Hooks/useDesignAnimations";
+import { usePersonalData } from "@/context/PersonalDataContext";
+import { RouteSEO } from "@/components/seo/RouteSEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const About: React.FC = () => {
   const { contactInfo, bentoData } = usePersonalData();
-  const { books: BOOKS, stack: STACK, soundtrack: SOUNDTRACK, gear: GEAR } = bentoData;
+  const {
+    books: BOOKS,
+    stack: STACK,
+    soundtrack: SOUNDTRACK,
+    gear: GEAR,
+    portrait,
+    photoA,
+    photoB,
+    reel,
+    gallery,
+  } = bentoData;
   const prologueRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -191,9 +197,9 @@ export const About: React.FC = () => {
       <section className="bento">
         {/* Portrait */}
         <div className="b-tile b-portrait" data-image-in>
-          <span className="corner">Portrait</span>
-          <span className="corner right">02:46</span>
-          <img src={BCImage} alt="Portrait" />
+          <span className="corner">{portrait.caption}</span>
+          {portrait.meta && <span className="corner right">{portrait.meta}</span>}
+          <img src={portrait.src} alt={portrait.caption} />
         </div>
 
         {/* Statement */}
@@ -244,8 +250,8 @@ export const About: React.FC = () => {
 
         {/* Photo A */}
         <div className="b-tile b-photo-a" data-image-in>
-          <span className="corner">Hackathon · win</span>
-          <img src={HC1Image} alt="Hackathon" />
+          <span className="corner">{photoA.caption}</span>
+          <img src={photoA.src} alt={photoA.caption} />
         </div>
 
         {/* Philosophy */}
@@ -273,14 +279,14 @@ export const About: React.FC = () => {
               loop
               playsInline
               preload="metadata"
-              src={meVideo}
+              src={reel.src}
             />
           </div>
           <div className="controls">
             <button type="button" className="play" onClick={toggleVideo}>
               {playing ? "Pause ❚❚" : "Play ▶"}
             </button>
-            <span>Reel · 2024</span>
+            <span>{reel.year}</span>
           </div>
         </div>
 
@@ -308,8 +314,8 @@ export const About: React.FC = () => {
 
         {/* Photo B */}
         <div className="b-tile b-photo-b" data-image-in>
-          <span className="corner">Speaking</span>
-          <img src={HC2Image} alt="Public speaking" />
+          <span className="corner">{photoB.caption}</span>
+          <img src={photoB.src} alt={photoB.caption} />
         </div>
 
         {/* Books */}
@@ -361,18 +367,12 @@ export const About: React.FC = () => {
         </div>
 
         {/* Mood images */}
-        <div className="b-tile b-mood-1" data-image-in>
-          <span className="corner">Workspace</span>
-          <img src={BCImage} alt="Workspace" />
-        </div>
-        <div className="b-tile b-mood-2" data-image-in>
-          <span className="corner">Notebook</span>
-          <img src={HC1Image} alt="Notebook" />
-        </div>
-        <div className="b-tile b-mood-3" data-image-in>
-          <span className="corner">Field</span>
-          <img src={HC2Image} alt="Field" />
-        </div>
+        {gallery.map((g, i) => (
+          <div key={g.src} className={`b-tile b-mood-${i + 1}`} data-image-in>
+            <span className="corner">{g.caption}</span>
+            <img src={g.src} alt={g.caption} />
+          </div>
+        ))}
       </section>
 
       {/* Pull quote */}

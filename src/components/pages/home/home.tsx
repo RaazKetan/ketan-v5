@@ -12,17 +12,17 @@ import {
   Word,
   Reveal,
   DesignLayout,
-} from "../../design";
-import { useDesignAnimations } from "../../../Hooks/useDesignAnimations";
-import { usePersonalData } from "../../../context/PersonalDataContext";
+} from "@/components/design";
+import { useDesignAnimations } from "@/Hooks/useDesignAnimations";
+import { usePersonalData } from "@/context/PersonalDataContext";
 /* Below-the-fold voice/RAG feature — split into its own chunk so the hero
    (LCP) isn't waiting on the sarvam + knowledge-base code to download. */
 const VoiceAnalyzer = lazy(() =>
-  import("../../Chat/VoiceAnalyzer").then((m) => ({ default: m.VoiceAnalyzer }))
+  import("@/components/Chat/VoiceAnalyzer").then((m) => ({ default: m.VoiceAnalyzer }))
 );
-import { useLenis } from "../../../App";
-import { RouteSEO } from "../../seo/RouteSEO";
-import { useSectionDwell } from "../../../Hooks/useSectionDwell";
+import { useLenis } from "@/App";
+import { RouteSEO } from "@/components/seo/RouteSEO";
+import { useSectionDwell } from "@/Hooks/useSectionDwell";
 
 gsap.registerPlugin(ScrollTrigger);
 

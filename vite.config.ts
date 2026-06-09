@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { fileURLToPath, URL } from 'node:url'
 import { apiHandlers } from './vite-plugin-api'
 
 // https://vite.dev/config/
@@ -16,5 +17,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss(), apiHandlers()],
+    resolve: {
+      /* "@" -> /src so imports read "@/components/..." instead of "../../..". */
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
   };
 });

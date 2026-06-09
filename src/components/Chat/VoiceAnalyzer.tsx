@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { sarvamSpeak, sarvamTranscribe, SarvamError } from "../../services/sarvam";
-import { trackVoice } from "../../lib/analytics";
-import { buildKnowledgeBase, retrieve, composeAnswer } from "../../services/rag";
-import { usePersonalData } from "../../context/PersonalDataContext";
-import { useChatHistory } from "../../context/ChatHistoryContext";
-import { PlayIcon, StopIcon, MicIcon } from "./icons";
+import { sarvamSpeak, sarvamTranscribe, SarvamError } from "@/services/sarvam";
+import { trackVoice } from "@/lib/analytics";
+import { buildKnowledgeBase } from "@/services/rag";
+import { answerQuery } from "@/services/agent";
+import { usePersonalData } from "@/context/PersonalDataContext";
+import { useChatHistory } from "@/context/ChatHistoryContext";
+import { PlayIcon, StopIcon, MicIcon } from "@/components/Chat/icons";
 
 /* Voice conversation widget.
    1. Agent speaks an intro (manual start; user clicks play once).
@@ -332,8 +333,7 @@ export const VoiceAnalyzer: React.FC<{ variant?: "compact" | "feature" }> = ({
            reply starts, then run RAG + speak. */
         await new Promise((r) => setTimeout(r, 700));
 
-        const chunks = retrieve(transcript, kb);
-        const answer = composeAnswer(transcript, chunks);
+        const answer = await answerQuery(transcript, kb);
         setLine({ speaker: "agent", text: answer });
         addMessage("agent", answer, "voice");
         setStage("agent-reply");

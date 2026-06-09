@@ -1,1 +1,1 @@
-export * from "./work";
+export * from "@/components/pages/work/work";
