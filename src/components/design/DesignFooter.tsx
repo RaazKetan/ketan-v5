@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { usePersonalData } from "@/context/PersonalDataContext";
 
 const PAGE_INDEX: Record<string, string> = {
@@ -25,7 +25,10 @@ export const DesignFooter: React.FC<{
         <span>{status ?? footerInfo.status}</span>
       </div>
       <div>{idx}</div>
-      <div>{copyright ?? footerInfo.copyright}</div>
+      <div className="ds-footer-end">
+        <Link to="/privacy" className="ds-footer-privacy">Privacy</Link>
+        <span>{copyright ?? footerInfo.copyright}</span>
+      </div>
     </footer>
   );
 };

@@ -139,6 +139,9 @@ body.loading { cursor: none !important; overflow: hidden; }
 }
 .ds-footer .led { width: 6px; height: 6px; background: #2a9b6f; border-radius: 50%; box-shadow: 0 0 8px #2a9b6f; }
 .ds-footer .left { display: flex; gap: 24px; align-items: center; }
+.ds-footer .ds-footer-end { display: flex; gap: 20px; align-items: center; }
+.ds-footer .ds-footer-privacy { color: var(--muted); text-decoration: none; transition: color .3s; }
+.ds-footer .ds-footer-privacy:hover { color: var(--ink); }
 
 /* ============ Buttons ============ */
 .ds-btn {
