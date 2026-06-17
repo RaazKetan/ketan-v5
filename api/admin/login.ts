@@ -1,4 +1,4 @@
-import { clientIp, getAllowedOrigins, json } from "../sarvam/_shared";
+import { clientIp, json, checkOrigin } from "../sarvam/_shared";
 import {
   limit,
   checkLoginBruteforce,
@@ -12,8 +12,6 @@ export const config = { runtime: "edge" };
 
 declare const process: { env: Record<string, string | undefined> };
 
-const VERCEL_PREVIEW =
-  /^https:\/\/ketan-v5-[a-z0-9-]+-ketan-rajs-projects\.vercel\.app$/i;
 const MAX_BODY_BYTES = 4 * 1024;
 const MAX_TOKEN_LEN = 256;
 
@@ -36,16 +34,8 @@ export default async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   /* Origin enforcement: admin login must be initiated from our own UI. */
-  const origin = req.headers.get("origin");
-  if (process.env.NODE_ENV === "production" && !origin) {
-    return json({ error: "Missing origin" }, 403);
-  }
-  if (origin) {
-    const allowed = getAllowedOrigins();
-    if (!allowed.has(origin) && !VERCEL_PREVIEW.test(origin)) {
-      return json({ error: "Forbidden origin" }, 403);
-    }
-  }
+  const originDenied = checkOrigin(req);
+  if (originDenied) return originDenied;
 
   /* Two layers of throttle:
      1. shared 'adminAuth' bucket — slow accidental retry storms

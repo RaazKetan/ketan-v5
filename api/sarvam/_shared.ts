@@ -4,26 +4,46 @@
 
 declare const process: { env: Record<string, string | undefined> };
 
-/* Allowed browser origins. Production: your Vercel domain + custom domain.
-   Set ALLOWED_ORIGINS in Vercel env as a comma-separated list to override. */
-const DEFAULT_ORIGINS = [
-  "https://ketanraj.com",
-  "https://www.ketanraj.com",
-  "https://ketan-v5-ketan-rajs-projects.vercel.app",
-];
-const DEV_ORIGINS = [
+/* Allowed browser origins. Single source of truth: ALLOWED_ORIGINS env
+   var (comma-separated). Nothing hardcoded in the codebase — domain
+   strings only live in Vercel project env.
+
+   Dev convenience: ALLOWED_DEV_ORIGINS (also comma-separated) is layered
+   in when NODE_ENV !== 'production'. Defaults to the common Vite/Next
+   localhost ports so a brand-new clone works without env config; you
+   can override or shrink the list per environment. */
+const FALLBACK_DEV_ORIGINS = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
 ];
 
-export function getAllowedOrigins(): Set<string> {
-  const fromEnv = (process.env.ALLOWED_ORIGINS || "")
+function parseList(s: string | undefined): string[] {
+  return (s || "")
     .split(",")
-    .map((s) => s.trim())
+    .map((x) => x.trim())
     .filter(Boolean);
-  const list = fromEnv.length ? fromEnv : DEFAULT_ORIGINS;
-  if (process.env.NODE_ENV !== "production") list.push(...DEV_ORIGINS);
+}
+
+let warnedNoOrigins = false;
+
+export function getAllowedOrigins(): Set<string> {
+  const prodList = parseList(process.env.ALLOWED_ORIGINS);
+  const devList = parseList(process.env.ALLOWED_DEV_ORIGINS);
+
+  if (process.env.NODE_ENV === "production" && prodList.length === 0 && !warnedNoOrigins) {
+    warnedNoOrigins = true;
+    console.warn(
+      "[proxy] ALLOWED_ORIGINS not set in production — every request " +
+        "with an Origin header will be rejected. Set it as a " +
+        "comma-separated list of your canonical hostnames."
+    );
+  }
+
+  const list = [...prodList];
+  if (process.env.NODE_ENV !== "production") {
+    list.push(...(devList.length ? devList : FALLBACK_DEV_ORIGINS));
+  }
   return new Set(list);
 }
 
@@ -80,10 +100,42 @@ export function clientIp(req: Request): string {
   );
 }
 
-/* Vercel preview deploys get URLs like ketan-v5-git-<branch>-<user>.vercel.app.
-   Allow them so previews work without per-deploy env config, but only when
-   the host clearly belongs to this project + ends in .vercel.app. */
-const VERCEL_PREVIEW = /^https:\/\/ketan-v5-[a-z0-9-]+-ketan-rajs-projects\.vercel\.app$/i;
+/* Preview-deploy origin matcher. Vercel mints ephemeral URLs like
+   <project>-<branch>-<user>.vercel.app per push; allow them so preview
+   deploys keep working without per-deploy env updates.
+
+   Source: PREVIEW_ORIGIN_PATTERN env var (a JS regex source, NOT a
+   regex literal — no surrounding slashes/flags). When unset, the
+   matcher is permanently disabled and only ALLOWED_ORIGINS is honored. */
+function getPreviewMatcher(): RegExp | null {
+  const pat = process.env.PREVIEW_ORIGIN_PATTERN;
+  if (!pat) return null;
+  try {
+    return new RegExp(pat, "i");
+  } catch {
+    console.warn("[proxy] PREVIEW_ORIGIN_PATTERN is not a valid regex; ignoring");
+    return null;
+  }
+}
+
+/* Single shared origin check used by every endpoint family. Returns null
+   when the request is allowed, or a Response to return immediately. The
+   conversation and admin endpoints don't use guard() (their rate limit
+   buckets are family-specific) but they all need the same origin policy. */
+export function checkOrigin(req: Request): Response | null {
+  const origin = req.headers.get("origin");
+  if (process.env.NODE_ENV === "production" && !origin) {
+    return json({ error: "Missing origin" }, 403);
+  }
+  if (origin) {
+    const allowed = getAllowedOrigins();
+    const preview = getPreviewMatcher();
+    if (!allowed.has(origin) && !(preview && preview.test(origin))) {
+      return json({ error: "Forbidden origin" }, 403);
+    }
+  }
+  return null;
+}
 
 /* Single guard called at the top of every handler. Returns null if the
    request is allowed, or a Response to return immediately if blocked. */
@@ -98,7 +150,8 @@ export function guard(req: Request, method = "POST"): Response | null {
   if (process.env.NODE_ENV === "production" && !origin) {
     return json({ error: "Missing origin" }, 403);
   }
-  if (origin && !allowed.has(origin) && !VERCEL_PREVIEW.test(origin)) {
+  const preview = getPreviewMatcher();
+  if (origin && !allowed.has(origin) && !(preview && preview.test(origin))) {
     return json({ error: "Forbidden origin" }, 403);
   }
   const ip = clientIp(req);

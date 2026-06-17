@@ -88,9 +88,25 @@ export function parseUA(uaString: string | null): UA {
 
 /* Daily-rotating IP hash. SHA-256(ip + salt + YYYY-MM-DD UTC).
    Stable within a UTC day → useful for "unique IPs today".
-   Cross-day correlation requires both the salt and the IP. */
-export async function ipHash(ip: string): Promise<string> {
-  const salt = process.env.IP_HASH_SALT || "ketanraj-default-salt";
+
+   IP_HASH_SALT MUST be set in the environment. We fail closed (return
+   null) rather than fall back to a hardcoded salt, because a known salt
+   makes the hash trivially reversible by anyone with the codebase. The
+   ip_hash column simply stays NULL when the env var is missing — the
+   raw ip is still captured separately. */
+let warnedNoSalt = false;
+export async function ipHash(ip: string): Promise<string | null> {
+  const salt = process.env.IP_HASH_SALT;
+  if (!salt) {
+    if (!warnedNoSalt) {
+      warnedNoSalt = true;
+      console.warn(
+        "[identity] IP_HASH_SALT not set — ip_hash column will be NULL. " +
+          "Set IP_HASH_SALT in Vercel env (openssl rand -base64 32)."
+      );
+    }
+    return null;
+  }
   const day = new Date().toISOString().slice(0, 10);
   const data = new TextEncoder().encode(`${ip}|${salt}|${day}`);
   const digest = await crypto.subtle.digest("SHA-256", data);

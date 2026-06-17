@@ -1,5 +1,4 @@
-import { json } from "../sarvam/_shared";
-import { getAllowedOrigins, clientIp } from "../sarvam/_shared";
+import { json, clientIp, checkOrigin } from "../sarvam/_shared";
 import { limit } from "../_shared/limits";
 import {
   readJson,
@@ -15,18 +14,12 @@ import { getSupabase, supabaseConfigured } from "../_shared/supabase";
 
 export const config = { runtime: "edge" };
 
-declare const process: { env: Record<string, string | undefined> };
-
 const ROLES = new Set(["user", "agent"] as const);
 const SOURCES = new Set(["text", "voice"] as const);
 
 const MAX_BODY_BYTES = 16 * 1024; // 16 KB
 const MAX_TEXT = 4096;
 const MAX_VISITOR_META_STRING = 500;
-
-/* Vercel preview deploys get URLs like ketan-v5-<branch>-<user>.vercel.app. */
-const VERCEL_PREVIEW =
-  /^https:\/\/ketan-v5-[a-z0-9-]+-ketan-rajs-projects\.vercel\.app$/i;
 
 type Body = {
   visitorId?: unknown;
@@ -67,19 +60,8 @@ function validateVisitorMeta(v: unknown): VisitorMeta | null {
 export default async function handler(req: Request): Promise<Response> {
   /* --- method + origin --- */
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-
-  const origin = req.headers.get("origin");
-  /* In production, browser POSTs always carry Origin; reject when absent
-     to block cURL-style abuse. */
-  if (process.env.NODE_ENV === "production" && !origin) {
-    return json({ error: "Missing origin" }, 403);
-  }
-  if (origin) {
-    const allowed = getAllowedOrigins();
-    if (!allowed.has(origin) && !VERCEL_PREVIEW.test(origin)) {
-      return json({ error: "Forbidden origin" }, 403);
-    }
-  }
+  const originDenied = checkOrigin(req);
+  if (originDenied) return originDenied;
 
   /* --- rate limit (dedicated 'message' bucket) --- */
   const ip = clientIp(req);

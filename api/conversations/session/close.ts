@@ -1,14 +1,10 @@
-import { clientIp, getAllowedOrigins, json } from "../../sarvam/_shared";
+import { clientIp, json, checkOrigin } from "../../sarvam/_shared";
 import { limit } from "../../_shared/limits";
 import { readJson, isUuid } from "../../_shared/validate";
 import { getSupabase, supabaseConfigured } from "../../_shared/supabase";
 
 export const config = { runtime: "edge" };
 
-declare const process: { env: Record<string, string | undefined> };
-
-const VERCEL_PREVIEW =
-  /^https:\/\/ketan-v5-[a-z0-9-]+-ketan-rajs-projects\.vercel\.app$/i;
 const MAX_BODY_BYTES = 1024;
 
 type Body = { sessionId?: unknown };
@@ -18,17 +14,8 @@ type Body = { sessionId?: unknown };
    ended_at when it's still null. */
 export default async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-
-  const origin = req.headers.get("origin");
-  if (process.env.NODE_ENV === "production" && !origin) {
-    return json({ error: "Missing origin" }, 403);
-  }
-  if (origin) {
-    const allowed = getAllowedOrigins();
-    if (!allowed.has(origin) && !VERCEL_PREVIEW.test(origin)) {
-      return json({ error: "Forbidden origin" }, 403);
-    }
-  }
+  const originDenied = checkOrigin(req);
+  if (originDenied) return originDenied;
 
   const ip = clientIp(req);
   if (!limit("close", ip)) return json({ error: "Rate limit exceeded" }, 429);
