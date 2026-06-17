@@ -1,25 +1,26 @@
-import { json } from "../sarvam/_shared";
+import { clientIp, json } from "../sarvam/_shared";
+import { limit } from "../_shared/limits";
+import { isUuid } from "../_shared/validate";
 import { requireAdmin } from "../_shared/admin";
 import { getSupabase, supabaseConfigured } from "../_shared/supabase";
 
 export const config = { runtime: "edge" };
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 /* GET /api/admin/session?id=<uuid>
-   Returns full visitor record + full message thread for a session.
-   Uses ?id= (query param) instead of /:id (path) to keep the dev plugin
-   simple — no dynamic-segment routing needed. */
+   Returns full visitor record + full message thread for a session. */
 export default async function handler(req: Request): Promise<Response> {
   if (req.method !== "GET") return json({ error: "Method not allowed" }, 405);
+
+  if (!limit("adminRead", clientIp(req))) {
+    return json({ error: "Rate limit exceeded" }, 429);
+  }
   const fail = requireAdmin(req);
   if (fail) return fail;
   if (!supabaseConfigured()) return json({ error: "DB not configured" }, 503);
 
   const url = new URL(req.url);
   const id = url.searchParams.get("id") || "";
-  if (!UUID_RE.test(id)) return json({ error: "Bad session id" }, 400);
+  if (!isUuid(id)) return json({ error: "Bad session id" }, 400);
 
   const supabase = getSupabase()!;
 
@@ -44,5 +45,7 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: "DB error" }, 500);
   }
 
-  return json({ session, messages: messages || [] });
+  return json({ session, messages: messages || [] }, 200, {
+    "Cache-Control": "no-store, max-age=0",
+  });
 }

@@ -2,40 +2,62 @@ import { json } from "../sarvam/_shared";
 
 declare const process: { env: Record<string, string | undefined> };
 
-export const ADMIN_COOKIE = "kr_admin";
+/* __Host- prefix locks the cookie to:
+   - the exact host (no Domain attribute allowed)
+   - Path=/ (required)
+   - Secure (required, set automatically below)
+   It's the strongest cookie posture browsers offer. Some local dev
+   environments (HTTP localhost) reject Secure cookies, so the dev path
+   uses the bare name. */
+const PROD_COOKIE = "__Host-kr_admin";
+const DEV_COOKIE = "kr_admin";
 const COOKIE_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
 
+export const ADMIN_COOKIE_PROD = PROD_COOKIE;
+export const ADMIN_COOKIE_DEV = DEV_COOKIE;
+
+function isProd(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+function activeCookieName(): string {
+  return isProd() ? PROD_COOKIE : DEV_COOKIE;
+}
+
 /* Constant-time string compare — defends against timing attacks on the
-   admin password. Returns false on length mismatch (which itself can leak
-   length, but the password is fixed-length once chosen so this is fine). */
+   admin password. Pads/clamps to a canonical length so we never branch
+   on (a.length !== b.length). */
 export function constantTimeEq(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  const max = Math.max(a.length, b.length, 1);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < max; i++) {
+    const ca = i < a.length ? a.charCodeAt(i) : 0;
+    const cb = i < b.length ? b.charCodeAt(i) : 0;
+    diff |= ca ^ cb;
   }
   return diff === 0;
 }
 
-/* Read the kr_admin cookie value, if present. Edge runtime gives a
-   single `cookie` header so we parse manually. */
-export function readCookie(req: Request, name: string): string | null {
+/* Read either cookie name (prod or dev). Edge runtime gives us a single
+   `cookie` header so we parse manually. */
+export function readAdminCookie(req: Request): string | null {
   const raw = req.headers.get("cookie") || "";
   for (const part of raw.split(";")) {
     const [k, ...rest] = part.split("=");
-    if (k && k.trim() === name) {
+    const name = k?.trim();
+    if (name === PROD_COOKIE || name === DEV_COOKIE) {
       return decodeURIComponent(rest.join("=").trim());
     }
   }
   return null;
 }
 
-/* Verify the admin cookie matches ADMIN_TOKEN. Returns null on success
-   (caller proceeds), or a Response on failure (caller returns it). */
+/* Verify cookie matches ADMIN_TOKEN. Returns null on success, Response
+   on failure. */
 export function requireAdmin(req: Request): Response | null {
   const expected = process.env.ADMIN_TOKEN || "";
   if (!expected) return json({ error: "Admin not configured" }, 503);
-  const cookie = readCookie(req, ADMIN_COOKIE) || "";
+  const cookie = readAdminCookie(req) || "";
   if (!constantTimeEq(cookie, expected)) {
     return json({ error: "Unauthorized" }, 401);
   }
@@ -43,19 +65,23 @@ export function requireAdmin(req: Request): Response | null {
 }
 
 export function setAdminCookieHeader(token: string): string {
-  /* httpOnly + Secure + SameSite=Lax. Long TTL — admin is just you, so
-     no need to re-auth every visit. */
+  const name = activeCookieName();
   const attrs = [
-    `${ADMIN_COOKIE}=${encodeURIComponent(token)}`,
+    `${name}=${encodeURIComponent(token)}`,
     `Path=/`,
     `HttpOnly`,
-    `Secure`,
     `SameSite=Lax`,
     `Max-Age=${COOKIE_TTL_SECONDS}`,
   ];
+  /* __Host- requires Secure; production is always HTTPS so add it.
+     In dev (localhost HTTP), we use the unprefixed name and skip Secure
+     so the browser keeps the cookie. */
+  if (isProd()) attrs.push("Secure");
   return attrs.join("; ");
 }
 
 export function clearAdminCookieHeader(): string {
-  return `${ADMIN_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+  const name = activeCookieName();
+  const secure = isProd() ? "; Secure" : "";
+  return `${name}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`;
 }

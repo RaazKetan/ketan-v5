@@ -1,74 +1,125 @@
-import { guard, json } from "../sarvam/_shared";
+import { json } from "../sarvam/_shared";
+import { getAllowedOrigins, clientIp } from "../sarvam/_shared";
+import { limit } from "../_shared/limits";
+import {
+  readJson,
+  isUuid,
+  isString,
+  isOneOf,
+  sanitizeText,
+  isFiniteInt,
+  isFiniteNumber,
+} from "../_shared/validate";
 import { readIdentity } from "../_shared/identity";
 import { getSupabase, supabaseConfigured } from "../_shared/supabase";
 
 export const config = { runtime: "edge" };
 
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+declare const process: { env: Record<string, string | undefined> };
 
-const ROLES = new Set(["user", "agent"]);
-const SOURCES = new Set(["text", "voice"]);
+const ROLES = new Set(["user", "agent"] as const);
+const SOURCES = new Set(["text", "voice"] as const);
+
+const MAX_BODY_BYTES = 16 * 1024; // 16 KB
 const MAX_TEXT = 4096;
+const MAX_VISITOR_META_STRING = 500;
+
+/* Vercel preview deploys get URLs like ketan-v5-<branch>-<user>.vercel.app. */
+const VERCEL_PREVIEW =
+  /^https:\/\/ketan-v5-[a-z0-9-]+-ketan-rajs-projects\.vercel\.app$/i;
 
 type Body = {
-  visitorId?: string;
-  sessionId?: string;
-  visitorMeta?: {
-    language?: string;
-    screenW?: number;
-    screenH?: number;
-    dpr?: number;
-    referrer?: string;
-  };
-  role?: string;
-  source?: string;
-  text?: string;
+  visitorId?: unknown;
+  sessionId?: unknown;
+  visitorMeta?: unknown;
+  role?: unknown;
+  source?: unknown;
+  text?: unknown;
 };
 
-export default async function handler(req: Request): Promise<Response> {
-  const blocked = guard(req);
-  if (blocked) return blocked;
+type VisitorMeta = {
+  language?: string;
+  screenW?: number;
+  screenH?: number;
+  dpr?: number;
+  referrer?: string;
+};
 
+/* Validate visitorMeta separately so each field has its own cap and
+   bad-faith metadata can't blow up the request. Returns null on any
+   issue, an object on success. */
+function validateVisitorMeta(v: unknown): VisitorMeta | null {
+  if (typeof v !== "object" || v === null) return null;
+  const m = v as Record<string, unknown>;
+  const out: VisitorMeta = {};
+  if (typeof m.language === "string" && m.language.length <= MAX_VISITOR_META_STRING) {
+    out.language = m.language;
+  }
+  if (isFiniteInt(m.screenW, 0, 32_000)) out.screenW = m.screenW as number;
+  if (isFiniteInt(m.screenH, 0, 32_000)) out.screenH = m.screenH as number;
+  if (isFiniteNumber(m.dpr, 0, 10)) out.dpr = m.dpr as number;
+  if (typeof m.referrer === "string" && m.referrer.length <= MAX_VISITOR_META_STRING) {
+    out.referrer = m.referrer;
+  }
+  return out;
+}
+
+export default async function handler(req: Request): Promise<Response> {
+  /* --- method + origin --- */
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+
+  const origin = req.headers.get("origin");
+  /* In production, browser POSTs always carry Origin; reject when absent
+     to block cURL-style abuse. */
+  if (process.env.NODE_ENV === "production" && !origin) {
+    return json({ error: "Missing origin" }, 403);
+  }
+  if (origin) {
+    const allowed = getAllowedOrigins();
+    if (!allowed.has(origin) && !VERCEL_PREVIEW.test(origin)) {
+      return json({ error: "Forbidden origin" }, 403);
+    }
+  }
+
+  /* --- rate limit (dedicated 'message' bucket) --- */
+  const ip = clientIp(req);
+  if (!limit("message", ip)) {
+    return json({ error: "Rate limit exceeded" }, 429);
+  }
+
+  /* --- DB readiness --- */
   if (!supabaseConfigured()) {
-    /* DB not provisioned — fail soft so the chat UI keeps working. The
-       client treats anything non-2xx as no-op. */
+    /* Soft-fail: client treats anything non-2xx as no-op, chat keeps
+       working. Returning 503 makes the disabled state explicit. */
     return json({ error: "Logging disabled" }, 503);
   }
 
-  let body: Body;
-  try {
-    body = await req.json();
-  } catch {
-    return json({ error: "Invalid JSON" }, 400);
-  }
+  /* --- read + validate body --- */
+  const parsed = await readJson<Body>(req, MAX_BODY_BYTES);
+  if (!parsed.ok) return parsed.res;
+  const body = parsed.body;
 
-  /* ---- Validate shape ---- */
-  const visitorId = String(body.visitorId || "");
-  const sessionId = String(body.sessionId || "");
-  const role = String(body.role || "");
-  const source = String(body.source || "");
-  const text = String(body.text || "").slice(0, MAX_TEXT).trim();
+  if (!isUuid(body.visitorId)) return json({ error: "Bad visitorId" }, 400);
+  if (!isUuid(body.sessionId)) return json({ error: "Bad sessionId" }, 400);
+  if (!isOneOf(body.role, ROLES)) return json({ error: "Bad role" }, 400);
+  if (!isOneOf(body.source, SOURCES)) return json({ error: "Bad source" }, 400);
+  if (!isString(body.text, MAX_TEXT)) return json({ error: "Bad text" }, 400);
 
-  if (!UUID_RE.test(visitorId)) return json({ error: "Bad visitorId" }, 400);
-  if (!UUID_RE.test(sessionId)) return json({ error: "Bad sessionId" }, 400);
-  if (!ROLES.has(role)) return json({ error: "Bad role" }, 400);
-  if (!SOURCES.has(source)) return json({ error: "Bad source" }, 400);
+  const text = sanitizeText(String(body.text)).slice(0, MAX_TEXT);
   if (!text) return json({ error: "Empty text" }, 400);
 
-  const supabase = getSupabase()!;
+  const visitorMeta = validateVisitorMeta(body.visitorMeta);
+  const isFreshSession = !!visitorMeta;
+
+  /* --- identity from request --- */
   const id = await readIdentity(req);
+  const supabase = getSupabase()!;
 
-  /* ---- Upsert visitor ----
-     If row exists: bump last_seen, refresh geo/UA so we get the most
-     recent values (visitors travel, change browsers). Increment
-     visit_count only when the call carries fresh visitorMeta (i.e. it's
-     the first message of a new session). */
-  const isFreshSession = !!body.visitorMeta;
-  const visitorMeta = body.visitorMeta || {};
-
+  /* --- upsert visitor ---
+     If row exists: bump last_seen + refresh geo/UA (visitors travel and
+     swap browsers). Increment visit_count only on a fresh session. */
   const visitorUpsert: Record<string, unknown> = {
-    id: visitorId,
+    id: body.visitorId,
     last_seen_at: new Date().toISOString(),
     ip: id.ip,
     ip_hash: id.ipHash,
@@ -76,7 +127,7 @@ export default async function handler(req: Request): Promise<Response> {
     ua_browser: id.ua.browser,
     ua_os: id.ua.os,
     ua_device: id.ua.device,
-    language: id.language || visitorMeta.language || null,
+    language: id.language || visitorMeta?.language || null,
     country: id.geo.country,
     region: id.geo.region,
     city: id.geo.city,
@@ -84,11 +135,11 @@ export default async function handler(req: Request): Promise<Response> {
     latitude: id.geo.latitude,
     longitude: id.geo.longitude,
   };
-  if (isFreshSession) {
-    visitorUpsert.screen_w = visitorMeta.screenW ?? null;
-    visitorUpsert.screen_h = visitorMeta.screenH ?? null;
-    visitorUpsert.dpr = visitorMeta.dpr ?? null;
-    visitorUpsert.referrer = visitorMeta.referrer ?? null;
+  if (isFreshSession && visitorMeta) {
+    if (visitorMeta.screenW !== undefined) visitorUpsert.screen_w = visitorMeta.screenW;
+    if (visitorMeta.screenH !== undefined) visitorUpsert.screen_h = visitorMeta.screenH;
+    if (visitorMeta.dpr !== undefined) visitorUpsert.dpr = visitorMeta.dpr;
+    if (visitorMeta.referrer !== undefined) visitorUpsert.referrer = visitorMeta.referrer;
   }
 
   const { error: vErr } = await supabase
@@ -100,65 +151,60 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   if (isFreshSession) {
-    /* Bump visit_count separately so concurrent upserts don't clobber it.
-       Best-effort: ignore failures. */
-    await supabase.rpc("increment_visit_count", { v: visitorId }).then(
-      () => {},
-      () => {
-        /* RPC may not exist; fall back to a read-modify-write. */
-        supabase
-          .from("visitors")
-          .select("visit_count")
-          .eq("id", visitorId)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              supabase
-                .from("visitors")
-                .update({ visit_count: (data.visit_count ?? 1) + 1 })
-                .eq("id", visitorId);
-            }
-          });
-      }
-    );
+    /* Best-effort bump; ignore failures. */
+    const { data } = await supabase
+      .from("visitors")
+      .select("visit_count")
+      .eq("id", body.visitorId)
+      .single();
+    if (data) {
+      await supabase
+        .from("visitors")
+        .update({ visit_count: (data.visit_count ?? 1) + 1 })
+        .eq("id", body.visitorId);
+    }
   }
 
-  /* ---- Upsert session ----
-     channel goes 'text' → 'voice' → 'both' as different sources arrive.
-     Use a SELECT first to know whether to widen, since we can't easily
-     express "channel = case when channel <> source then 'both' else …"
-     in upsert. */
+  /* --- upsert session ---
+     Widen channel 'text' → 'voice' → 'both' as different sources arrive. */
   const { data: existingSession } = await supabase
     .from("sessions")
     .select("channel")
-    .eq("id", sessionId)
+    .eq("id", body.sessionId)
     .maybeSingle();
 
-  let nextChannel = source;
-  if (existingSession?.channel && existingSession.channel !== source) {
+  let nextChannel: string = body.source as string;
+  if (existingSession?.channel && existingSession.channel !== body.source) {
     nextChannel = "both";
   }
 
-  const { error: sErr } = await supabase.from("sessions").upsert(
-    {
-      id: sessionId,
-      visitor_id: visitorId,
-      channel: nextChannel,
-      page_path: isFreshSession ? new URL(req.url).pathname : undefined,
-    },
-    { onConflict: "id" }
-  );
+  const sessionUpsert: Record<string, unknown> = {
+    id: body.sessionId,
+    visitor_id: body.visitorId,
+    channel: nextChannel,
+  };
+  if (isFreshSession) {
+    try {
+      sessionUpsert.page_path = new URL(req.url).pathname;
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const { error: sErr } = await supabase
+    .from("sessions")
+    .upsert(sessionUpsert, { onConflict: "id" });
   if (sErr) {
     console.error("[conversations] session upsert", sErr);
     return json({ error: "DB error" }, 500);
   }
 
-  /* ---- Insert message ---- */
+  /* --- insert message --- */
   const { error: mErr } = await supabase.from("messages").insert({
-    session_id: sessionId,
-    visitor_id: visitorId,
-    role,
-    source,
+    session_id: body.sessionId,
+    visitor_id: body.visitorId,
+    role: body.role,
+    source: body.source,
     text,
     country: id.geo.country,
     city: id.geo.city,
@@ -168,5 +214,10 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: "DB error" }, 500);
   }
 
-  return json({ ok: true });
+  return json(
+    { ok: true },
+    200,
+    /* Tell every intermediate cache to keep its hands off. */
+    { "Cache-Control": "no-store, max-age=0" }
+  );
 }
