@@ -1,5 +1,5 @@
-import { json } from "../sarvam/_shared";
-import { clearAdminCookieHeader } from "../_shared/admin";
+import { json } from "../sarvam/_shared.js";
+import { clearAdminCookieHeader } from "../_shared/admin.js";
 
 export const config = { runtime: "edge" };
 

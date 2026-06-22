@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { readIdentity } from "./identity";
+import type { readIdentity } from "./identity.js";
 
 /* Shared visitor + session upsert. Called from every analytics
    endpoint (pageview, event, message) so the parent rows exist before

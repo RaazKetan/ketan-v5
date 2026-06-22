@@ -1,15 +1,15 @@
-import { clientIp, json, checkOrigin } from "../sarvam/_shared";
-import { limit } from "../_shared/limits";
+import { clientIp, json, checkOrigin } from "../sarvam/_shared.js";
+import { limit } from "../_shared/limits.js";
 import {
   readJson,
   isUuid,
   isString,
   sanitizeText,
-} from "../_shared/validate";
-import { readIdentity } from "../_shared/identity";
-import { getSupabase, supabaseConfigured } from "../_shared/supabase";
-import { logApiError } from "../_shared/apiError";
-import { ensureVisitor, ensureSession } from "../_shared/upserts";
+} from "../_shared/validate.js";
+import { readIdentity } from "../_shared/identity.js";
+import { getSupabase, supabaseConfigured } from "../_shared/supabase.js";
+import { logApiError } from "../_shared/apiError.js";
+import { ensureVisitor, ensureSession } from "../_shared/upserts.js";
 
 export const config = { runtime: "edge" };
 

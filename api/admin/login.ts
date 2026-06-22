@@ -1,8 +1,8 @@
-import { clientIp, json, checkOrigin } from "../sarvam/_shared";
-import { limit } from "../_shared/limits";
-import { readJson, isString } from "../_shared/validate";
-import { setAdminCookieHeader, signSession } from "../_shared/admin";
-import { getSupabase, supabaseConfigured } from "../_shared/supabase";
+import { clientIp, json, checkOrigin } from "../sarvam/_shared.js";
+import { limit } from "../_shared/limits.js";
+import { readJson, isString } from "../_shared/validate.js";
+import { setAdminCookieHeader, signSession } from "../_shared/admin.js";
+import { getSupabase, supabaseConfigured } from "../_shared/supabase.js";
 
 export const config = { runtime: "edge" };
 

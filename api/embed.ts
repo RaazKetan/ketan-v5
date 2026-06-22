@@ -1,4 +1,4 @@
-import { guard, json, getGeminiKey } from "./sarvam/_shared";
+import { guard, json, getGeminiKey } from "./sarvam/_shared.js";
 
 export const config = { runtime: "edge" };
 

@@ -1,8 +1,8 @@
-import { clientIp, json } from "../sarvam/_shared";
-import { limit } from "../_shared/limits";
-import { requireAdmin } from "../_shared/admin";
-import { getSupabase, supabaseConfigured } from "../_shared/supabase";
-import { parseUA } from "../_shared/identity";
+import { clientIp, json } from "../sarvam/_shared.js";
+import { limit } from "../_shared/limits.js";
+import { requireAdmin } from "../_shared/admin.js";
+import { getSupabase, supabaseConfigured } from "../_shared/supabase.js";
+import { parseUA } from "../_shared/identity.js";
 
 export const config = { runtime: "edge" };
 

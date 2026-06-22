@@ -1,5 +1,5 @@
-import { getSupabase, supabaseConfigured } from "./supabase";
-import { ipHash, rawIp } from "./identity";
+import { getSupabase, supabaseConfigured } from "./supabase.js";
+import { ipHash, rawIp } from "./identity.js";
 
 /* Fire-and-forget API error logger. Writes a row to api_errors so the
    /admin "API health" card can show 4xx/5xx rates without us having to

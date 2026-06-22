@@ -1,4 +1,4 @@
-import { guard, json, getSarvamKey } from "./_shared";
+import { guard, json, getSarvamKey } from "./_shared.js";
 
 export const config = { runtime: "edge" };
 

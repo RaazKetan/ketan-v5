@@ -1,4 +1,4 @@
-import { json } from "../sarvam/_shared";
+import { json } from "../sarvam/_shared.js";
 
 declare const process: { env: Record<string, string | undefined> };
 
