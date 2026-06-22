@@ -52,15 +52,13 @@ export const ChatWidget: React.FC = () => {
     return () => window.clearTimeout(t);
   }, [notice]);
 
-  /* Seed the shared history with the greeting the first time anyone
-     opens the chat / triggers the voice agent. Re-renders won't add
-     duplicates because we check before appending. */
-  useEffect(() => {
-    if (history.length === 0) addMessage("agent", GREETING_TEXT, "text");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  /* Render-friendly messages: the shared history plus the greeting fallback. */
+  /* Render-friendly messages: the shared history plus a transient
+     greeting that lives ONLY in the UI when the real history is empty.
+     The greeting used to be seeded via addMessage() on mount, but that
+     fired on every route change + twice in StrictMode + once per page,
+     so the database was filling with duplicate "Hi, I'm Ketan's …"
+     rows for every navigation. Static fallback render keeps the UX
+     identical and never persists. */
   const messages = history.length
     ? history
     : [{ id: 0, role: "agent" as const, text: GREETING_TEXT, source: "text" as const, ts: 0 }];

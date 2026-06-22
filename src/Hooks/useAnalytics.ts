@@ -1,6 +1,26 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { trackScrollDepth, trackDwell } from "@/lib/analytics";
+import { logPageView } from "@/services/pageviewLog";
+
+/* Fires a page_view POST to /api/analytics/pageview on every route
+   change. UTM params + referrer are captured automatically. The first
+   call on a hard navigation will see document.referrer set; subsequent
+   client-side route changes will see it empty, which is correct. */
+export function usePageView() {
+  const { pathname } = useLocation();
+  const lastRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (lastRef.current === pathname) return;
+    const prev = lastRef.current;
+    lastRef.current = pathname;
+    /* On in-app navigation, the previous pathname is a more useful
+       referrer than document.referrer (which only holds external). */
+    const referrer = prev ? window.location.origin + prev : document.referrer;
+    logPageView({ path: pathname, referrer });
+  }, [pathname]);
+}
 
 /* Fires scroll_depth(25/50/75/100) at most once per (path, depth)
    pair, then resets on route change. Cheap — just listens to scroll

@@ -3,6 +3,7 @@ import { limit } from "../_shared/limits";
 import { isUuid } from "../_shared/validate";
 import { requireAdmin } from "../_shared/admin";
 import { getSupabase, supabaseConfigured } from "../_shared/supabase";
+import { parseUA } from "../_shared/identity";
 
 export const config = { runtime: "edge" };
 
@@ -14,7 +15,7 @@ export default async function handler(req: Request): Promise<Response> {
   if (!limit("adminRead", clientIp(req))) {
     return json({ error: "Rate limit exceeded" }, 429);
   }
-  const fail = requireAdmin(req);
+  const fail = await requireAdmin(req);
   if (fail) return fail;
   if (!supabaseConfigured()) return json({ error: "DB not configured" }, 503);
 
@@ -45,7 +46,16 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: "DB error" }, 500);
   }
 
-  return json({ session, messages: messages || [] }, 200, {
-    "Cache-Control": "no-store, max-age=0",
-  });
+  /* Attach device model derived from the stored UA so the drawer can
+     show it without the client having to know how to parse User-Agent. */
+  const visitor = (session as { visitors: unknown }).visitors as
+    | { ua: string | null }
+    | null;
+  const model = visitor?.ua ? parseUA(visitor.ua).model : null;
+
+  return json(
+    { session, messages: messages || [], visitorModel: model },
+    200,
+    { "Cache-Control": "no-store, max-age=0" }
+  );
 }

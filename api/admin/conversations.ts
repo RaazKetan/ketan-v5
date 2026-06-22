@@ -2,6 +2,7 @@ import { clientIp, json } from "../sarvam/_shared";
 import { limit } from "../_shared/limits";
 import { requireAdmin } from "../_shared/admin";
 import { getSupabase, supabaseConfigured } from "../_shared/supabase";
+import { parseUA } from "../_shared/identity";
 
 export const config = { runtime: "edge" };
 
@@ -15,7 +16,7 @@ export default async function handler(req: Request): Promise<Response> {
   if (!limit("adminRead", clientIp(req))) {
     return json({ error: "Rate limit exceeded" }, 429);
   }
-  const fail = requireAdmin(req);
+  const fail = await requireAdmin(req);
   if (fail) return fail;
   if (!supabaseConfigured()) return json({ error: "DB not configured" }, 503);
 
@@ -33,7 +34,11 @@ export default async function handler(req: Request): Promise<Response> {
     .from("sessions")
     .select(
       `id, started_at, ended_at, channel, page_path,
-       visitors:visitor_id (country, city, ua_browser, ua_os, ua_device)`
+       visitors:visitor_id (
+         id, ip, ip_hash, ua, ua_browser, ua_os, ua_device,
+         country, region, city, timezone, language,
+         screen_w, screen_h, visit_count, referrer
+       )`
     )
     .order("started_at", { ascending: false })
     .limit(lim);
@@ -67,34 +72,65 @@ export default async function handler(req: Request): Promise<Response> {
   const rows = (sessions || []).map((s) => {
     const visitor = (s as { visitors: unknown }).visitors as
       | {
-          country: string | null;
-          city: string | null;
+          id: string | null;
+          ip: string | null;
+          ip_hash: string | null;
+          ua: string | null;
           ua_browser: string | null;
           ua_os: string | null;
           ua_device: string | null;
+          country: string | null;
+          region: string | null;
+          city: string | null;
+          timezone: string | null;
+          language: string | null;
+          screen_w: number | null;
+          screen_h: number | null;
+          visit_count: number | null;
+          referrer: string | null;
         }
       | null;
     const p = previews[s.id as string] || { count: 0, last: null };
+    /* Parse the stored UA to recover a device model on the fly (e.g.
+       "iPhone (iOS 17)" or "Samsung SM-G990B"). Storing it back to the
+       visitors row would mean a schema migration; computing here is free. */
+    const model = visitor?.ua ? parseUA(visitor.ua).model : null;
     return {
       id: s.id,
       startedAt: s.started_at,
       endedAt: s.ended_at,
       channel: s.channel,
       pagePath: s.page_path,
+      visitorId: visitor?.id ?? null,
+      ip: visitor?.ip ?? null,
+      ipHash: visitor?.ip_hash ?? null,
       country: visitor?.country ?? null,
+      region: visitor?.region ?? null,
       city: visitor?.city ?? null,
+      timezone: visitor?.timezone ?? null,
+      language: visitor?.language ?? null,
       browser: visitor?.ua_browser ?? null,
       os: visitor?.ua_os ?? null,
       device: visitor?.ua_device ?? null,
+      model,
+      screenW: visitor?.screen_w ?? null,
+      screenH: visitor?.screen_h ?? null,
+      visitCount: visitor?.visit_count ?? null,
+      referrer: visitor?.referrer ?? null,
       messageCount: p.count,
       lastMessage: p.last,
     };
   });
 
-  const nextCursor =
-    rows.length === lim ? rows[rows.length - 1]!.startedAt : null;
+  /* Recent Conversations table is for chats only — the analytics tab
+     already shows page-view-only sessions. Filter empty sessions so
+     the operator's view doesn't fill up with browser pings. */
+  const chatRows = rows.filter((r) => (r.messageCount ?? 0) > 0);
 
-  return json({ rows, nextCursor }, 200, {
+  const nextCursor =
+    chatRows.length === lim ? chatRows[chatRows.length - 1]!.startedAt : null;
+
+  return json({ rows: chatRows, nextCursor }, 200, {
     "Cache-Control": "no-store, max-age=0",
   });
 }

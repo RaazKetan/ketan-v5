@@ -14,7 +14,7 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: "Rate limit exceeded" }, 429);
   }
 
-  const fail = requireAdmin(req);
+  const fail = await requireAdmin(req);
   if (fail) return fail;
   return json({ ok: true }, 200, { "Cache-Control": "no-store, max-age=0" });
 }

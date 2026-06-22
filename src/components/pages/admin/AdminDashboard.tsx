@@ -1,20 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DesignLayout, GridBg, Word } from "@/components/design";
 import { RouteSEO } from "@/components/seo/RouteSEO";
-
-type Stats = {
-  range: string;
-  since: string;
-  sessionCount: number;
-  messageCount: number;
-  uniqueVisitors: number;
-  topCountries: Array<{ name: string; count: number }>;
-  topCities: Array<{ name: string; count: number }>;
-  topBrowsers: Array<{ name: string; count: number }>;
-  topOS: Array<{ name: string; count: number }>;
-  channelMix: Record<string, number>;
-  dailySeries: Array<{ date: string; count: number }>;
-};
+import { AnalyticsView } from "./AnalyticsView";
 
 type ConvRow = {
   id: string;
@@ -22,11 +9,22 @@ type ConvRow = {
   endedAt: string | null;
   channel: string | null;
   pagePath: string | null;
+  visitorId: string | null;
+  ip: string | null;
+  ipHash: string | null;
   country: string | null;
+  region: string | null;
   city: string | null;
+  timezone: string | null;
+  language: string | null;
   browser: string | null;
   os: string | null;
   device: string | null;
+  model: string | null;
+  screenW: number | null;
+  screenH: number | null;
+  visitCount: number | null;
+  referrer: string | null;
   messageCount: number;
   lastMessage: string | null;
 };
@@ -46,31 +44,43 @@ type SessionDetail = {
     text: string;
     ts: string;
   }>;
+  visitorModel?: string | null;
 };
 
 type Range = "24h" | "7d" | "30d";
 
 type Props = { onLogout: () => void };
+type Tab = "overview" | "conversations";
 
 export const AdminDashboard: React.FC<Props> = ({ onLogout }) => {
+  const [tab, setTab] = useState<Tab>("overview");
   const [range, setRange] = useState<Range>("7d");
-  const [stats, setStats] = useState<Stats | null>(null);
   const [conversations, setConversations] = useState<ConvRow[] | null>(null);
   const [openSessionId, setOpenSessionId] = useState<string | null>(null);
   const [detail, setDetail] = useState<SessionDetail | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /* Centralized 401 handler — any admin endpoint that responds 401
+     means our cookie has gone bad (HMAC rotated, expired, signed out
+     elsewhere). Kick to the login screen instead of leaving the user
+     staring at empty cards. */
+  const handleUnauthorized = onLogout;
+
   useEffect(() => {
+    if (tab !== "conversations") return;
     let cancelled = false;
     const load = async () => {
       setLoading(true);
       try {
-        const [statsRes, convRes] = await Promise.all([
-          fetch(`/api/admin/stats?range=${range}`).then((r) => r.json()),
-          fetch(`/api/admin/conversations?limit=50`).then((r) => r.json()),
-        ]);
+        const r = await fetch(`/api/admin/conversations?limit=50`, {
+          credentials: "same-origin",
+        });
+        if (r.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+        const convRes = await r.json();
         if (cancelled) return;
-        setStats(statsRes);
         setConversations(convRes.rows || []);
       } catch (e) {
         console.error("[admin] load", e);
@@ -82,7 +92,7 @@ export const AdminDashboard: React.FC<Props> = ({ onLogout }) => {
     return () => {
       cancelled = true;
     };
-  }, [range]);
+  }, [range, tab]);
 
   useEffect(() => {
     if (!openSessionId) {
@@ -92,9 +102,15 @@ export const AdminDashboard: React.FC<Props> = ({ onLogout }) => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(
-          `/api/admin/session?id=${encodeURIComponent(openSessionId)}`
-        ).then((r) => r.json());
+        const r = await fetch(
+          `/api/admin/session?id=${encodeURIComponent(openSessionId)}`,
+          { credentials: "same-origin" }
+        );
+        if (r.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+        const res = await r.json();
         if (!cancelled) setDetail(res);
       } catch (e) {
         console.error("[admin] session detail", e);
@@ -122,8 +138,20 @@ export const AdminDashboard: React.FC<Props> = ({ onLogout }) => {
           <div>
             <div className="ad-eyebrow">Admin / live</div>
             <h1 className="ad-h1">
-              <Word>What</Word> <Word em>people</Word> <Word>ask.</Word>
+              <Word>What</Word> <Word em>people</Word> <Word>do.</Word>
             </h1>
+            <div className="ad-tabs">
+              {(["overview", "conversations"] as Tab[]).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`ad-tab${tab === t ? " is-active" : ""}`}
+                  onClick={() => setTab(t)}
+                >
+                  {t === "overview" ? "Overview" : "Conversations"}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="ad-controls">
             <div className="ad-range">
@@ -144,67 +172,80 @@ export const AdminDashboard: React.FC<Props> = ({ onLogout }) => {
           </div>
         </div>
 
-        {loading && !stats && <div className="ad-loading">Loading…</div>}
-
-        {stats && (
-          <div className="ad-stats">
-            <Stat label="Sessions" value={stats.sessionCount} />
-            <Stat label="Messages" value={stats.messageCount} />
-            <Stat label="Unique visitors" value={stats.uniqueVisitors} />
-            <Stat
-              label="Channels"
-              value={Object.entries(stats.channelMix)
-                .map(([k, v]) => `${k}:${v}`)
-                .join(" · ") || "-"}
-            />
-          </div>
+        {tab === "overview" && (
+          <AnalyticsView range={range} onUnauthorized={handleUnauthorized} />
         )}
 
-        {stats && (
-          <div className="ad-grids">
-            <TopList title="Top countries" items={stats.topCountries} />
-            <TopList title="Top cities" items={stats.topCities} />
-            <TopList title="Browsers" items={stats.topBrowsers} />
-            <TopList title="Operating systems" items={stats.topOS} />
-          </div>
-        )}
-
+        {tab === "conversations" && (
         <div className="ad-section">
           <div className="ad-sec-head">Recent conversations</div>
-          <div className="ad-table">
-            <div className="ad-row ad-head">
-              <span>When</span>
-              <span>Where</span>
-              <span>Channel</span>
-              <span>Msgs</span>
-              <span>Preview</span>
-            </div>
-            {(conversations || []).map((c) => (
-              <button
-                key={c.id}
-                className="ad-row ad-clickable"
-                onClick={() => setOpenSessionId(c.id)}
-              >
-                <span>{new Date(c.startedAt).toLocaleString()}</span>
-                <span>
-                  {[c.city, c.country].filter(Boolean).join(", ") || "-"}
-                  <span className="ad-sub">
-                    {" "}
-                    {c.browser}/{c.os}/{c.device}
-                  </span>
-                </span>
-                <span>{c.channel || "-"}</span>
-                <span>{c.messageCount}</span>
-                <span className="ad-preview">{c.lastMessage || "(empty)"}</span>
-              </button>
-            ))}
-            {conversations && conversations.length === 0 && (
-              <div className="ad-empty">
-                No conversations yet. Open the chat on the site and say hi.
+          <div className="ad-table-scroll">
+            <div className="ad-table ad-table-wide">
+              <div className="ad-row ad-head">
+                <span>When</span>
+                <span>IP</span>
+                <span>Where</span>
+                <span>Device</span>
+                <span>Browser / OS</span>
+                <span>Channel</span>
+                <span title="Messages count">Msgs</span>
+                <span>Preview</span>
               </div>
-            )}
+              {(conversations || []).map((c) => (
+                <button
+                  key={c.id}
+                  className="ad-row ad-clickable"
+                  onClick={() => setOpenSessionId(c.id)}
+                >
+                  <span>
+                    {new Date(c.startedAt).toLocaleString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {c.timezone && (
+                      <span className="ad-sub"> {c.timezone}</span>
+                    )}
+                  </span>
+                  <span className="ad-mono">
+                    {c.ip && c.ip !== "unknown" ? c.ip : "-"}
+                  </span>
+                  <span>
+                    {[c.city, c.region, c.country].filter(Boolean).join(", ") ||
+                      "-"}
+                  </span>
+                  <span>
+                    {c.model || c.device || "-"}
+                    {c.screenW && c.screenH && (
+                      <span className="ad-sub">
+                        {" "}
+                        {c.screenW}×{c.screenH}
+                      </span>
+                    )}
+                  </span>
+                  <span>
+                    {c.browser || "-"}
+                    {c.os && <span className="ad-sub"> / {c.os}</span>}
+                  </span>
+                  <span>{c.channel || "-"}</span>
+                  <span>{c.messageCount}</span>
+                  <span className="ad-preview">{c.lastMessage || "(empty)"}</span>
+                </button>
+              ))}
+              {conversations && conversations.length === 0 && (
+                <div className="ad-empty">
+                  No conversations yet. Open the chat on the site and say hi.
+                </div>
+              )}
+            </div>
           </div>
         </div>
+        )}
+
+        {tab === "conversations" && loading && (
+          <div className="ad-loading">Loading…</div>
+        )}
       </section>
 
       {openSessionId && detail && (
@@ -219,31 +260,30 @@ export const AdminDashboard: React.FC<Props> = ({ onLogout }) => {
   );
 };
 
-const Stat: React.FC<{ label: string; value: number | string }> = ({
-  label,
-  value,
-}) => (
-  <div className="ad-stat">
-    <div className="ad-stat-l">{label}</div>
-    <div className="ad-stat-v">{value}</div>
-  </div>
-);
+const fmtDateTime = (iso: string) =>
+  new Date(iso).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
-const TopList: React.FC<{
-  title: string;
-  items: Array<{ name: string; count: number }>;
-}> = ({ title, items }) => (
-  <div className="ad-card">
-    <div className="ad-card-title">{title}</div>
-    <ul>
-      {items.length === 0 && <li className="ad-empty-inline">No data yet</li>}
-      {items.map((i) => (
-        <li key={i.name}>
-          <span>{i.name}</span>
-          <span className="ad-count">{i.count}</span>
-        </li>
-      ))}
-    </ul>
+const KV: React.FC<{
+  label: string;
+  value: string;
+  mono?: boolean;
+  wrap?: boolean;
+}> = ({ label, value, mono, wrap }) => (
+  <div className="ad-kv-row">
+    <div className="ad-kv-l">{label}</div>
+    <div
+      className={`ad-kv-v${mono ? " ad-mono" : ""}${wrap ? " ad-wrap" : ""}`}
+      title={value}
+    >
+      {value}
+    </div>
   </div>
 );
 
@@ -262,25 +302,79 @@ const SessionDrawer: React.FC<{
         <div className="ad-drawer-head">
           <div className="ad-eyebrow">Session</div>
           <div className="ad-drawer-id">{detail.session.id}</div>
-          <div className="ad-drawer-meta">
-            {[
-              v.city,
-              v.country,
-              v.region,
-              v.timezone,
-              v.ua_browser,
-              v.ua_os,
-              v.ua_device,
-              v.language,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
+
+          <div className="ad-kv">
+            <KV label="Started" value={fmtDateTime(detail.session.started_at)} />
+            <KV
+              label="Ended"
+              value={
+                detail.session.ended_at
+                  ? fmtDateTime(detail.session.ended_at)
+                  : "(active)"
+              }
+            />
+            <KV label="Channel" value={detail.session.channel || "-"} />
+            <KV
+              label="Page"
+              value={(detail.session.page_path as string) || "-"}
+            />
           </div>
-          <div className="ad-drawer-meta">
-            Started {new Date(detail.session.started_at).toLocaleString()}
-            {detail.session.ended_at &&
-              ` · ended ${new Date(detail.session.ended_at).toLocaleString()}`}
+
+          <div className="ad-drawer-divider">VISITOR</div>
+
+          <div className="ad-kv">
+            <KV label="IP" value={(v.ip as string) || "-"} mono />
+            <KV
+              label="IP hash"
+              value={(v.ip_hash as string)?.slice(0, 16) + "…" || "-"}
+              mono
+            />
+            <KV label="Country" value={(v.country as string) || "-"} />
+            <KV label="Region" value={(v.region as string) || "-"} />
+            <KV label="City" value={(v.city as string) || "-"} />
+            <KV label="Timezone" value={(v.timezone as string) || "-"} />
+            <KV
+              label="Coords"
+              value={
+                v.latitude && v.longitude
+                  ? `${v.latitude}, ${v.longitude}`
+                  : "-"
+              }
+              mono
+            />
+            <KV label="Language" value={(v.language as string) || "-"} />
           </div>
+
+          <div className="ad-kv">
+            <KV
+              label="Device"
+              value={detail.visitorModel || (v.ua_device as string) || "-"}
+            />
+            <KV label="Browser" value={(v.ua_browser as string) || "-"} />
+            <KV label="OS" value={(v.ua_os as string) || "-"} />
+            <KV
+              label="Screen"
+              value={
+                v.screen_w && v.screen_h
+                  ? `${v.screen_w}×${v.screen_h} · ${v.dpr || 1}x`
+                  : "-"
+              }
+            />
+            <KV
+              label="Visits"
+              value={String((v.visit_count as number) ?? "-")}
+            />
+            <KV
+              label="Referrer"
+              value={(v.referrer as string) || "(direct)"}
+              wrap
+            />
+          </div>
+
+          <details className="ad-ua-details">
+            <summary>Full User-Agent</summary>
+            <code className="ad-ua-raw">{(v.ua as string) || "-"}</code>
+          </details>
         </div>
         <div className="ad-msgs">
           {detail.messages.map((m) => (
@@ -339,6 +433,28 @@ const styles = `
   }
   .ad-pill:hover { border-color: var(--ink); color: var(--ink); }
   .ad-pill.is-active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .ad-tabs {
+    display: inline-flex; gap: 4px;
+    margin-top: 16px;
+    padding: 4px;
+    background: var(--bg-deep); border-radius: 999px;
+    border: 1px solid var(--line);
+  }
+  .ad-tab {
+    padding: 8px 18px; border-radius: 999px;
+    border: 0; background: transparent;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .12em; text-transform: uppercase;
+    cursor: pointer; color: var(--ink-2);
+    transition: color .2s, background .2s;
+  }
+  .ad-tab:hover { color: var(--ink); }
+  .ad-tab.is-active {
+    background: var(--bg); color: var(--ink);
+    box-shadow: 0 1px 3px rgba(22, 21, 19, 0.08);
+  }
+
   .ad-logout {
     padding: 6px 12px; border-radius: 999px;
     border: 1px solid var(--line); background: transparent;
@@ -352,61 +468,32 @@ const styles = `
     font-family: var(--mono); font-size: 12px; color: var(--muted);
   }
 
-  .ad-stats {
-    position: relative;
-    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-  }
-  .ad-stat {
-    border: 1px solid var(--line); border-radius: 8px;
-    padding: 16px 18px; background: var(--bg);
-  }
-  .ad-stat-l {
-    font-family: var(--mono); font-size: 10px;
-    text-transform: uppercase; letter-spacing: .14em; color: var(--muted);
-  }
-  .ad-stat-v {
-    font-family: var(--serif); font-size: 28px;
-    margin-top: 6px; color: var(--ink);
-  }
-
-  .ad-grids {
-    position: relative;
-    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-  }
-  .ad-card {
-    border: 1px solid var(--line); border-radius: 8px;
-    padding: 16px 18px; background: var(--bg);
-  }
-  .ad-card-title {
-    font-family: var(--mono); font-size: 10px;
-    text-transform: uppercase; letter-spacing: .14em; color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .ad-card ul { list-style: none; padding: 0; margin: 0; }
-  .ad-card li {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 6px 0; border-top: 1px solid var(--line);
-    font-size: 13px;
-  }
-  .ad-card li:first-child { border-top: 0; }
-  .ad-count { color: var(--muted); font-family: var(--mono); font-size: 11px; }
-  .ad-empty-inline { color: var(--muted); font-size: 12px; padding: 4px 0; }
-
   .ad-section { position: relative; }
   .ad-sec-head {
     font-family: var(--mono); font-size: 10px;
     text-transform: uppercase; letter-spacing: .14em; color: var(--muted);
     margin-bottom: 10px;
   }
-  .ad-table {
+  /* Horizontal scroll wrapper so the wide table doesn't break the layout
+     on narrow screens. The min-width lets every column breathe. */
+  .ad-table-scroll {
     border: 1px solid var(--line); border-radius: 8px;
-    overflow: hidden; background: var(--bg);
+    background: var(--bg);
+    overflow-x: auto;
   }
+  .ad-table { background: var(--bg); }
+  .ad-table-wide { min-width: 1280px; }
   .ad-row {
     display: grid;
-    grid-template-columns: 180px 200px 70px 50px 1fr;
+    grid-template-columns:
+      140px              /* When */
+      140px              /* IP */
+      200px              /* Where */
+      200px              /* Device */
+      160px              /* Browser / OS */
+      80px               /* Channel */
+      60px               /* Msgs */
+      minmax(220px, 1fr);/* Preview */
     gap: 14px;
     align-items: center;
     padding: 10px 14px;
@@ -423,10 +510,12 @@ const styles = `
     font-family: var(--mono); font-size: 10px;
     text-transform: uppercase; letter-spacing: .14em;
     color: var(--muted);
+    position: sticky; top: 0; z-index: 1;
   }
   .ad-clickable { cursor: pointer; }
   .ad-clickable:hover { background: var(--bg-deep); }
   .ad-sub { color: var(--muted); font-size: 11px; }
+  .ad-mono { font-family: var(--mono); font-size: 11.5px; }
   .ad-preview {
     color: var(--ink-2);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -470,6 +559,41 @@ const styles = `
     font-family: var(--mono); font-size: 11px; color: var(--muted);
     line-height: 1.5;
   }
+  .ad-drawer-divider {
+    margin-top: 14px; padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 9px;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .ad-kv {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 18px;
+    margin-top: 8px;
+  }
+  .ad-kv-row { display: grid; grid-template-columns: 78px 1fr; gap: 8px; min-width: 0; }
+  .ad-kv-l {
+    font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); align-self: center;
+  }
+  .ad-kv-v {
+    font-size: 12.5px; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .ad-kv-v.ad-wrap { white-space: normal; word-break: break-all; }
+  .ad-ua-details {
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+  }
+  .ad-ua-details summary { cursor: pointer; user-select: none; }
+  .ad-ua-raw {
+    display: block; margin-top: 8px;
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-2); word-break: break-all; line-height: 1.5;
+  }
   .ad-msgs {
     flex: 1; overflow-y: auto;
     padding: 18px 28px; display: flex; flex-direction: column; gap: 14px;
@@ -490,16 +614,12 @@ const styles = `
   .ad-msg-user .ad-msg-text { background: var(--ink); color: var(--bg); }
 
   @media (max-width: 1000px) {
-    .ad-stats, .ad-grids { grid-template-columns: repeat(2, 1fr); }
-    .ad-row { grid-template-columns: 140px 1fr 50px 40px; }
-    .ad-row > :nth-child(5) { display: none; }
+    .ad-kv { grid-template-columns: 1fr; }
   }
   @media (max-width: 600px) {
     .ad-hero { padding: 100px 18px 60px; }
-    .ad-stats, .ad-grids { grid-template-columns: 1fr; }
-    .ad-row { grid-template-columns: 1fr 50px 40px; gap: 8px; padding: 10px; }
-    .ad-row > :nth-child(2) { display: none; }
     .ad-h1 { font-size: clamp(36px, 9vw, 64px); }
+    .ad-kv-row { grid-template-columns: 70px 1fr; }
   }
 `;
 

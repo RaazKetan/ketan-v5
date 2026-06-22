@@ -16,11 +16,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    /* In dev: surface in the console so the stack is one click away.
-       In prod: console.error only (no remote logging yet). */
-    if (typeof console !== "undefined") {
-      console.error("[ErrorBoundary] uncaught render error", error, info);
-    }
+    /* General error surfaces in console for debugging. We never log
+       message text, IP, tokens, or any secrets — only the React error
+       and component stack, which is safe to expose. */
+    console.error("[ErrorBoundary] uncaught render error", error, info);
   }
 
   handleRetry = () => {

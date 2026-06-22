@@ -68,6 +68,10 @@ export type VisitorMeta = {
   screenH: number;
   dpr: number;
   referrer: string;
+  /* Page where the visitor started this session, e.g. '/about'. The
+     server stamps sessions.page_path from this so the admin shows the
+     real entry page, not the API endpoint. */
+  pagePath: string;
 };
 
 /* Returns visitor meta exactly once per session — the first call returns
@@ -86,5 +90,6 @@ export function takeVisitorMeta(): VisitorMeta | null {
     screenH: window.screen?.height || 0,
     dpr: window.devicePixelRatio || 1,
     referrer: document.referrer || "",
+    pagePath: window.location.pathname || "/",
   };
 }

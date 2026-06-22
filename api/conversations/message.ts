@@ -36,6 +36,7 @@ type VisitorMeta = {
   screenH?: number;
   dpr?: number;
   referrer?: string;
+  pagePath?: string;
 };
 
 /* Validate visitorMeta separately so each field has its own cap and
@@ -53,6 +54,18 @@ function validateVisitorMeta(v: unknown): VisitorMeta | null {
   if (isFiniteNumber(m.dpr, 0, 10)) out.dpr = m.dpr as number;
   if (typeof m.referrer === "string" && m.referrer.length <= MAX_VISITOR_META_STRING) {
     out.referrer = m.referrer;
+  }
+  /* page_path must start with '/' and be reasonable length; refuse
+     anything that looks like an absolute URL to avoid open-redirect-
+     style attribution on the admin side. */
+  if (
+    typeof m.pagePath === "string" &&
+    m.pagePath.length > 0 &&
+    m.pagePath.length <= MAX_VISITOR_META_STRING &&
+    m.pagePath.startsWith("/") &&
+    !m.pagePath.startsWith("//")
+  ) {
+    out.pagePath = m.pagePath;
   }
   return out;
 }
@@ -165,12 +178,11 @@ export default async function handler(req: Request): Promise<Response> {
     visitor_id: body.visitorId,
     channel: nextChannel,
   };
-  if (isFreshSession) {
-    try {
-      sessionUpsert.page_path = new URL(req.url).pathname;
-    } catch {
-      /* ignore */
-    }
+  /* page_path = the page the visitor was on when the session began.
+     Comes from the client (window.location.pathname) inside visitorMeta,
+     NOT from req.url which would always be the API endpoint path. */
+  if (isFreshSession && visitorMeta?.pagePath) {
+    sessionUpsert.page_path = visitorMeta.pagePath;
   }
 
   const { error: sErr } = await supabase

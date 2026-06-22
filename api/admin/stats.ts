@@ -17,7 +17,7 @@ export default async function handler(req: Request): Promise<Response> {
   if (!limit("adminRead", clientIp(req))) {
     return json({ error: "Rate limit exceeded" }, 429);
   }
-  const fail = requireAdmin(req);
+  const fail = await requireAdmin(req);
   if (fail) return fail;
   if (!supabaseConfigured()) return json({ error: "DB not configured" }, 503);
 

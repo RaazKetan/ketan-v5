@@ -1,4 +1,5 @@
 import { track as vercelTrack } from "@vercel/analytics";
+import { logEvent } from "@/services/pageviewLog";
 
 /* Thin wrapper around Vercel Web Analytics.
 
@@ -28,11 +29,22 @@ function sanitize(props?: Props): Props | undefined {
 }
 
 export function track(event: string, props?: Props) {
+  const clean = sanitize(props);
+  /* Fan out to Vercel (dashboards) AND our Supabase events table
+     (admin dashboard, custom queries). Either failing must not throw
+     into render. */
   try {
-    vercelTrack(event, sanitize(props));
+    vercelTrack(event, clean);
   } catch {
-    /* analytics never throws into render */
+    /* swallow */
   }
+  /* Convert null → undefined so JSONB doesn't get nulls everywhere. */
+  const propsForLog = clean
+    ? Object.fromEntries(
+        Object.entries(clean).filter(([, v]) => v !== null && v !== undefined)
+      )
+    : undefined;
+  logEvent(event, propsForLog);
 }
 
 /* Convenience helpers. Each emits a single canonical event name so the
@@ -76,5 +88,3 @@ export const trackSection = (name: string, action: "enter" | "exit", ms?: number
 export const trackDwell = (path: string, ms: number) =>
   track("page_dwell", { path, ms });
 
-export const trackError = (where: string, message: string) =>
-  track("error", { where, message });

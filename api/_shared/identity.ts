@@ -19,6 +19,10 @@ export type UA = {
   browser: string;
   os: string;
   device: "mobile" | "tablet" | "desktop" | "bot" | "unknown";
+  /* Best-effort device family hint from UA: e.g. "iPhone", "iPad",
+     "Pixel 7", "Samsung SM-G990B", "Mac". Modern iPhones don't expose
+     model so we return generic "iPhone"; many Androids do leak a model. */
+  model: string | null;
 };
 
 /* Read the leftmost x-forwarded-for token. Multiple proxies append; the
@@ -83,7 +87,52 @@ export function parseUA(uaString: string | null): UA {
   else if (/mobi|android|iphone|ipod/i.test(ua)) device = "mobile";
   else if (ua) device = "desktop";
 
-  return { ua, browser, os, device };
+  return { ua, browser, os, device, model: extractModel(ua) };
+}
+
+/* Pull a human-readable device family out of the UA. Patterns checked
+   in priority order — most specific first so a Galaxy hits its branded
+   string instead of falling through to generic "Android". */
+function extractModel(ua: string): string | null {
+  if (!ua) return null;
+
+  /* Apple: iPhones/iPads stopped exposing model after iOS 13. Just
+     surface the family + iOS version when present. */
+  if (/iPhone/i.test(ua)) {
+    const ver = ua.match(/CPU iPhone OS (\d+)_/i)?.[1];
+    return ver ? `iPhone (iOS ${ver})` : "iPhone";
+  }
+  if (/iPad/i.test(ua)) {
+    const ver = ua.match(/CPU OS (\d+)_/i)?.[1];
+    return ver ? `iPad (iPadOS ${ver})` : "iPad";
+  }
+  if (/iPod/i.test(ua)) return "iPod touch";
+
+  /* Android: many UAs include the model in the form "; <Model> Build/"
+     or "; <Model>)". Capture between the locale and the build/closing. */
+  const android = ua.match(/Android[^;)]*;\s*[^;)]*?;\s*([^;)]+?)(?:\s+Build|\))/i);
+  if (android?.[1]) {
+    const m = android[1]!.trim();
+    /* Known prefixes → friendly name. */
+    if (/^SM-/i.test(m)) return `Samsung ${m}`;
+    if (/^Pixel/i.test(m)) return m;
+    if (/^Nexus/i.test(m)) return m;
+    if (/^OnePlus|^ONEPLUS|^GM\d/i.test(m)) return `OnePlus ${m.replace(/^OnePlus\s*/i, "")}`.trim();
+    if (/^Mi |^Redmi|^M\d{4}/i.test(m)) return `Xiaomi ${m}`;
+    if (/^RMX|realme/i.test(m)) return `Realme ${m}`;
+    if (/^CPH/i.test(m)) return `Oppo ${m}`;
+    if (/^V\d{4}|vivo/i.test(m)) return `Vivo ${m}`;
+    if (/^Nokia/i.test(m)) return m;
+    return m;
+  }
+
+  /* Desktop hints. */
+  if (/Macintosh|Mac OS X/i.test(ua)) return "Mac";
+  if (/Windows NT 10/i.test(ua)) return "Windows 10/11 PC";
+  if (/Windows NT/i.test(ua)) return "Windows PC";
+  if (/Linux/i.test(ua) && !/Android/i.test(ua)) return "Linux PC";
+  if (/CrOS/i.test(ua)) return "Chromebook";
+  return null;
 }
 
 /* Daily-rotating IP hash. SHA-256(ip + salt + YYYY-MM-DD UTC).
