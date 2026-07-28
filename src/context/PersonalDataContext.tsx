@@ -144,7 +144,7 @@ const defaultData: PersonalData = {
     topmate: "https://topmate.io/ketan_raj",
     github: "https://github.com/RaazKetan",
     medium: "https://medium.com/@ketanraaz",
-    linkedin: "https://www.linkedin.com/in/ketanraj",
+    linkedin: "https://www.linkedin.com/in/ketanraaz/",
     locationShort: "Bengaluru, IN",
     locationLong: "Bengaluru, Karnataka",
     timezone: "IST · UTC+5:30 · 12.97° N",
