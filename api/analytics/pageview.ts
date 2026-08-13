@@ -1,4 +1,4 @@
-import { clientIp, json, checkOrigin } from "../sarvam/_shared.js";
+import { clientIp, json, checkOrigin } from "../_shared/http.js";
 import { limit } from "../_shared/limits.js";
 import {
   readJson,

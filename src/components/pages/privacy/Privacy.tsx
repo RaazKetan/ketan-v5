@@ -3,9 +3,12 @@ import { DesignLayout, GridBg, Word } from "@/components/design";
 import { RouteSEO } from "@/components/seo/RouteSEO";
 import { usePersonalData } from "@/context/PersonalDataContext";
 
-/* What gets stored when you chat with the agent.
-   Plain-language, no legalese. The intent is full disclosure so
-   visitors can make an informed call about whether to use the agent. */
+/* What gets stored when you browse the site.
+   Plain-language, no legalese.
+
+   The chat and voice agent were removed, so the section describing
+   stored conversations went with them: a privacy policy claiming to
+   collect messages that can no longer be sent is worse than no policy. */
 export const Privacy: React.FC = () => {
   const { contactInfo } = usePersonalData();
 
@@ -13,7 +16,7 @@ export const Privacy: React.FC = () => {
     <DesignLayout>
       <RouteSEO
         title="Privacy - Ketan Raj"
-        description="What data is collected when you talk to Ketan's portfolio agent."
+        description="What data is collected when you browse Ketan Raj's site."
         path="/privacy"
       />
       <section className="pr-hero">
@@ -26,28 +29,9 @@ export const Privacy: React.FC = () => {
           <Word>What</Word> <Word em>I</Word> <Word>collect.</Word>
         </h1>
         <p className="pr-sub">
-          Plain language. No legalese. If you talk to the agent or browse
-          the site, here is exactly what lands on a server I control.
+          Plain language. No legalese. If you browse the site, here is
+          exactly what lands on a server I control.
         </p>
-
-        <div className="pr-section">
-          <h2>Agent conversations</h2>
-          <p>
-            Every message you send to the chat or voice agent is stored
-            in a Postgres database, along with these signals:
-          </p>
-          <ul>
-            <li>The text of your message and the agent's reply.</li>
-            <li>A random visitor ID stored in your browser's localStorage.</li>
-            <li>A random session ID stored in your browser's sessionStorage.</li>
-            <li>Your IP address (raw + a daily-rotating hash).</li>
-            <li>Country, region, city, and timezone derived from your IP by Vercel.</li>
-            <li>User-Agent string (browser, OS, device).</li>
-            <li>Top language from your Accept-Language header.</li>
-            <li>Screen size, device pixel ratio, document.referrer.</li>
-            <li>Timestamp of every message and session.</li>
-          </ul>
-        </div>
 
         <div className="pr-section">
           <h2>Site analytics</h2>
@@ -58,13 +42,21 @@ export const Privacy: React.FC = () => {
             counts and the events I added (button clicks, scroll depth,
             section visibility, route navigations).
           </p>
+          <p>
+            Page views are also written to a Postgres database I control,
+            with: a random visitor ID (localStorage) and session ID
+            (sessionStorage), your IP address and a daily-rotating hash of
+            it, country / region / city / timezone derived from that IP by
+            Vercel, User-Agent, top Accept-Language, screen size, referrer
+            and a timestamp.
+          </p>
         </div>
 
         <div className="pr-section">
           <h2>Why</h2>
           <p>
-            So I can understand what people ask, what they read, where
-            they came from, and whether the site is fast enough. Pure
+            So I can understand what people read, where they came from,
+            and whether the site is fast enough. Pure
             curiosity + iteration signal. No ad networks, no third-party
             sharing.
           </p>
@@ -73,8 +65,8 @@ export const Privacy: React.FC = () => {
         <div className="pr-section">
           <h2>How to opt out</h2>
           <p>
-            Don't use the chat / voice agent. Pageviews can be blocked
-            with any standard tracker blocker (uBlock Origin etc.).
+            Page views can be blocked with any standard tracker blocker
+            (uBlock Origin etc.).
             Email me at{" "}
             <a className="pr-link" href={`mailto:${contactInfo.email}`}>
               {contactInfo.email}

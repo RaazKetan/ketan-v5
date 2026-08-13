@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useRef } from "react";
+import React, { useRef } from 'react';
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -6,7 +6,6 @@ import {
   Btn,
   GridBg,
   Marquee,
-  SectionTag,
   ShimmerBtn,
   BeamFrame,
   Word,
@@ -17,9 +16,6 @@ import { useDesignAnimations } from "@/Hooks/useDesignAnimations";
 import { usePersonalData } from "@/context/PersonalDataContext";
 /* Below-the-fold voice/RAG feature — split into its own chunk so the hero
    (LCP) isn't waiting on the sarvam + knowledge-base code to download. */
-const VoiceAnalyzer = lazy(() =>
-  import("@/components/Chat/VoiceAnalyzer").then((m) => ({ default: m.VoiceAnalyzer }))
-);
 import { useLenis } from "@/App";
 import { RouteSEO } from "@/components/seo/RouteSEO";
 import { useSectionDwell } from "@/Hooks/useSectionDwell";
@@ -219,25 +215,7 @@ const Home: React.FC = () => {
         ]}
       />
 
-      <section className="feature-section voice-section" id="voice-feature" data-section="voice-agent">
-        <SectionTag>Index · 02 / Agent</SectionTag>
-
-        <div className="feature-head">
-          <h2 data-split>
-            <Word>Meet</Word> <Word em>Ketan's</Word> <Word>assistant.</Word>
-          </h2>
-          <div className="feature-head-aside">
-            An AI agent trained on Ketan's work - roles, projects, stack, writing.
-            Voice or text. Anything personal, it sends you to /contact.
-          </div>
-        </div>
-
-        <div className="voice-feature">
-          <Suspense fallback={null}>
-            <VoiceAnalyzer variant="feature" />
-          </Suspense>
-        </div>
-
+      <section className="feature-section" data-section="work-cta">
         <div className="more-work-cta">
           <BeamFrame>
             <Btn to="/projects">

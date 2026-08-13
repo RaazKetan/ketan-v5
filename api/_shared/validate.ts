@@ -5,7 +5,7 @@
    confusion), and tampered identifiers. Centralizing the checks keeps
    each handler tiny and impossible to forget. */
 
-import { json } from "../sarvam/_shared.js";
+import { json } from "../_shared/http.js";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

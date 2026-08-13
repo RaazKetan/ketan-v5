@@ -1,8 +1,12 @@
-/* Shared helpers for Sarvam proxy edge functions.
-   Centralizes rate limiting, origin enforcement, and method/method handling
-   so each route stays small and the limits are consistent. */
+/* Shared HTTP helpers for the surviving edge functions.
+   Lived at api/sarvam/_shared.ts until the voice and chat agent was
+   removed; the analytics routes still need the origin guard, rate limit
+   and json() helper, so it moved here rather than being deleted with the
+   provider proxies. The provider key getters went with them. */
 
 declare const process: { env: Record<string, string | undefined> };
+
+let warnedNoOrigins = false;
 
 /* Allowed browser origins. Single source of truth: ALLOWED_ORIGINS env
    var (comma-separated). Nothing hardcoded in the codebase — domain
@@ -25,7 +29,6 @@ function parseList(s: string | undefined): string[] {
     .filter(Boolean);
 }
 
-let warnedNoOrigins = false;
 
 export function getAllowedOrigins(): Set<string> {
   const prodList = parseList(process.env.ALLOWED_ORIGINS);
@@ -168,30 +171,8 @@ export function json(body: unknown, status = 200, extra: HeadersInit = {}): Resp
   });
 }
 
-let warnedNoKey = false;
-export function getSarvamKey(): string | null {
-  const key = process.env.SARVAM_API_KEY || null;
-  if (!key && !warnedNoKey) {
-    warnedNoKey = true;
-    console.warn(
-      "[sarvam proxy] SARVAM_API_KEY not set. " +
-        "Add SARVAM_API_KEY=... to .env.local (or Vercel project env)."
-    );
-  }
-  return key;
-}
 
-let warnedNoGemini = false;
+
 /* GEMINI_API_KEY (server-only) powers the /api/embed proxy. Same VITE_-prefix
    leak caveat as the Sarvam key — keep it server-side, never VITE_-prefixed. */
-export function getGeminiKey(): string | null {
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || null;
-  if (!key && !warnedNoGemini) {
-    warnedNoGemini = true;
-    console.warn(
-      "[embed proxy] GEMINI_API_KEY not set. " +
-        "Add GEMINI_API_KEY=... to .env.local (or Vercel project env)."
-    );
-  }
-  return key;
-}
+
