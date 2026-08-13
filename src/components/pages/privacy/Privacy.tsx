@@ -6,9 +6,11 @@ import { usePersonalData } from "@/context/PersonalDataContext";
 /* What gets stored when you browse the site.
    Plain-language, no legalese.
 
-   The chat and voice agent were removed, so the section describing
-   stored conversations went with them: a privacy policy claiming to
-   collect messages that can no longer be sent is worse than no policy. */
+   The chat and voice agent were removed, and then this deployment was
+   disconnected from the database entirely. Both sections describing
+   stored data went with them: a policy claiming collection that cannot
+   happen is worse than no policy. Vercel Web Analytics is all that is
+   left, and it stores nothing of mine. */
 export const Privacy: React.FC = () => {
   const { contactInfo } = usePersonalData();
 
@@ -43,12 +45,9 @@ export const Privacy: React.FC = () => {
             section visibility, route navigations).
           </p>
           <p>
-            Page views are also written to a Postgres database I control,
-            with: a random visitor ID (localStorage) and session ID
-            (sessionStorage), your IP address and a daily-rotating hash of
-            it, country / region / city / timezone derived from that IP by
-            Vercel, User-Agent, top Accept-Language, screen size, referrer
-            and a timestamp.
+            Nothing is written to any database I control. This site has no
+            server-side logging of its own: no visitor IDs, no IP addresses,
+            no stored sessions.
           </p>
         </div>
 
@@ -67,13 +66,12 @@ export const Privacy: React.FC = () => {
           <p>
             Page views can be blocked with any standard tracker blocker
             (uBlock Origin etc.).
-            Email me at{" "}
+            There is nothing else to opt out of — no database of mine holds
+            anything about you. Questions either way:{" "}
             <a className="pr-link" href={`mailto:${contactInfo.email}`}>
               {contactInfo.email}
-            </a>{" "}
-            with your visitor ID (find it in DevTools → Application →
-            Local Storage → <code>kr_visitor</code>) and I'll delete
-            every row tied to you.
+            </a>
+            .
           </p>
         </div>
       </section>

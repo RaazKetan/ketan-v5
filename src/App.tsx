@@ -14,7 +14,7 @@ const Contact = lazy(() => import('@/components/pages/contact').then((m) => ({ d
 const NotFound = lazy(() => import('@/components/pages/notfound').then((m) => ({ default: m.NotFound })));
 const Privacy = lazy(() => import('@/components/pages/privacy').then((m) => ({ default: m.Privacy })));
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
-import { useScrollDepth, usePageDwell, usePageView } from '@/Hooks/useAnalytics';
+import { useScrollDepth, usePageDwell } from '@/Hooks/useAnalytics';
 import { trackNav } from '@/lib/analytics';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -90,7 +90,6 @@ const RouteEffects: React.FC = () => {
 
   useScrollDepth();
   usePageDwell();
-  usePageView();
 
   useEffect(() => {
     /* Skip the first call (initial mount) — page_view fires automatically
