@@ -16,7 +16,6 @@ import { useDesignAnimations } from "@/Hooks/useDesignAnimations";
 import { usePersonalData } from "@/context/PersonalDataContext";
 /* Below-the-fold voice/RAG feature — split into its own chunk so the hero
    (LCP) isn't waiting on the sarvam + knowledge-base code to download. */
-import { useLenis } from "@/App";
 import { RouteSEO } from "@/components/seo/RouteSEO";
 import { useSectionDwell } from "@/Hooks/useSectionDwell";
 
@@ -25,28 +24,9 @@ gsap.registerPlugin(ScrollTrigger);
 const Home: React.FC = () => {
   const { heroTitle, heroStrip } = usePersonalData();
   const heroRef = useRef<HTMLElement>(null);
-  const lenis = useLenis();
   useDesignAnimations();
   useSectionDwell("[data-section]");
 
-  /* Scroll to a target id. Tries Lenis first, then a native fallback
-     verified ~600ms later — if neither lands us inside +/-20px of the
-     target we hard-jump there so the click never feels dead. */
-  const scrollToTarget = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const target = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 40);
-    if (lenis) {
-      lenis.scrollTo(target, { duration: 1.2 });
-    } else {
-      window.scrollTo({ top: target, behavior: "smooth" });
-    }
-    window.setTimeout(() => {
-      if (Math.abs(window.scrollY - target) > 24) {
-        window.scrollTo({ top: target, behavior: "smooth" });
-      }
-    }, 700);
-  };
 
   // Hero entrance timeline - scoped via useGSAP so StrictMode + remounts
   // never leave elements stuck in the from state.
@@ -110,27 +90,6 @@ const Home: React.FC = () => {
             </span>
           </span>
         </div>
-
-        <a
-          href="#voice-feature"
-          className="hero-agent-cta"
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToTarget("voice-feature");
-          }}
-          data-magnet="0.1"
-        >
-          <span className="agent-cta-dot" />
-          <span className="agent-cta-pulse">NEW</span>
-          <span className="agent-cta-rotator" aria-label="Talk to my AI agent">
-            <span className="agent-cta-rline agent-cta-rline-0">Talk to my AI agent</span>
-            <span className="agent-cta-rline agent-cta-rline-1">Ask about my work</span>
-            <span className="agent-cta-rline agent-cta-rline-2">Hear about Origin</span>
-            {/* Ghost line sets the width to the longest option to prevent jitter. */}
-            <span className="agent-cta-ghost">Talk to my AI agent</span>
-          </span>
-          <span className="agent-cta-arrow">↓</span>
-        </a>
 
         <h1 className="hero-name" aria-label={heroTitle.name}>
           <div className="row">
@@ -361,190 +320,7 @@ const styles = `
     flex-shrink: 0; white-space: nowrap;
   }
 
-  /* "Talk to my AI agent" attention CTA — outlined pill with a rotating
-     animated-gradient list (Magic UI animated-list + animated-gradient-
-     text combined). Pill is justify-self: start + width: fit-content
-     so the hero grid doesn't stretch it across the whole row.
-     position: relative + z-index above the hero h1 (z:2) because the
-     h1's line-height: 0.9 lets its giant glyphs visually spill up into
-     the CTA's grid cell, stealing clicks from the hit-test. */
-  .hero-agent-cta {
-    display: inline-flex; align-items: center; gap: 12px;
-    width: fit-content; justify-self: start;
-    margin-top: 18px; padding: 10px 18px 10px 14px;
-    border: 1px solid var(--ink); border-radius: 999px;
-    background: var(--bg); color: var(--ink); text-decoration: none;
-    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
-    text-transform: uppercase; cursor: pointer;
-    position: relative; z-index: 6;
-    transition: transform .35s var(--ease),
-                box-shadow .35s var(--ease),
-                background .35s var(--ease);
-    box-shadow: 0 4px 0 0 color-mix(in oklab, var(--accent) 16%, transparent);
-  }
-  .hero-agent-cta:hover {
-    transform: translateY(-2px);
-    background: color-mix(in oklab, var(--accent) 6%, var(--bg));
-    box-shadow: 0 6px 0 0 color-mix(in oklab, var(--accent) 28%, transparent),
-                0 12px 28px color-mix(in oklab, var(--accent) 18%, transparent);
-  }
-  .agent-cta-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent);
-    animation: pulse 1.8s infinite ease-in-out;
-    flex-shrink: 0;
-  }
-  .agent-cta-pulse {
-    padding: 3px 7px; border-radius: 4px;
-    background: var(--ink); color: var(--bg);
-    font-size: 9px; letter-spacing: .18em;
-    animation: cta-flash 2.4s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-  @keyframes cta-flash {
-    0%, 100% { background: var(--ink); }
-    50%      { background: var(--accent); }
-  }
 
-  /* Rotating list — three lines, each visible for ~2s then slides up.
-     Total cycle 6s, so each lineN is offset by 2s (33%). The ghost
-     sets the container width to the longest line so the pill doesn't
-     jitter as labels change. */
-  .agent-cta-rotator {
-    position: relative; display: inline-block; overflow: hidden;
-    height: 1.2em; line-height: 1.2;
-  }
-  .agent-cta-ghost { visibility: hidden; white-space: nowrap; }
-  .agent-cta-rline {
-    position: absolute; left: 0; top: 0; white-space: nowrap;
-    opacity: 0; transform: translateY(110%);
-    /* Animated gradient text — Magic UI animated-gradient-text style. */
-    background: linear-gradient(
-      110deg,
-      var(--ink) 0%,
-      var(--accent) 35%,
-      color-mix(in oklab, var(--accent) 70%, white) 50%,
-      var(--accent) 65%,
-      var(--ink) 100%
-    );
-    background-size: 220% 100%;
-    background-clip: text; -webkit-background-clip: text;
-    color: transparent; -webkit-text-fill-color: transparent;
-  }
-  .agent-cta-rline-0 { animation: cta-rotate 6s ease-in-out infinite 0s, cta-shine 3.5s linear infinite; }
-  .agent-cta-rline-1 { animation: cta-rotate 6s ease-in-out infinite 2s, cta-shine 3.5s linear infinite; }
-  .agent-cta-rline-2 { animation: cta-rotate 6s ease-in-out infinite 4s, cta-shine 3.5s linear infinite; }
-  @keyframes cta-rotate {
-    0%             { opacity: 0; transform: translateY(110%); }
-    6%, 28%        { opacity: 1; transform: translateY(0); }
-    34%, 100%      { opacity: 0; transform: translateY(-110%); }
-  }
-  @keyframes cta-shine {
-    0%   { background-position: 220% 0; }
-    100% { background-position: -220% 0; }
-  }
-
-  .agent-cta-arrow {
-    font-family: var(--serif); font-size: 16px; letter-spacing: 0;
-    color: var(--accent);
-    animation: bob 1.6s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-  @keyframes bob {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(4px); }
-  }
-
-  .feature-section { padding: 160px 56px 120px; max-width: var(--maxw); margin: 0 auto; }
-  .feature-head {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    margin-bottom: 64px; gap: 48px;
-  }
-  .feature-head h2 {
-    font-family: var(--serif); font-size: clamp(56px, 8vw, 132px);
-    line-height: 0.9; letter-spacing: -0.02em; font-weight: 400;
-  }
-  .feature-head h2 em { font-style: italic; color: var(--accent); }
-  .feature-head-aside {
-    font-family: var(--mono); font-size: 12px; text-transform: uppercase;
-    letter-spacing: .14em; color: var(--muted); max-width: 28ch; text-align: right;
-  }
-  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-  .feature-card-wrap { display: block; }
-  .feature-card {
-    display: block;
-    border: 1px solid var(--line); border-radius: 6px;
-    background: var(--bg); overflow: hidden; position: relative;
-    transition: transform .5s var(--ease);
-  }
-  .feature-card:hover { transform: translateY(-4px); }
-  .feature-card .img {
-    aspect-ratio: 16/10; position: relative; background: var(--bg-deep);
-    border-bottom: 1px solid var(--line); overflow: hidden;
-  }
-  .feature-card .info { padding: 28px; }
-  .feature-card .meta-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    font-family: var(--mono); font-size: 10px; text-transform: uppercase;
-    letter-spacing: .14em; color: var(--muted); margin-bottom: 12px;
-  }
-  .feature-card h3 {
-    font-family: var(--serif); font-size: 32px; line-height: 1.05;
-    font-weight: 400; letter-spacing: -0.01em; margin-bottom: 12px;
-  }
-  .feature-card h3 em { font-style: italic; color: var(--accent); }
-  .feature-card p { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
-  .feature-card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
-
-  .more-work-cta { margin-top: 64px; display: flex; justify-content: center; }
-
-  .cta-strip {
-    margin-top: 80px; padding: 96px 56px;
-    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-    position: relative; overflow: hidden;
-    max-width: var(--maxw); margin-left: auto; margin-right: auto;
-  }
-  .cta-strip-bg { position: absolute; inset: 0; opacity: .5; }
-  .cta-strip h2 {
-    font-family: var(--serif); font-weight: 400;
-    font-size: clamp(56px, 9vw, 160px);
-    line-height: 0.92; letter-spacing: -0.03em;
-    text-align: center; position: relative;
-  }
-  .cta-strip h2 em { font-style: italic; color: var(--accent); }
-  .cta-actions {
-    margin-top: 48px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
-    position: relative;
-  }
-
-  @media (max-width: 1100px) {
-    .hero-name { font-size: clamp(64px, 15vw, 180px); }
-    .hero-tagline { grid-template-columns: 1fr; gap: 24px; }
-    .hero-tagline .tag-actions { justify-content: flex-start; }
-  }
-  @media (max-width: 900px) {
-    .hero-section { padding: 130px 24px 60px; min-height: auto; }
-    .feature-section { padding: 80px 24px 60px; }
-    .hero-meta { grid-template-columns: 1fr 1fr; gap: 20px; }
-    .hero-strip { grid-template-columns: 1fr; gap: 24px; }
-    .feature-grid { grid-template-columns: 1fr; }
-    .feature-head { flex-direction: column; align-items: flex-start; gap: 24px; }
-    .feature-head h2 { font-size: clamp(40px, 12vw, 80px); }
-    .feature-head-aside { text-align: left; }
-    .cta-strip { padding: 64px 24px; margin-top: 40px; }
-    .cta-strip h2 { font-size: clamp(40px, 12vw, 80px); }
-  }
-  @media (max-width: 600px) {
-    .hero-section { padding: 140px 18px 40px; }
-    .hero-agent-cta {
-      margin-top: 14px; padding: 9px 14px 9px 12px; gap: 8px;
-      font-size: 10px; letter-spacing: .12em;
-      max-width: calc(100vw - 36px);
-    }
-    .agent-cta-dot { width: 6px; height: 6px; }
-    .agent-cta-pulse { font-size: 8px; padding: 2px 6px; letter-spacing: .14em; }
-    .agent-cta-arrow { font-size: 14px; }
-    .agent-cta-rotator { height: 1.4em; }
     .voice-section .feature-head h2 { font-size: clamp(36px, 11vw, 64px); }
     .voice-section .feature-head-aside { font-size: 12px; }
     .hero-name { font-size: clamp(54px, 14vw, 96px); letter-spacing: -0.03em; }
