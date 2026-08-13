@@ -12,7 +12,6 @@ const Projects = lazy(() => import('@/components/pages/projects').then((m) => ({
 const Work = lazy(() => import('@/components/pages/work').then((m) => ({ default: m.Work })));
 const Contact = lazy(() => import('@/components/pages/contact').then((m) => ({ default: m.Contact })));
 const NotFound = lazy(() => import('@/components/pages/notfound').then((m) => ({ default: m.NotFound })));
-const Privacy = lazy(() => import('@/components/pages/privacy').then((m) => ({ default: m.Privacy })));
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { useScrollDepth, usePageDwell } from '@/Hooks/useAnalytics';
 import { trackNav } from '@/lib/analytics';
@@ -130,7 +129,6 @@ const App: React.FC = () => {
               <Route path="/projects" element={<Projects />} />
               <Route path="/work" element={<Work />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
